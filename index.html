@@ -775,9 +775,7 @@
   // ── 사이드바 렌더 ──
   function renderSidebar() {
     if (!selectedDate) return;
-    const btn = document.getElementById('attendBtn');
     const attList = document.getElementById('attList');
-    btn.disabled = false;
     const names = selectedDate && attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
     const isRegistered = names.includes(currentUser);
 
@@ -788,11 +786,11 @@
       if (isRegistered) {
         hdrBtn.className = 'hdr-btn attend-hdr-btn cancel';
         hdrBtn.innerHTML = '❌ 참석 취소';
-        hdrBtn.onclick = toggleAttendance;
+        hdrBtn.onclick = () => toggleAttendance();
       } else {
         hdrBtn.className = 'hdr-btn attend-hdr-btn register';
         hdrBtn.innerHTML = '✅ 참석 등록';
-        hdrBtn.onclick = toggleAttendance;
+        hdrBtn.onclick = () => toggleAttendance();
       }
     }
 
@@ -851,8 +849,6 @@
     const dateEl = document.getElementById('mdpDate');
     const attGrid = document.getElementById('mdpAttGrid');
     const attCountEl = document.getElementById('mdpAttCount');
-    const btn = null; // 헤더 버튼으로 통합
-
     dateEl.textContent = formatDateKr(selectedDate);
     const names = attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
     const isRegistered = names.includes(currentUser);
@@ -1013,6 +1009,9 @@
     renderCalendar();
     updateStats();
   });
+
+  // ── 초기 달력 렌더 (Firebase 연결 전에도 달력 표시) ──
+  renderCalendar();
 </script>
 <script>
 // ── PWA 설치 프롬프트 캡처 ──
