@@ -224,10 +224,11 @@
   }
   .att-name-chip {
     background: var(--bg); border: 1px solid var(--border);
-    border-radius: 4px; padding: 2px 6px;
+    border-radius: 4px; padding: 2px 3px;
     font-size: 11px; font-weight: 600; color: var(--text);
     text-align: center; cursor: pointer; user-select: none;
     transition: all 0.12s; white-space: nowrap; display: inline-block;
+    width: fit-content; min-width: 0;
   }
   .att-name-chip:hover { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
   .att-name-chip.mine { background: var(--accent-light); border-color: var(--accent); color: #065f46; }
