@@ -49,12 +49,12 @@
   .login-title-row { display:flex; align-items:center; gap:10px; margin-bottom:2px; }
   .login-icon { font-size:36px; line-height:1; }
   .login-title { font-size:1.4rem; font-weight:900; color:#ffffff; letter-spacing:2px; margin-bottom:0; text-shadow:0 1px 6px rgba(0,0,0,0.8); }
-  .login-sub { font-size:0.72rem; color:rgba(255,255,255,0.85); font-weight:700; margin-bottom:10px; letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
-  .login-name-wrap { width:260px; margin-bottom:12px; }
-  .login-name-label { font-size:0.68rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:1px; margin-bottom:5px; display:block; text-align:center; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+  .login-sub { font-size:0.95rem; color:rgba(255,255,255,0.85); font-weight:700; margin-bottom:10px; letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+  .login-name-wrap { width:160px; margin-bottom:12px; }
+  .login-name-label { font-size:1rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:1px; margin-bottom:6px; display:block; text-align:center; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
   .login-name-input {
     width:100%; padding:11px 14px; border:1px solid #252530;
-    border-radius:10px; font-size:15px; font-family:inherit;
+    border-radius:10px; font-size:18px; font-family:inherit;
     text-align:center; outline:none; background:#18181f;
     color:#f0f0f5; transition:border-color 0.15s; letter-spacing:1px;
   }
@@ -346,15 +346,13 @@
       <div class="login-title">보탁 참석자 조사</div>
     </div>
     <div id="pwSubMsg" style="font-size:0.68rem;color:#ffffff;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.8);"></div>
-    <div class="login-sub">보령탁구동호회</div>
+    <div class="login-sub">(보령탁구동호회)</div>
     <div class="login-name-wrap">
       <label class="login-name-label">성 명</label>
       <input type="text" class="login-name-input" id="nameLoginInput"
         placeholder="홍길동" maxlength="10"
         onkeydown="if(event.key==='Enter') this.blur()">
-      <div class="login-saved-hint" id="loginSavedHint" style="display:none;">
-        저장된 이름: <strong id="savedNameDisplay"></strong>
-      </div>
+
     </div>
   </div>
 
@@ -397,7 +395,7 @@
   <header>
     <div class="header-left">
       <h1>🏓 보탁 참석자 조사</h1>
-      <div class="subtitle">보령탁구동호회</div>
+      <div class="subtitle">(보령탁구동호회)</div>
     </div>
     <div class="header-right">
       <div class="user-badge">
@@ -580,13 +578,11 @@
     } catch(e) { /* 기본값 사용 */ }
   })();
 
-  // ── 로그인 화면: 저장된 이름 힌트 ──
+  // ── 로그인 화면: 저장된 이름 자동 입력 ──
   (function initLoginHint() {
     const saved = localStorage.getItem(LOCAL_KEY);
     if (saved) {
       document.getElementById('nameLoginInput').value = saved;
-      document.getElementById('savedNameDisplay').textContent = saved;
-      document.getElementById('loginSavedHint').style.display = 'block';
     }
   })();
 
