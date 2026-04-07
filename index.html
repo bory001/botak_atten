@@ -119,7 +119,7 @@
     justify-content: space-between; position: sticky; top: 0; z-index: 100; gap: 8px;
   }
   .header-left h1 { font-size: 15px; font-weight: 700; white-space: nowrap; }
-  .header-left .subtitle { font-size: 10px; opacity: 0.7; white-space: nowrap; }
+  .header-left .subtitle { font-size: 10px; opacity: 0.7; white-space: nowrap; padding-left: 22px; }
   .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .user-badge {
     display: flex; align-items: center; gap: 5px;
@@ -136,6 +136,8 @@
     color: white; padding: 5px 9px; border-radius: 16px; font-size: 11px;
     font-family: inherit; cursor: pointer; white-space: nowrap;
   }
+  .attend-hdr-btn.register { background: var(--accent); border-color: var(--accent); }
+  .attend-hdr-btn.cancel { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.6); }
   @media (max-width: 480px) {
     header { padding: 0.4rem 0.75rem; }
     .header-left h1 { font-size: 13px; }
@@ -205,7 +207,7 @@
   }
 
   /* 참석자 목록 */
-  .att-list { padding: 0 1rem 1rem; }
+  .att-list { padding: 0 0.75rem 0.75rem; }
   .att-empty {
     padding: 1.5rem 0; text-align: center; color: var(--text-muted);
     font-size: 13px; line-height: 1.8;
@@ -218,14 +220,14 @@
   }
   /* 간소화된 이름 그리드 */
   .att-name-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;
+    display: flex; flex-wrap: wrap; gap: 4px;
   }
   .att-name-chip {
     background: var(--bg); border: 1px solid var(--border);
-    border-radius: 6px; padding: 5px 4px;
+    border-radius: 5px; padding: 2px 6px;
     font-size: 11px; font-weight: 600; color: var(--text);
     text-align: center; cursor: pointer; user-select: none;
-    transition: all 0.12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: all 0.12s; white-space: nowrap; display: inline-block;
   }
   .att-name-chip:hover { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
   .att-name-chip.mine { background: var(--accent-light); border-color: var(--accent); color: #065f46; }
@@ -398,15 +400,11 @@
       <div class="subtitle">(보령탁구동호회)</div>
     </div>
     <div class="header-right">
-      <div class="user-badge">
-        <div class="user-dot"></div>
-        <span id="headerUserName"></span>
-      </div>
       <div class="sync-dot-wrap">
         <div class="sync-dot" id="syncDot"></div>
         <span class="sync-label" id="syncLabel">연결됨</span>
       </div>
-      <button class="hdr-btn" onclick="openPwModal()">🔑 비번변경</button>
+      <button class="hdr-btn attend-hdr-btn register" id="hdrAttendBtn" onclick="toggleAttendance()" style="display:none;">✅ 참석 등록</button>
       <button class="hdr-btn" onclick="doLogout()">나가기</button>
     </div>
   </header>
@@ -438,9 +436,7 @@
         <div class="mdp-att-grid" id="mdpAttGrid">
           <div class="mdp-empty">날짜를 선택해 주세요</div>
         </div>
-        <button class="mdp-attend-btn register" id="mdpAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">
-          ✅ 참석 등록
-        </button>
+
       </div>
     </div>
 
@@ -450,13 +446,6 @@
         <div class="panel-header">
           <h3>📅 참석 현황</h3>
           <span class="panel-date-badge" id="selectedDateLabel">날짜를 선택하세요</span>
-        </div>
-
-        <!-- 내 참석 등록/취소 버튼 -->
-        <div class="my-attend-section">
-          <button class="my-attend-btn register" id="attendBtn" onclick="toggleAttendance()" disabled>
-            ✅ 참석 등록
-          </button>
         </div>
 
         <!-- 참석자 목록 -->
@@ -644,7 +633,8 @@
       _lockBuf = ''; updateDots();
       return;
     }
-    if (_lockBuf === currentPassword || _lockBuf === ADMIN_PW) {
+    const isAdmin = (_lockBuf === ADMIN_PW);
+    if (_lockBuf === currentPassword || isAdmin) {
       localStorage.setItem(LOCAL_KEY, name);
       currentUser = name;
       document.getElementById('loginScreen').style.display = 'none';
@@ -652,6 +642,7 @@
       document.getElementById('headerUserName').textContent = name;
       _lockBuf = '';
       startListening();
+      if (isAdmin) { setTimeout(() => openPwModal(), 400); }
     } else {
       errEl.textContent = '비밀번호가 틀렸습니다';
       shakeError();
@@ -661,11 +652,20 @@
   }
 
   window.doLogout = function() {
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
-    _lockBuf = ''; updateDots();
-    document.getElementById('loginError').textContent = '';
-    selectedDate = null;
+    // 앱/탭 종료 시도
+    window.close();
+    // window.close()가 막힌 경우 (안드로이드 앱 등) history 종료 시도
+    setTimeout(function() {
+      history.go(-(history.length));
+      setTimeout(function() {
+        // 종료 불가 시 로그인 화면으로 대체
+        document.getElementById('app').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'flex';
+        _lockBuf = ''; updateDots();
+        document.getElementById('loginError').textContent = '';
+        selectedDate = null;
+      }, 300);
+    }, 200);
   };
 
   // ── 비밀번호 변경 ──
@@ -781,12 +781,19 @@
     const names = selectedDate && attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
     const isRegistered = names.includes(currentUser);
 
-    if (isRegistered) {
-      btn.className = 'my-attend-btn cancel';
-      btn.innerHTML = '❌ 참석 취소';
-    } else {
-      btn.className = 'my-attend-btn register';
-      btn.innerHTML = '✅ 참석 등록';
+    // 헤더 버튼 동기화
+    const hdrBtn = document.getElementById('hdrAttendBtn');
+    if (hdrBtn) {
+      hdrBtn.style.display = '';
+      if (isRegistered) {
+        hdrBtn.className = 'hdr-btn attend-hdr-btn cancel';
+        hdrBtn.innerHTML = '❌ 참석 취소';
+        hdrBtn.onclick = toggleAttendance;
+      } else {
+        hdrBtn.className = 'hdr-btn attend-hdr-btn register';
+        hdrBtn.innerHTML = '✅ 참석 등록';
+        hdrBtn.onclick = toggleAttendance;
+      }
     }
 
     if (names.length === 0) {
@@ -844,20 +851,25 @@
     const dateEl = document.getElementById('mdpDate');
     const attGrid = document.getElementById('mdpAttGrid');
     const attCountEl = document.getElementById('mdpAttCount');
-    const btn = document.getElementById('mdpAttendBtn');
+    const btn = null; // 헤더 버튼으로 통합
 
     dateEl.textContent = formatDateKr(selectedDate);
     const names = attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
     const isRegistered = names.includes(currentUser);
 
-    // 참석 버튼
-    btn.style.display = 'flex';
-    if (isRegistered) {
-      btn.className = 'mdp-attend-btn cancel';
-      btn.innerHTML = '❌ 참석 취소';
-    } else {
-      btn.className = 'mdp-attend-btn register';
-      btn.innerHTML = '✅ 참석 등록';
+    // 헤더 버튼 동기화 (모바일)
+    const hdrBtn2 = document.getElementById('hdrAttendBtn');
+    if (hdrBtn2) {
+      hdrBtn2.style.display = '';
+      if (isRegistered) {
+        hdrBtn2.className = 'hdr-btn attend-hdr-btn cancel';
+        hdrBtn2.innerHTML = '❌ 참석 취소';
+        hdrBtn2.onclick = toggleAttendanceMobile;
+      } else {
+        hdrBtn2.className = 'hdr-btn attend-hdr-btn register';
+        hdrBtn2.innerHTML = '✅ 참석 등록';
+        hdrBtn2.onclick = toggleAttendanceMobile;
+      }
     }
 
     // 참석자 수 뱃지
