@@ -398,10 +398,7 @@
       <div class="subtitle">(보령탁구동호회)</div>
     </div>
     <div class="header-right">
-      <div class="user-badge">
-        <div class="user-dot"></div>
-        <span id="headerUserName"></span>
-      </div>
+
       <div class="sync-dot-wrap">
         <div class="sync-dot" id="syncDot"></div>
         <span class="sync-label" id="syncLabel">연결됨</span>
@@ -649,7 +646,7 @@
       currentUser = name;
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
-      document.getElementById('headerUserName').textContent = name;
+      const _hnEl = document.getElementById('headerUserName'); if (_hnEl) _hnEl.textContent = name;
       _lockBuf = '';
       startListening();
     } else {
