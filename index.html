@@ -651,11 +651,11 @@
       document.getElementById('app').style.display = 'block';
       document.getElementById('headerUserName').textContent = name;
       _lockBuf = '';
-      // 로그인 직후 달력 즉시 렌더링 (Firebase 데이터 오기 전에도 달력 표시)
+      attendanceData = {};
       renderCalendar();
       updateStats();
       startListening();
-      if (isAdmin) { setTimeout(() => openPwModal(), 300); }
+      if (isAdmin) { setTimeout(() => openPwModal(), 400); }
     } else {
       errEl.textContent = '비밀번호가 틀렸습니다';
       shakeError();
@@ -695,8 +695,10 @@
   };
 
   // ── Firebase 리스너 ──
+  let _unsubscribe = null;
   function startListening() {
-    onValue(ref(db, 'botak_attendance'), (snap) => {
+    if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
+    _unsubscribe = onValue(ref(db, 'botak_attendance'), (snap) => {
       attendanceData = snap.val() || {};
       renderCalendar();
       if (selectedDate) {
