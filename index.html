@@ -28,52 +28,55 @@
 
   /* ── 로그인 화면 ── */
   #loginScreen {
-    position:fixed; inset:0; z-index:9999;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    /* 배경 이미지 반투명 오버레이 */
-    background:
-      linear-gradient(rgba(10,10,15,0.72), rgba(10,10,15,0.72)),
-      url('login.png') center center / cover no-repeat;
-    padding: 0 0 44px;
+    position:fixed; inset:0; background:#0a0a0f;
+    display:flex; align-items:center; justify-content:flex-start; padding-top:0; padding-bottom:40px; z-index:9999;
+    flex-direction:column; overflow-y:auto;
   }
-  .login-box {
+  /* 상단 이미지 오버레이 영역 (타이틀 + 성명 입력까지) */
+  .login-hero-area {
+    width:100%;
+    background: linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.82)),
+                url('login.png') center top / cover no-repeat;
     display:flex; flex-direction:column; align-items:center;
-    width:100%; max-width:340px; padding: 0 16px;
+    padding: 5vh 16px 20px;
   }
+  /* 하단 비번 영역 (순수 검정) */
+  .login-pw-area {
+    display:flex; flex-direction:column; align-items:center;
+    width:100%; padding-top:16px;
+  }
+  .login-box { display:flex; flex-direction:column; align-items:center; width:100%; }
   .login-title-row { display:flex; align-items:center; gap:10px; margin-bottom:2px; }
-  .login-icon { font-size:34px; line-height:1; }
-  .login-title { font-size:1.4rem; font-weight:900; color:#3498db; letter-spacing:2px; }
+  .login-icon { font-size:36px; line-height:1; }
+  .login-title { font-size:1.4rem; font-weight:900; color:#3498db; letter-spacing:2px; margin-bottom:0; }
   .login-sub { font-size:0.72rem; color:#5a5a72; font-weight:700; margin-bottom:10px; letter-spacing:1px; }
-
-  .login-name-wrap { width:100%; margin-bottom:10px; }
+  .login-name-wrap { width:260px; margin-bottom:12px; }
   .login-name-label { font-size:0.68rem; font-weight:700; color:#5a5a72; letter-spacing:1px; margin-bottom:5px; display:block; text-align:center; }
   .login-name-input {
-    width:100%; padding:10px 14px; border:1px solid #252530;
+    width:100%; padding:11px 14px; border:1px solid #252530;
     border-radius:10px; font-size:15px; font-family:inherit;
-    text-align:center; outline:none; background:rgba(24,24,31,0.85);
+    text-align:center; outline:none; background:#18181f;
     color:#f0f0f5; transition:border-color 0.15s; letter-spacing:1px;
   }
   .login-name-input::placeholder { color:#2a2a3a; }
   .login-name-input:focus { border-color:#3498db; }
   .login-name-input.error { border-color:#e74c3c; animation: shake 0.35s; }
-  .login-saved-hint { font-size:0.68rem; color:#4a4a62; margin-top:4px; text-align:center; }
+  .login-saved-hint { font-size:0.68rem; color:#3a3a52; margin-top:5px; text-align:center; }
   .login-saved-hint strong { color:#5a5a72; }
-  .login-error { font-size:0.72rem; font-weight:700; min-height:14px; margin-bottom:6px; color:#e74c3c; text-align:center; letter-spacing:0.5px; }
-
-  .pw-dots { display:flex; gap:14px; margin-bottom:8px; }
-  .pw-dot { width:15px; height:15px; border-radius:50%; border:2px solid #2a2a3a; background:transparent; transition:all .2s; }
+  .login-error { font-size:0.72rem; font-weight:700; min-height:16px; margin-bottom:8px; color:#e74c3c; text-align:center; letter-spacing:0.5px; }
+  .pw-dots { display:flex; gap:14px; margin-bottom:12px; }
+  .pw-dot { width:16px; height:16px; border-radius:50%; border:2px solid #2a2a3a; background:transparent; transition:all .2s; }
   .pw-dot.filled { background:#3498db; border-color:#3498db; box-shadow:0 0 8px rgba(52,152,219,.5); }
   .pw-dot.error { background:#e74c3c; border-color:#e74c3c; }
-  .pw-sub-label { font-size:0.72rem; color:#5a5a72; font-weight:700; margin-bottom:6px; letter-spacing:1px; }
-
-  .pw-keypad { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; width:100%; }
+  .pw-sub-label { font-size:0.72rem; color:#5a5a72; font-weight:700; margin-bottom:8px; letter-spacing:1px; }
+  .pw-keypad { display:grid; grid-template-columns:repeat(3,72px); gap:10px; }
   .kbtn {
-    height:62px; border-radius:14px; background:rgba(24,24,31,0.75); border:1px solid #252530;
+    height:66px; border-radius:14px; background:#18181f; border:1px solid #252530;
     color:#f0f0f5; font-family:inherit; font-size:1.4rem; font-weight:900;
     cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center;
     -webkit-tap-highlight-color:transparent; user-select:none;
   }
-  .kbtn:active { background:rgba(37,37,53,0.9); transform:scale(.93); }
+  .kbtn:active { background:#252535; transform:scale(.93); }
   .kbtn.del { font-size:1.1rem; color:#5a5a72; }
   .kbtn.empty { visibility:hidden; }
   @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
@@ -335,15 +338,15 @@
 
 <!-- 로그인 화면 -->
 <div id="loginScreen">
-  <div class="login-box">
+
+  <!-- ① 상단: 배경 이미지 + 타이틀 + 성명 입력 오버레이 -->
+  <div class="login-hero-area">
     <div class="login-title-row">
       <div class="login-icon" id="installIcon" onclick="triggerInstall()" title="앱 설치" style="cursor:pointer;">🏓</div>
       <div class="login-title">보탁 참석자 조사</div>
     </div>
     <div id="pwSubMsg" style="font-size:0.68rem;color:#3498db;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;"></div>
     <div class="login-sub">보령탁구동호회</div>
-
-    <!-- 이름 입력 -->
     <div class="login-name-wrap">
       <label class="login-name-label">성 명</label>
       <input type="text" class="login-name-input" id="nameLoginInput"
@@ -353,16 +356,16 @@
         저장된 이름: <strong id="savedNameDisplay"></strong>
       </div>
     </div>
+  </div>
 
-    <!-- 비번 도트 -->
+  <!-- ② 하단: 순수 검정 + 도트 + 키패드 -->
+  <div class="login-pw-area">
     <div class="pw-dots">
       <div class="pw-dot" id="pd0"></div><div class="pw-dot" id="pd1"></div>
       <div class="pw-dot" id="pd2"></div><div class="pw-dot" id="pd3"></div>
     </div>
     <div class="pw-sub-label">비밀번호를 입력하세요</div>
     <div class="login-error" id="loginError"></div>
-
-    <!-- 숫자 키패드 -->
     <div class="pw-keypad">
       <button class="kbtn" onclick="lockKey('1')">1</button>
       <button class="kbtn" onclick="lockKey('2')">2</button>
@@ -379,7 +382,7 @@
     </div>
   </div>
 
-  <!-- 하단 캐시 새로고침 + 제작자 (absolute 고정) -->
+  <!-- 하단 캐시 새로고침 + 제작자 -->
   <div style="position:absolute;bottom:12px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;">
     <button onclick="hardRefresh()"
       style="background:none;border:none;color:#ffffff;font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:inherit;padding:4px 6px;border-radius:6px;transition:color .2s;"
