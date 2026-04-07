@@ -50,8 +50,8 @@
   .login-icon { font-size:36px; line-height:1; }
   .login-title { font-size:1.4rem; font-weight:900; color:#ffffff; letter-spacing:2px; margin-bottom:0; text-shadow:0 1px 6px rgba(0,0,0,0.8); }
   .login-sub { font-size:0.95rem; color:rgba(255,255,255,0.85); font-weight:700; margin-bottom:6px; letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
-  .login-name-wrap { width:auto; display:inline-flex; flex-direction:column; align-items:center; margin-bottom:8px; }
-  .login-name-label { font-size:1rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:1px; margin-bottom:6px; display:block; text-align:center; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+  .login-name-wrap { display:flex; flex-direction:row; align-items:center; gap:6px; margin-bottom:8px; flex-wrap:nowrap; }
+  .login-name-label { font-size:1rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); white-space:nowrap; }
   .login-name-input {
     width:100px; padding:5px 8px; border:1px solid rgba(255,255,255,0.2);
     border-radius:10px; font-size:18px; font-family:inherit;
@@ -59,6 +59,15 @@
     color:#f0f0f5; transition:border-color 0.15s; letter-spacing:1px;
   }
   .login-name-input::placeholder { color:#2a2a3a; }
+  .login-busoo-label { font-size:1rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); white-space:nowrap; }
+  .login-busoo-input {
+    width:44px; padding:4px 6px; border:1px solid rgba(255,255,255,0.2);
+    border-radius:10px; font-size:18px; font-family:inherit;
+    text-align:center; outline:none; background:rgba(10,10,15,0.35);
+    color:#f0f0f5; transition:border-color 0.15s;
+  }
+  .login-busoo-input:focus { border-color:#3498db; }
+  .login-busoo-input.error { border-color:#e74c3c; animation: shake 0.35s; }
   .login-name-input:focus { border-color:#3498db; }
   .login-name-input.error { border-color:#e74c3c; animation: shake 0.35s; }
   .login-saved-hint { font-size:0.68rem; color:rgba(255,255,255,0.6); margin-top:5px; text-align:center; }
@@ -355,13 +364,16 @@
       <div class="login-title">보탁 참석자 조사</div>
     </div>
     <div id="pwSubMsg" style="font-size:0.68rem;color:#ffffff;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.8);"></div>
-    <div class="login-sub">(보령탁구동호회)</div>
     <div class="login-name-wrap">
-      <label class="login-name-label">성 명</label>
+      <label class="login-name-label">성명</label>
       <input type="text" class="login-name-input" id="nameLoginInput"
         placeholder="홍길동" maxlength="10"
         onkeydown="if(event.key==='Enter') this.blur()">
-
+      <label class="login-busoo-label">부수</label>
+      <input type="number" class="login-busoo-input" id="busooInput"
+        placeholder="1" min="1" max="8" maxlength="1"
+        onkeydown="if(event.key==='Enter') this.blur()"
+        oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
     </div>
   </div>
 
@@ -585,6 +597,7 @@
   const ATT_PAGE_SIZE = 20; // 페이지당 표시 수
 
   const LOCAL_KEY = 'botak_user_name';
+  const LOCAL_BUSOO_KEY = 'botak_user_busoo';
   const isMobile = () => window.innerWidth <= 768;
 
   // ── 유틸 ──
@@ -615,12 +628,12 @@
     } catch(e) { /* 기본값 사용 */ }
   })();
 
-  // ── 로그인 화면: 저장된 이름 자동 입력 ──
+  // ── 로그인 화면: 저장된 이름/부수 자동 입력 ──
   (function initLoginHint() {
     const saved = localStorage.getItem(LOCAL_KEY);
-    if (saved) {
-      document.getElementById('nameLoginInput').value = saved;
-    }
+    if (saved) document.getElementById('nameLoginInput').value = saved;
+    const savedBusoo = localStorage.getItem(LOCAL_BUSOO_KEY);
+    if (savedBusoo) document.getElementById('busooInput').value = savedBusoo;
   })();
 
   // ── 키패드 도트 업데이트 ──
@@ -672,6 +685,8 @@
   function checkAndLogin() {
     const name = document.getElementById('nameLoginInput').value.trim();
     const nameInp = document.getElementById('nameLoginInput');
+    const busoo = document.getElementById('busooInput').value.trim();
+    const busooInp = document.getElementById('busooInput');
     const errEl = document.getElementById('loginError');
     if (!name) {
       errEl.textContent = '성명을 먼저 입력해주세요';
@@ -681,9 +696,19 @@
       _lockBuf = ''; updateDots();
       return;
     }
+    const busooNum = parseInt(busoo);
+    if (!busoo || isNaN(busooNum) || busooNum < 1 || busooNum > 8) {
+      errEl.textContent = '부수를 1~8 사이로 입력해주세요';
+      busooInp.classList.add('error');
+      setTimeout(() => busooInp.classList.remove('error'), 400);
+      busooInp.focus();
+      _lockBuf = ''; updateDots();
+      return;
+    }
     const _isAdmin = (_lockBuf === ADMIN_PW);
     if (_lockBuf === currentPassword || _isAdmin) {
       localStorage.setItem(LOCAL_KEY, name);
+      localStorage.setItem(LOCAL_BUSOO_KEY, busoo);
       currentUser = name;
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
