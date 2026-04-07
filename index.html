@@ -403,7 +403,6 @@
         <div class="sync-dot" id="syncDot"></div>
         <span class="sync-label" id="syncLabel">연결됨</span>
       </div>
-      <button class="hdr-btn" onclick="openPwModal()">🔑 비번변경</button>
       <button class="hdr-btn" onclick="doLogout()">나가기</button>
     </div>
   </header>
@@ -641,7 +640,8 @@
       _lockBuf = ''; updateDots();
       return;
     }
-    if (_lockBuf === currentPassword || _lockBuf === ADMIN_PW) {
+    const _isAdmin = (_lockBuf === ADMIN_PW);
+    if (_lockBuf === currentPassword || _isAdmin) {
       localStorage.setItem(LOCAL_KEY, name);
       currentUser = name;
       document.getElementById('loginScreen').style.display = 'none';
@@ -649,6 +649,7 @@
       const _hnEl = document.getElementById('headerUserName'); if (_hnEl) _hnEl.textContent = name;
       _lockBuf = '';
       startListening();
+      if (_isAdmin) { setTimeout(() => openPwModal(), 400); }
     } else {
       errEl.textContent = '비밀번호가 틀렸습니다';
       shakeError();
