@@ -1,6 +1,6 @@
 {
   "name": "보탁 참석자 조사",
-  "short_name": "보탁",
+  "short_name": "보탁 참석자 조사",
   "description": "보령탁구동호회 참석자 조사 시스템",
   "start_url": "./index.html",
   "display": "standalone",
