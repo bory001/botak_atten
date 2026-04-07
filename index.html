@@ -35,7 +35,7 @@
   /* 상단 이미지 오버레이 영역 (타이틀 + 성명 입력까지) */
   .login-hero-area {
     width:100%;
-    background: linear-gradient(rgba(10,10,15,0.55), rgba(10,10,15,0.82)),
+    background: linear-gradient(rgba(10,10,15,0.25), rgba(10,10,15,0.35)),
                 url('login.png') center top / cover no-repeat;
     display:flex; flex-direction:column; align-items:center;
     padding: 5vh 16px 20px;
@@ -48,10 +48,10 @@
   .login-box { display:flex; flex-direction:column; align-items:center; width:100%; }
   .login-title-row { display:flex; align-items:center; gap:10px; margin-bottom:2px; }
   .login-icon { font-size:36px; line-height:1; }
-  .login-title { font-size:1.4rem; font-weight:900; color:#3498db; letter-spacing:2px; margin-bottom:0; }
-  .login-sub { font-size:0.72rem; color:#5a5a72; font-weight:700; margin-bottom:10px; letter-spacing:1px; }
+  .login-title { font-size:1.4rem; font-weight:900; color:#ffffff; letter-spacing:2px; margin-bottom:0; text-shadow:0 1px 6px rgba(0,0,0,0.8); }
+  .login-sub { font-size:0.72rem; color:rgba(255,255,255,0.85); font-weight:700; margin-bottom:10px; letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
   .login-name-wrap { width:260px; margin-bottom:12px; }
-  .login-name-label { font-size:0.68rem; font-weight:700; color:#5a5a72; letter-spacing:1px; margin-bottom:5px; display:block; text-align:center; }
+  .login-name-label { font-size:0.68rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:1px; margin-bottom:5px; display:block; text-align:center; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
   .login-name-input {
     width:100%; padding:11px 14px; border:1px solid #252530;
     border-radius:10px; font-size:15px; font-family:inherit;
@@ -61,8 +61,8 @@
   .login-name-input::placeholder { color:#2a2a3a; }
   .login-name-input:focus { border-color:#3498db; }
   .login-name-input.error { border-color:#e74c3c; animation: shake 0.35s; }
-  .login-saved-hint { font-size:0.68rem; color:#3a3a52; margin-top:5px; text-align:center; }
-  .login-saved-hint strong { color:#5a5a72; }
+  .login-saved-hint { font-size:0.68rem; color:rgba(255,255,255,0.6); margin-top:5px; text-align:center; }
+  .login-saved-hint strong { color:rgba(255,255,255,0.9); }
   .login-error { font-size:0.72rem; font-weight:700; min-height:16px; margin-bottom:8px; color:#e74c3c; text-align:center; letter-spacing:0.5px; }
   .pw-dots { display:flex; gap:14px; margin-bottom:12px; }
   .pw-dot { width:16px; height:16px; border-radius:50%; border:2px solid #2a2a3a; background:transparent; transition:all .2s; }
@@ -345,7 +345,7 @@
       <div class="login-icon" id="installIcon" onclick="triggerInstall()" title="앱 설치" style="cursor:pointer;">🏓</div>
       <div class="login-title">보탁 참석자 조사</div>
     </div>
-    <div id="pwSubMsg" style="font-size:0.68rem;color:#3498db;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;"></div>
+    <div id="pwSubMsg" style="font-size:0.68rem;color:#ffffff;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.8);"></div>
     <div class="login-sub">보령탁구동호회</div>
     <div class="login-name-wrap">
       <label class="login-name-label">성 명</label>
