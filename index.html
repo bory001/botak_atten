@@ -398,10 +398,7 @@
       <div class="subtitle">(보령탁구동호회)</div>
     </div>
     <div class="header-right">
-      <div class="user-badge">
-        <div class="user-dot"></div>
-        <span id="headerUserName"></span>
-      </div>
+
       <div class="sync-dot-wrap">
         <div class="sync-dot" id="syncDot"></div>
         <span class="sync-label" id="syncLabel">연결됨</span>
@@ -661,11 +658,12 @@
   }
 
   window.doLogout = function() {
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
-    _lockBuf = ''; updateDots();
-    document.getElementById('loginError').textContent = '';
-    selectedDate = null;
+    // 앱 종료 시도
+    window.close();
+    // window.close() 막힌 경우 대비
+    setTimeout(function() {
+      history.go(-(history.length));
+    }, 200);
   };
 
   // ── 비밀번호 변경 ──
