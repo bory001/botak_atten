@@ -47,9 +47,10 @@
   }
   .login-box { display:flex; flex-direction:column; align-items:center; width:100%; }
   .login-title-row { display:flex; align-items:center; gap:10px; margin-bottom:1px; }
-  .login-icon { font-size:36px; line-height:1; }
+  .login-icon { font-size:36px; line-height:1; flex-shrink:0; }
   .login-title { font-size:1.4rem; font-weight:900; color:#ffffff; letter-spacing:2px; margin-bottom:0; text-shadow:0 1px 6px rgba(0,0,0,0.8); }
-  .login-sub { font-size:0.95rem; color:rgba(255,255,255,0.85); font-weight:700; margin-bottom:6px; letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+  .login-title-block { display:flex; flex-direction:column; }
+  .login-sub { font-size:0.95rem; color:rgba(255,255,255,0.85); font-weight:700; margin-bottom:0; letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
   .login-name-wrap { width:auto; display:inline-flex; flex-direction:column; align-items:center; margin-bottom:8px; }
   .login-name-label { font-size:1rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:1px; margin-bottom:6px; display:block; text-align:center; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
   .login-name-input {
@@ -343,10 +344,12 @@
   <div class="login-hero-area">
     <div class="login-title-row">
       <div class="login-icon" id="installIcon" onclick="triggerInstall()" title="앱 설치" style="cursor:pointer;">🏓</div>
-      <div class="login-title">보탁 참석자 조사</div>
+      <div class="login-title-block">
+        <div class="login-title">보탁 참석자 조사</div>
+        <div class="login-sub">(보령탁구동호회)</div>
+      </div>
     </div>
-    <div id="pwSubMsg" style="font-size:0.68rem;color:#ffffff;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.8);"></div>
-    <div class="login-sub">(보령탁구동호회)</div>
+    <div id="pwSubMsg" style="font-size:0.68rem;color:#ffffff;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;margin-top:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.8);"></div>
     <div class="login-name-wrap">
       <label class="login-name-label">성 명</label>
       <input type="text" class="login-name-input" id="nameLoginInput"
@@ -398,10 +401,6 @@
       <div class="subtitle">(보령탁구동호회)</div>
     </div>
     <div class="header-right">
-      <div class="user-badge">
-        <div class="user-dot"></div>
-        <span id="headerUserName"></span>
-      </div>
       <div class="sync-dot-wrap">
         <div class="sync-dot" id="syncDot"></div>
         <span class="sync-label" id="syncLabel">연결됨</span>
@@ -645,6 +644,7 @@
       return;
     }
     if (_lockBuf === currentPassword || _lockBuf === ADMIN_PW) {
+      const isAdmin = _lockBuf === ADMIN_PW;
       localStorage.setItem(LOCAL_KEY, name);
       currentUser = name;
       document.getElementById('loginScreen').style.display = 'none';
@@ -652,6 +652,9 @@
       document.getElementById('headerUserName').textContent = name;
       _lockBuf = '';
       startListening();
+      if (isAdmin) {
+        setTimeout(() => openPwModal(), 300);
+      }
     } else {
       errEl.textContent = '비밀번호가 틀렸습니다';
       shakeError();
@@ -661,11 +664,17 @@
   }
 
   window.doLogout = function() {
-    document.getElementById('app').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
-    _lockBuf = ''; updateDots();
-    document.getElementById('loginError').textContent = '';
-    selectedDate = null;
+    // PWA/앱 종료 시도
+    if (window.navigator && window.navigator.standalone) {
+      // iOS PWA
+      window.close();
+    } else {
+      try { window.close(); } catch(e) {}
+      // window.close()가 차단된 경우 빈 페이지로 이동
+      setTimeout(() => {
+        try { window.open('', '_self', ''); window.close(); } catch(e) {}
+      }, 100);
+    }
   };
 
   // ── 비밀번호 변경 ──
