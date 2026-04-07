@@ -651,6 +651,9 @@
       document.getElementById('app').style.display = 'block';
       document.getElementById('headerUserName').textContent = name;
       _lockBuf = '';
+      // 로그인 직후 달력 즉시 렌더링 (Firebase 데이터 오기 전에도 달력 표시)
+      renderCalendar();
+      updateStats();
       startListening();
       if (isAdmin) { setTimeout(() => openPwModal(), 300); }
     } else {
