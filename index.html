@@ -30,48 +30,47 @@
   #loginScreen {
     position: fixed; inset: 0; background: var(--primary);
     display: flex; align-items: center; justify-content: center; z-index: 999;
+    flex-direction: column;
   }
   .login-box {
-    background: white; border-radius: 16px; padding: 2.5rem 2rem;
-    width: 90%; max-width: 340px; text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    display: flex; flex-direction: column; align-items: center;
+    width: 100%; max-width: 320px; padding: 0 1rem;
   }
-  .login-icon { font-size: 44px; margin-bottom: 1rem; }
-  .login-title { font-size: 19px; font-weight: 700; color: var(--primary); margin-bottom: 0.2rem; }
-  .login-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 1.6rem; }
-  .login-label { display: block; text-align: left; font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .login-input {
-    width: 100%; padding: 13px 14px; border: 1.5px solid var(--border);
+  .login-icon { font-size: 48px; margin-bottom: 10px; }
+  .login-title { font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px; margin-bottom: 2px; }
+  .login-sub { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 700; margin-bottom: 20px; letter-spacing: 1px; }
+  .login-name-wrap { width: 100%; margin-bottom: 18px; }
+  .login-name-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 1px; margin-bottom: 5px; display: block; text-align: center; }
+  .login-name-input {
+    width: 100%; padding: 11px 14px; border: 1.5px solid rgba(255,255,255,0.2);
     border-radius: 10px; font-size: 15px; font-family: inherit;
-    text-align: center; outline: none; margin-bottom: 1rem;
-    transition: border-color 0.15s; color: var(--text);
+    text-align: center; outline: none; background: rgba(255,255,255,0.1);
+    color: #fff; transition: border-color 0.15s;
   }
-  .login-input:focus { border-color: var(--primary); }
-  .login-input.error { border-color: var(--danger); animation: shake 0.3s; }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
-  .login-btn {
-    width: 100%; padding: 14px; background: var(--primary); color: white;
-    border: none; border-radius: 10px; font-size: 15px; font-weight: 700;
-    font-family: inherit; cursor: pointer; transition: background 0.15s;
-    margin-bottom: 0.5rem;
+  .login-name-input::placeholder { color: rgba(255,255,255,0.3); }
+  .login-name-input:focus { border-color: rgba(255,255,255,0.6); }
+  .login-name-input.error { border-color: #e74c3c; animation: shake 0.3s; }
+  .login-saved-hint { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 4px; text-align: center; }
+  .login-saved-hint strong { color: rgba(255,255,255,0.75); }
+  .login-error { font-size: 11px; color: #e74c3c; min-height: 16px; text-align: center; margin-bottom: 8px; font-weight: 700; }
+  .pw-dots { display: flex; gap: 14px; margin-bottom: 6px; }
+  .pw-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); background: transparent; transition: all .2s; }
+  .pw-dot.filled { background: #fff; border-color: #fff; }
+  .pw-dot.error { background: #e74c3c; border-color: #e74c3c; }
+  .pw-sub-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 1px; margin-bottom: 12px; }
+  .pw-keypad { display: grid; grid-template-columns: repeat(3, 72px); gap: 10px; }
+  .kbtn {
+    height: 68px; border-radius: 14px;
+    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; font-family: inherit; font-size: 1.5rem; font-weight: 900;
+    cursor: pointer; transition: all .15s;
+    display: flex; align-items: center; justify-content: center;
+    -webkit-tap-highlight-color: transparent; user-select: none;
   }
-  .login-btn:hover { background: var(--primary-light); }
-  .login-error { font-size: 12px; color: var(--danger); min-height: 18px; }
-  .login-saved-hint {
-    margin-top: 0.75rem; font-size: 11px; color: var(--text-muted);
-    background: var(--bg); border-radius: 8px; padding: 8px 12px; line-height: 1.5;
-  }
-  .login-saved-hint strong { color: var(--primary); }
-
-  /* 비번 입력창 (letter-spacing 점 형식) */
-  .lock-input {
-    width: 100%; padding: 12px 14px; border: 1.5px solid var(--border);
-    border-radius: 10px; font-size: 22px; font-family: inherit;
-    text-align: center; letter-spacing: 10px; outline: none; margin-bottom: 1rem;
-    transition: border-color 0.15s; color: var(--text);
-  }
-  .lock-input:focus { border-color: var(--primary); }
-  .lock-input.error { border-color: var(--danger); animation: shake 0.3s; }
+  .kbtn:active { background: rgba(255,255,255,0.28); transform: scale(.93); }
+  .kbtn.del { font-size: 1.1rem; color: rgba(255,255,255,0.6); }
+  .kbtn.empty { visibility: hidden; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
 
   /* 비번 변경 모달 */
   .modal-overlay {
@@ -160,27 +159,27 @@
   .weekday:first-child { color: var(--danger); }
   .weekday:last-child { color: #3b82f6; }
 
-  .days-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 4px 10px 10px; gap: 3px; }
+  .days-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 3px 8px 8px; gap: 2px; }
   .day-cell {
-    border-radius: 8px; padding: 5px 4px; cursor: pointer;
+    border-radius: 6px; padding: 3px 3px 2px; cursor: pointer;
     transition: background 0.15s; display: flex; flex-direction: column;
-    align-items: flex-start; min-height: 72px; border: 1px solid transparent;
+    align-items: center; min-height: 0; border: 1px solid transparent;
   }
   .day-cell:hover:not(.other-month) { background: #eef3fa; border-color: var(--border); }
   .day-cell.today { background: #eff6ff; border-color: #93c5fd; }
   .day-cell.selected { background: var(--primary); border-color: var(--primary); }
   .day-cell.selected .day-num { color: white !important; }
   .day-cell.other-month { opacity: 0.3; cursor: default; }
-  .day-num { font-size: 12px; font-weight: 600; line-height: 1; color: var(--text); margin-bottom: 4px; }
+  .day-num { font-size: 12px; font-weight: 600; line-height: 1.3; color: var(--text); }
   .day-cell:nth-child(7n+1) .day-num { color: var(--danger); }
   .day-cell:nth-child(7n) .day-num { color: #3b82f6; }
   .day-cell.selected .day-num { color: white !important; }
 
   /* 달력 셀 참석 인원수 뱃지 */
   .day-att-num {
-    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 10px;
-    background: var(--accent-light); color: #065f46; margin-top: 2px;
-    display: inline-block; line-height: 1.4;
+    font-size: 9px; font-weight: 700; padding: 1px 5px; border-radius: 8px;
+    background: var(--accent-light); color: #065f46;
+    display: inline-block; line-height: 1.4; margin-top: 1px;
   }
   .day-cell.selected .day-att-num { background: rgba(255,255,255,0.25); color: white; }
 
@@ -197,36 +196,44 @@
   }
 
   /* 참석자 목록 */
-  .att-list { padding: 0 1.25rem 1.25rem; }
+  .att-list { padding: 0 1rem 1rem; }
   .att-empty {
-    padding: 2rem 0; text-align: center; color: var(--text-muted);
-    font-size: 13px; line-height: 2;
+    padding: 1.5rem 0; text-align: center; color: var(--text-muted);
+    font-size: 13px; line-height: 1.8;
   }
-  .att-empty-icon { font-size: 32px; display: block; margin-bottom: 0.5rem; }
   .att-count-badge {
     display: inline-flex; align-items: center; gap: 4px;
     background: var(--accent-light); color: #065f46;
-    border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 700;
-    margin: 0.75rem 0 0.5rem;
+    border-radius: 20px; padding: 3px 10px; font-size: 11px; font-weight: 700;
+    margin: 0.6rem 0 0.4rem;
   }
-  .att-grid { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 0.5rem; }
-  .att-chip-big {
-    display: flex; align-items: center; gap: 6px;
-    background: var(--bg); border: 1.5px solid var(--border);
-    border-radius: 24px; padding: 7px 13px; font-size: 13px; font-weight: 600;
-    color: var(--text); cursor: pointer; user-select: none;
-    transition: all 0.15s; position: relative;
+  /* 간소화된 이름 그리드 */
+  .att-name-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;
   }
-  .att-chip-big:hover { border-color: var(--danger); background: #fef2f2; }
-  .att-chip-big.mine { background: var(--accent-light); border-color: var(--accent); color: #065f46; }
-  .att-chip-big.mine:hover { background: #fef2f2; border-color: var(--danger); color: var(--text); }
-  .att-chip-avatar {
-    width: 22px; height: 22px; border-radius: 50%; background: var(--primary);
-    color: white; display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 700; flex-shrink: 0;
+  .att-name-chip {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; padding: 5px 4px;
+    font-size: 11px; font-weight: 600; color: var(--text);
+    text-align: center; cursor: pointer; user-select: none;
+    transition: all 0.12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .att-chip-big.mine .att-chip-avatar { background: var(--accent); }
-  .long-press-hint { font-size: 10px; color: var(--text-muted); padding: 0.5rem 0 0; text-align: center; }
+  .att-name-chip:hover { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
+  .att-name-chip.mine { background: var(--accent-light); border-color: var(--accent); color: #065f46; }
+  .att-name-chip.mine:hover { background: #fef2f2; border-color: var(--danger); color: var(--danger); }
+  /* 페이징 */
+  .att-paging {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 8px;
+  }
+  .att-page-btn {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 10px; font-size: 11px; font-family: inherit; cursor: pointer; font-weight: 600;
+  }
+  .att-page-btn:hover { background: var(--primary); color: white; border-color: var(--primary); }
+  .att-page-btn:disabled { opacity: 0.35; cursor: default; }
+  .att-page-info { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+  .long-press-hint { font-size: 10px; color: var(--text-muted); padding: 0.4rem 0 0; text-align: center; }
 
   /* ── 내 참석 버튼 ── */
   .my-attend-section { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
@@ -323,9 +330,9 @@
     .sidebar { display: none; }
     .mobile-day-panel { display: block; }
     .days-grid { padding: 4px 6px 8px; gap: 2px; }
-    .day-cell { min-height: 58px; padding: 5px 3px; border-radius: 6px; }
-    .day-num { font-size: 13px; margin-bottom: 3px; }
-    .day-att-num { font-size: 9px; padding: 1px 5px; }
+    .day-cell { padding: 3px 2px 2px; border-radius: 5px; }
+    .day-num { font-size: 12px; }
+    .day-att-num { font-size: 8px; padding: 1px 4px; }
     .weekdays { padding: 6px 6px 2px; }
     .weekday { font-size: 11px; }
     .calendar-header { padding: 0.75rem 1rem; }
@@ -347,19 +354,39 @@
     <div class="login-title">보탁 참석자 조사</div>
     <div class="login-sub">보령탁구동호회</div>
 
-    <label class="login-label">성명</label>
-    <input type="text" class="login-input" id="nameLoginInput"
-      placeholder="홍길동" maxlength="10"
-      onkeydown="if(event.key==='Enter') document.getElementById('lockInput').focus()">
+    <!-- 이름 입력 -->
+    <div class="login-name-wrap">
+      <label class="login-name-label">성 명</label>
+      <input type="text" class="login-name-input" id="nameLoginInput"
+        placeholder="홍길동" maxlength="10"
+        onkeydown="if(event.key==='Enter') this.blur()">
+      <div class="login-saved-hint" id="loginSavedHint" style="display:none;">
+        저장된 이름: <strong id="savedNameDisplay"></strong>
+      </div>
+    </div>
 
-    <label class="login-label">비밀번호</label>
-    <input type="password" class="lock-input" id="lockInput" placeholder="● ● ● ●" maxlength="20"
-      onkeydown="if(event.key==='Enter') doLogin()">
-
-    <button class="login-btn" onclick="doLogin()">로그인</button>
+    <!-- 비번 도트 -->
+    <div class="pw-dots">
+      <div class="pw-dot" id="pd0"></div><div class="pw-dot" id="pd1"></div>
+      <div class="pw-dot" id="pd2"></div><div class="pw-dot" id="pd3"></div>
+    </div>
+    <div class="pw-sub-label">비밀번호를 입력하세요</div>
     <div class="login-error" id="loginError"></div>
-    <div class="login-saved-hint" id="loginSavedHint" style="display:none;">
-      저장된 이름: <strong id="savedNameDisplay"></strong>
+
+    <!-- 숫자 키패드 -->
+    <div class="pw-keypad">
+      <button class="kbtn" onclick="lockKey('1')">1</button>
+      <button class="kbtn" onclick="lockKey('2')">2</button>
+      <button class="kbtn" onclick="lockKey('3')">3</button>
+      <button class="kbtn" onclick="lockKey('4')">4</button>
+      <button class="kbtn" onclick="lockKey('5')">5</button>
+      <button class="kbtn" onclick="lockKey('6')">6</button>
+      <button class="kbtn" onclick="lockKey('7')">7</button>
+      <button class="kbtn" onclick="lockKey('8')">8</button>
+      <button class="kbtn" onclick="lockKey('9')">9</button>
+      <div class="kbtn empty"></div>
+      <button class="kbtn" onclick="lockKey('0')">0</button>
+      <button class="kbtn del" onclick="lockDel()">⌫</button>
     </div>
   </div>
 </div>
@@ -523,13 +550,16 @@
   const db = getDatabase(app);
 
   // ── 상태 ──
-  let currentUser = null;       // 로그인한 사람 이름
-  let attendanceData = {};      // { 'YYYY-MM-DD': { '홍길동': true, ... } }
+  let currentUser = null;
+  let attendanceData = {};
   let currentDate = new Date();
   let selectedDate = null;
   let confirmCallback = null;
-  let currentPassword = '6986';       // 유저 비번 (Firebase에서 로드)
-  const ADMIN_PW = '1020';            // 관리자 비번 (고정)
+  let currentPassword = '6986';
+  const ADMIN_PW = '1020';
+  let _lockBuf = '';
+  let attPage = 0;          // 참석자 목록 현재 페이지
+  const ATT_PAGE_SIZE = 20; // 페이지당 표시 수
 
   const LOCAL_KEY = 'botak_user_name';
   const isMobile = () => window.innerWidth <= 768;
@@ -572,43 +602,84 @@
     }
   })();
 
-  // ── 로그인 (비번 + 이름 동시 검증) ──
-  window.doLogin = function() {
-    const name = document.getElementById('nameLoginInput').value.trim();
-    const pw = document.getElementById('lockInput').value;
-    const errEl = document.getElementById('loginError');
-    const nameInp = document.getElementById('nameLoginInput');
-    const pwInp = document.getElementById('lockInput');
-    errEl.textContent = '';
+  // ── 키패드 도트 업데이트 ──
+  function updateDots() {
+    for (let i = 0; i < 4; i++) {
+      const d = document.getElementById('pd' + i);
+      if (!d) continue;
+      d.classList.remove('filled', 'error');
+      if (i < _lockBuf.length) d.classList.add('filled');
+    }
+  }
 
+  function shakeError() {
+    const kp = document.querySelector('.pw-keypad');
+    const dots = document.querySelector('.pw-dots');
+    [kp, dots].forEach(el => {
+      if (!el) return;
+      el.style.animation = 'none';
+      requestAnimationFrame(() => { el.style.animation = 'shake .35s ease'; });
+    });
+    for (let i = 0; i < 4; i++) {
+      const d = document.getElementById('pd' + i);
+      if (d) { d.classList.remove('filled'); d.classList.add('error'); }
+    }
+    setTimeout(() => {
+      for (let i = 0; i < 4; i++) {
+        const d = document.getElementById('pd' + i);
+        if (d) d.classList.remove('error');
+      }
+    }, 600);
+  }
+
+  window.lockKey = function(n) {
+    if (_lockBuf.length >= 4) return;
+    _lockBuf += n;
+    updateDots();
+    document.getElementById('loginError').textContent = '';
+    if (_lockBuf.length === 4) {
+      setTimeout(() => checkAndLogin(), 120);
+    }
+  };
+
+  window.lockDel = function() {
+    if (!_lockBuf.length) return;
+    _lockBuf = _lockBuf.slice(0, -1);
+    updateDots();
+  };
+
+  function checkAndLogin() {
+    const name = document.getElementById('nameLoginInput').value.trim();
+    const nameInp = document.getElementById('nameLoginInput');
+    const errEl = document.getElementById('loginError');
     if (!name) {
-      errEl.textContent = '성명을 입력해주세요';
+      errEl.textContent = '성명을 먼저 입력해주세요';
       nameInp.classList.add('error');
       setTimeout(() => nameInp.classList.remove('error'), 400);
       nameInp.focus();
+      _lockBuf = ''; updateDots();
       return;
     }
-    if (pw !== currentPassword && pw !== ADMIN_PW) {
-      errEl.textContent = '비밀번호가 틀렸어요';
-      pwInp.classList.add('error');
-      pwInp.value = '';
-      setTimeout(() => pwInp.classList.remove('error'), 400);
-      pwInp.focus();
-      return;
+    if (_lockBuf === currentPassword || _lockBuf === ADMIN_PW) {
+      localStorage.setItem(LOCAL_KEY, name);
+      currentUser = name;
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      document.getElementById('headerUserName').textContent = name;
+      _lockBuf = '';
+      startListening();
+    } else {
+      errEl.textContent = '비밀번호가 틀렸습니다';
+      shakeError();
+      _lockBuf = '';
+      setTimeout(() => updateDots(), 600);
     }
-
-    localStorage.setItem(LOCAL_KEY, name);
-    currentUser = name;
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    document.getElementById('headerUserName').textContent = name;
-    startListening();
-  };
+  }
 
   window.doLogout = function() {
     document.getElementById('app').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('lockInput').value = '';
+    _lockBuf = ''; updateDots();
     document.getElementById('loginError').textContent = '';
     selectedDate = null;
   };
@@ -707,6 +778,7 @@
   // ── 날짜 선택 ──
   function selectDate(key, y, m, day) {
     selectedDate = key;
+    attPage = 0;
     document.getElementById('selectedDateLabel').textContent = formatDateKr(key);
     renderCalendar();
     renderSidebar();
@@ -725,7 +797,6 @@
     const names = selectedDate && attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
     const isRegistered = names.includes(currentUser);
 
-    // 버튼 상태
     if (isRegistered) {
       btn.className = 'my-attend-btn cancel';
       btn.innerHTML = '❌ 참석 취소';
@@ -734,39 +805,54 @@
       btn.innerHTML = '✅ 참석 등록';
     }
 
-    // 참석자 목록
     if (names.length === 0) {
-      attList.innerHTML = `<div class="att-empty"><span class="att-empty-icon">🏓</span>아직 등록된 참석자가 없어요<br>첫 번째로 등록해보세요!</div>`;
+      attList.innerHTML = `<div class="att-empty">아직 등록된 참석자가 없어요</div>`;
       return;
     }
 
-    let html = `<div class="att-count-badge">🙋 총 ${names.length}명 참석</div>`;
-    html += `<div class="att-grid">`;
-    names.forEach(name => {
+    renderAttPage(names, attPage);
+  }
+
+  function renderAttPage(names, page) {
+    const attList = document.getElementById('attList');
+    const totalPages = Math.ceil(names.length / ATT_PAGE_SIZE);
+    const start = page * ATT_PAGE_SIZE;
+    const slice = names.slice(start, start + ATT_PAGE_SIZE);
+
+    let html = `<div class="att-count-badge">총 ${names.length}명 참석</div>`;
+    html += `<div class="att-name-grid">`;
+    slice.forEach(name => {
       const isMine = (name === currentUser);
-      const initials = name.charAt(0);
-      html += `<div class="att-chip-big ${isMine ? 'mine' : ''}" data-name="${name}" title="${name} (길게 눌러 취소)">
-        <div class="att-chip-avatar">${initials}</div>
-        ${name}${isMine ? ' 👤' : ''}
-      </div>`;
+      html += `<div class="att-name-chip ${isMine ? 'mine' : ''}" data-name="${name}">${name}</div>`;
     });
     html += `</div>`;
-    html += `<div class="long-press-hint">💡 이름을 길게 누르면 등록 취소</div>`;
+    if (totalPages > 1) {
+      html += `<div class="att-paging">
+        <button class="att-page-btn" id="attPrevBtn" ${page === 0 ? 'disabled' : ''} onclick="changeAttPage(-1)">◀</button>
+        <span class="att-page-info">${page + 1} / ${totalPages}</span>
+        <button class="att-page-btn" id="attNextBtn" ${page >= totalPages - 1 ? 'disabled' : ''} onclick="changeAttPage(1)">▶</button>
+      </div>`;
+    }
+    html += `<div class="long-press-hint">이름을 길게 누르면 등록 취소</div>`;
     attList.innerHTML = html;
 
-    // 길게 누르기 이벤트
-    attList.querySelectorAll('.att-chip-big').forEach(chip => {
+    attList.querySelectorAll('.att-name-chip').forEach(chip => {
       setupLongPress(chip, () => {
         const name = chip.dataset.name;
         openConfirm(
           `"${name}" 님의 ${formatDateKr(selectedDate)} 참석을 취소할까요?`,
-          async () => {
-            await removeAttendance(selectedDate, name);
-          }
+          async () => { await removeAttendance(selectedDate, name); }
         );
       });
     });
   }
+
+  window.changeAttPage = function(dir) {
+    const names = selectedDate && attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
+    const totalPages = Math.ceil(names.length / ATT_PAGE_SIZE);
+    attPage = Math.max(0, Math.min(attPage + dir, totalPages - 1));
+    renderAttPage(names, attPage);
+  };
 
   // ── 모바일 패널 렌더 ──
   function renderMobilePanel() {
@@ -798,18 +884,18 @@
       attCountEl.style.display = 'none';
     }
 
-    // 참석자 칩 목록
+    // 참석자 이름 목록 (간소화)
     if (names.length === 0) {
       attGrid.innerHTML = '<div class="mdp-empty">아직 등록된 참석자가 없어요</div>';
     } else {
       attGrid.innerHTML = '';
+      attGrid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:0.75rem;';
       names.forEach(name => {
         const isMine = (name === currentUser);
         const chip = document.createElement('div');
-        chip.className = `att-chip-big ${isMine ? 'mine' : ''}`;
+        chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
         chip.dataset.name = name;
-        chip.title = name;
-        chip.innerHTML = `<div class="att-chip-avatar">${name.charAt(0)}</div>${name}${isMine ? ' 👤' : ''}`;
+        chip.textContent = name;
         setupLongPress(chip, () => {
           const n = chip.dataset.name;
           openConfirm(
