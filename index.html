@@ -880,8 +880,8 @@
     if (names.length === 0) {
       attGrid.innerHTML = '<div class="mdp-empty">아직 등록된 참석자가 없어요</div>';
     } else {
-      attGrid.innerHTML = '';
-      attGrid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:0.75rem;';
+      attGrid.innerHTML = `<div class="att-count-badge" style="width:100%;margin-bottom:6px;">총 ${names.length}명 참석</div>`;
+      attGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:4px;align-items:flex-start;';
       names.forEach(name => {
         const isMine = (name === currentUser);
         const chip = document.createElement('div');
