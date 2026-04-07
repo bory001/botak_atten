@@ -29,14 +29,36 @@
   /* ── 로그인 화면 ── */
   #loginScreen {
     position:fixed; inset:0; background:#0a0a0f;
-    display:flex; align-items:center; justify-content:flex-start; padding-top:4vh; padding-bottom:40px; z-index:9999;
-    flex-direction:column; overflow-y:auto;
+    display:flex; flex-direction:column; align-items:stretch;
+    z-index:9999; overflow-y:auto;
   }
-  .login-box { display:flex; flex-direction:column; align-items:center; }
+
+  /* 상단 배경 이미지 영역 — 가로 100%, 비율 1376:768 = 56% */
+  .login-hero {
+    width:100%; padding-bottom:55.8%; /* 768/1376 */
+    background: url('login.png') center center / cover no-repeat;
+    flex-shrink:0;
+    position:relative;
+  }
+
+  /* 이미지 아래 그라데이션 페이드 */
+  .login-hero::after {
+    content:''; position:absolute; bottom:0; left:0; right:0; height:60px;
+    background: linear-gradient(to bottom, transparent, #0a0a0f);
+  }
+
+  /* 입력 영역 — 이미지 바로 아래 */
+  .login-box {
+    display:flex; flex-direction:column; align-items:center;
+    padding: 12px 0 50px;
+    background:#0a0a0f;
+  }
+
   .login-title-row { display:flex; align-items:center; gap:10px; margin-bottom:2px; }
-  .login-icon { font-size:36px; line-height:1; }
-  .login-title { font-size:1.4rem; font-weight:900; color:#3498db; letter-spacing:2px; margin-bottom:0; }
+  .login-icon { font-size:34px; line-height:1; }
+  .login-title { font-size:1.4rem; font-weight:900; color:#3498db; letter-spacing:2px; }
   .login-sub { font-size:0.72rem; color:#5a5a72; font-weight:700; margin-bottom:10px; letter-spacing:1px; }
+
   .login-name-wrap { width:260px; margin-bottom:12px; }
   .login-name-label { font-size:0.68rem; font-weight:700; color:#5a5a72; letter-spacing:1px; margin-bottom:5px; display:block; text-align:center; }
   .login-name-input {
@@ -51,11 +73,13 @@
   .login-saved-hint { font-size:0.68rem; color:#3a3a52; margin-top:5px; text-align:center; }
   .login-saved-hint strong { color:#5a5a72; }
   .login-error { font-size:0.72rem; font-weight:700; min-height:16px; margin-bottom:8px; color:#e74c3c; text-align:center; letter-spacing:0.5px; }
-  .pw-dots { display:flex; gap:14px; margin-bottom:12px; }
+
+  .pw-dots { display:flex; gap:14px; margin-bottom:10px; }
   .pw-dot { width:16px; height:16px; border-radius:50%; border:2px solid #2a2a3a; background:transparent; transition:all .2s; }
   .pw-dot.filled { background:#3498db; border-color:#3498db; box-shadow:0 0 8px rgba(52,152,219,.5); }
   .pw-dot.error { background:#e74c3c; border-color:#e74c3c; }
   .pw-sub-label { font-size:0.72rem; color:#5a5a72; font-weight:700; margin-bottom:8px; letter-spacing:1px; }
+
   .pw-keypad { display:grid; grid-template-columns:repeat(3,72px); gap:10px; }
   .kbtn {
     height:66px; border-radius:14px; background:#18181f; border:1px solid #252530;
@@ -325,12 +349,17 @@
 
 <!-- 로그인 화면 -->
 <div id="loginScreen">
+
+  <!-- 상단 배경 이미지 -->
+  <div class="login-hero"></div>
+
+  <!-- 하단 입력 영역 -->
   <div class="login-box">
     <div class="login-title-row">
       <div class="login-icon" id="installIcon" onclick="triggerInstall()" title="앱 설치" style="cursor:pointer;">🏓</div>
       <div class="login-title">보탁 참석자 조사</div>
     </div>
-    <div id="pwSubMsg" style="font-size:0.68rem;color:#3498db;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:8px;text-align:center;"></div>
+    <div id="pwSubMsg" style="font-size:0.68rem;color:#3498db;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:6px;text-align:center;"></div>
     <div class="login-sub">보령탁구동호회</div>
 
     <!-- 이름 입력 -->
@@ -367,15 +396,17 @@
       <button class="kbtn" onclick="lockKey('0')">0</button>
       <button class="kbtn del" onclick="lockDel()">⌫</button>
     </div>
+
+    <!-- 하단 캐시 새로고침 + 제작자 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;width:260px;margin-top:18px;">
+      <button onclick="hardRefresh()"
+        style="background:none;border:none;color:#ffffff;font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:inherit;padding:4px 6px;border-radius:6px;transition:color .2s;"
+        onmouseenter="this.style.color='#3498db'" onmouseleave="this.style.color='#ffffff'"
+        ontouchstart="this.style.color='#3498db'" ontouchend="this.style.color='#ffffff'">🔄 캐시 새로고침</button>
+      <div style="color:#ffffff;font-size:10px;letter-spacing:.5px;font-weight:700;">Made by yybest</div>
+    </div>
   </div>
-  <!-- 하단 캐시 새로고침 + 제작자 -->
-  <div style="position:absolute;bottom:12px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;">
-    <button onclick="hardRefresh()"
-      style="background:none;border:none;color:#ffffff;font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:inherit;padding:4px 6px;border-radius:6px;transition:color .2s;"
-      onmouseenter="this.style.color='#3498db'" onmouseleave="this.style.color='#ffffff'"
-      ontouchstart="this.style.color='#3498db'" ontouchend="this.style.color='#ffffff'">🔄 캐시 새로고침</button>
-    <div style="color:#ffffff;font-size:10px;letter-spacing:.5px;font-weight:700;">Made by yybest</div>
-  </div>
+
 </div>
 
 <!-- 메인 앱 -->
