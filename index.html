@@ -28,49 +28,44 @@
 
   /* ── 로그인 화면 ── */
   #loginScreen {
-    position: fixed; inset: 0; background: var(--primary);
-    display: flex; align-items: center; justify-content: center; z-index: 999;
-    flex-direction: column;
+    position:fixed; inset:0; background:#0a0a0f;
+    display:flex; align-items:center; justify-content:center; z-index:9999;
+    flex-direction:column;
   }
-  .login-box {
-    display: flex; flex-direction: column; align-items: center;
-    width: 100%; max-width: 320px; padding: 0 1rem;
-  }
-  .login-icon { font-size: 48px; margin-bottom: 10px; }
-  .login-title { font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px; margin-bottom: 2px; }
-  .login-sub { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 700; margin-bottom: 20px; letter-spacing: 1px; }
-  .login-name-wrap { width: 100%; margin-bottom: 18px; }
-  .login-name-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 1px; margin-bottom: 5px; display: block; text-align: center; }
+  .login-box { display:flex; flex-direction:column; align-items:center; }
+  .login-icon { font-size:52px; margin-bottom:12px; }
+  .login-title { font-size:1.4rem; font-weight:900; color:#3498db; letter-spacing:2px; margin-bottom:4px; }
+  .login-sub { font-size:0.72rem; color:#5a5a72; font-weight:700; margin-bottom:20px; letter-spacing:1px; }
+  .login-name-wrap { width:260px; margin-bottom:20px; }
+  .login-name-label { font-size:0.68rem; font-weight:700; color:#5a5a72; letter-spacing:1px; margin-bottom:5px; display:block; text-align:center; }
   .login-name-input {
-    width: 100%; padding: 11px 14px; border: 1.5px solid rgba(255,255,255,0.2);
-    border-radius: 10px; font-size: 15px; font-family: inherit;
-    text-align: center; outline: none; background: rgba(255,255,255,0.1);
-    color: #fff; transition: border-color 0.15s;
+    width:100%; padding:11px 14px; border:1px solid #252530;
+    border-radius:10px; font-size:15px; font-family:inherit;
+    text-align:center; outline:none; background:#18181f;
+    color:#f0f0f5; transition:border-color 0.15s; letter-spacing:1px;
   }
-  .login-name-input::placeholder { color: rgba(255,255,255,0.3); }
-  .login-name-input:focus { border-color: rgba(255,255,255,0.6); }
-  .login-name-input.error { border-color: #e74c3c; animation: shake 0.3s; }
-  .login-saved-hint { font-size: 10px; color: rgba(255,255,255,0.4); margin-top: 4px; text-align: center; }
-  .login-saved-hint strong { color: rgba(255,255,255,0.75); }
-  .login-error { font-size: 11px; color: #e74c3c; min-height: 16px; text-align: center; margin-bottom: 8px; font-weight: 700; }
-  .pw-dots { display: flex; gap: 14px; margin-bottom: 6px; }
-  .pw-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); background: transparent; transition: all .2s; }
-  .pw-dot.filled { background: #fff; border-color: #fff; }
-  .pw-dot.error { background: #e74c3c; border-color: #e74c3c; }
-  .pw-sub-label { font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.5); letter-spacing: 1px; margin-bottom: 12px; }
-  .pw-keypad { display: grid; grid-template-columns: repeat(3, 72px); gap: 10px; }
+  .login-name-input::placeholder { color:#2a2a3a; }
+  .login-name-input:focus { border-color:#3498db; }
+  .login-name-input.error { border-color:#e74c3c; animation: shake 0.35s; }
+  .login-saved-hint { font-size:0.68rem; color:#3a3a52; margin-top:5px; text-align:center; }
+  .login-saved-hint strong { color:#5a5a72; }
+  .login-error { font-size:0.72rem; font-weight:700; min-height:18px; margin-bottom:14px; color:#e74c3c; text-align:center; letter-spacing:0.5px; }
+  .pw-dots { display:flex; gap:14px; margin-bottom:22px; }
+  .pw-dot { width:16px; height:16px; border-radius:50%; border:2px solid #2a2a3a; background:transparent; transition:all .2s; }
+  .pw-dot.filled { background:#3498db; border-color:#3498db; box-shadow:0 0 8px rgba(52,152,219,.5); }
+  .pw-dot.error { background:#e74c3c; border-color:#e74c3c; }
+  .pw-sub-label { font-size:0.72rem; color:#5a5a72; font-weight:700; margin-bottom:16px; letter-spacing:1px; }
+  .pw-keypad { display:grid; grid-template-columns:repeat(3,72px); gap:10px; }
   .kbtn {
-    height: 68px; border-radius: 14px;
-    background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.15);
-    color: #fff; font-family: inherit; font-size: 1.5rem; font-weight: 900;
-    cursor: pointer; transition: all .15s;
-    display: flex; align-items: center; justify-content: center;
-    -webkit-tap-highlight-color: transparent; user-select: none;
+    height:72px; border-radius:16px; background:#18181f; border:1px solid #252530;
+    color:#f0f0f5; font-family:inherit; font-size:1.4rem; font-weight:900;
+    cursor:pointer; transition:all .15s; display:flex; align-items:center; justify-content:center;
+    -webkit-tap-highlight-color:transparent; user-select:none;
   }
-  .kbtn:active { background: rgba(255,255,255,0.28); transform: scale(.93); }
-  .kbtn.del { font-size: 1.1rem; color: rgba(255,255,255,0.6); }
-  .kbtn.empty { visibility: hidden; }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+  .kbtn:active { background:#252535; transform:scale(.93); }
+  .kbtn.del { font-size:1.1rem; color:#5a5a72; }
+  .kbtn.empty { visibility:hidden; }
+  @keyframes shake { 0%,100%{transform:translateX(0);} 25%{transform:translateX(-8px);} 75%{transform:translateX(8px);} }
 
   /* 비번 변경 모달 */
   .modal-overlay {
@@ -303,27 +298,7 @@
   .stat-num { font-size: 22px; font-weight: 700; color: var(--primary); line-height: 1; }
   .stat-label { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
 
-  /* ── 확인 삭제 팝업 ── */
-  .confirm-overlay {
-    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
-    display: none; align-items: center; justify-content: center; z-index: 500; padding: 1rem;
-  }
-  .confirm-overlay.show { display: flex; }
-  .confirm-box {
-    background: white; border-radius: 14px; padding: 1.5rem;
-    width: 100%; max-width: 300px; text-align: center;
-  }
-  .confirm-icon { font-size: 32px; margin-bottom: 0.75rem; }
-  .confirm-msg { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 1.2rem; }
-  .confirm-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-  .confirm-cancel {
-    padding: 10px; background: var(--bg); border: 1px solid var(--border);
-    border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer;
-  }
-  .confirm-ok {
-    padding: 10px; background: var(--danger); color: white; border: none;
-    border-radius: 8px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer;
-  }
+  /* 확인 팝업 제거됨 */
 
   @media (max-width: 768px) {
     .main-layout { grid-template-columns: 1fr; padding: 0.75rem; gap: 0.75rem; }
@@ -388,6 +363,14 @@
       <button class="kbtn" onclick="lockKey('0')">0</button>
       <button class="kbtn del" onclick="lockDel()">⌫</button>
     </div>
+  </div>
+  <!-- 하단 캐시 새로고침 + 제작자 -->
+  <div style="position:absolute;bottom:12px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;">
+    <button onclick="(function(){var c=document.cookie.split(';');for(var i=0;i<c.length;i++){var e=c[i].indexOf('=');var n=e>-1?c[i].substr(0,e):c[i];document.cookie=n+'=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';}if('caches' in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n);});});}location.reload(true);})()"
+      style="background:none;border:none;color:#ffffff;font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:inherit;padding:4px 6px;border-radius:6px;transition:color .2s;"
+      onmouseenter="this.style.color='#3498db'" onmouseleave="this.style.color='#ffffff'"
+      ontouchstart="this.style.color='#3498db'" ontouchend="this.style.color='#ffffff'">🔄 캐시 새로고침</button>
+    <div style="color:#ffffff;font-size:10px;letter-spacing:.5px;font-weight:700;">Made by yybest</div>
   </div>
 </div>
 
@@ -499,18 +482,6 @@
   </div>
 </div>
 
-<!-- 삭제 확인 팝업 -->
-<div class="confirm-overlay" id="confirmOverlay">
-  <div class="confirm-box">
-    <div class="confirm-icon">🗑️</div>
-    <div class="confirm-msg" id="confirmMsg">참석을 취소하시겠어요?</div>
-    <div class="confirm-btns">
-      <button class="confirm-cancel" onclick="closeConfirm()">아니요</button>
-      <button class="confirm-ok" id="confirmOkBtn">취소</button>
-    </div>
-  </div>
-</div>
-
 <!-- 비밀번호 변경 모달 -->
 <div class="modal-overlay" id="pwModal">
   <div class="modal-box">
@@ -554,7 +525,6 @@
   let attendanceData = {};
   let currentDate = new Date();
   let selectedDate = null;
-  let confirmCallback = null;
   let currentPassword = '6986';
   const ADMIN_PW = '1020';
   let _lockBuf = '';
@@ -1001,22 +971,10 @@
     el.addEventListener('touchcancel', cancel);
   }
 
-  // ── 확인 팝업 ──
+  // ── 확인 없이 바로 실행 ──
   function openConfirm(msg, onOk) {
-    document.getElementById('confirmMsg').textContent = msg;
-    confirmCallback = onOk;
-    document.getElementById('confirmOverlay').classList.add('show');
+    onOk();
   }
-
-  window.closeConfirm = function() {
-    document.getElementById('confirmOverlay').classList.remove('show');
-    confirmCallback = null;
-  };
-
-  document.getElementById('confirmOkBtn').addEventListener('click', async () => {
-    if (confirmCallback) await confirmCallback();
-    closeConfirm();
-  });
 
   // ── 달력 이동 ──
   document.getElementById('prevBtn').addEventListener('click', () => {
