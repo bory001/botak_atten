@@ -315,7 +315,9 @@
   }
   @media (max-width: 380px) {
     .day-num { font-size: 12px; }
-    .day-att-chip { width: 6px; height: 6px; }
+  }
+  @keyframes installBlink {
+    0%,100% { opacity:1; } 50% { opacity:0.4; }
   }
 </style>
 </head>
@@ -327,9 +329,10 @@
 <div id="loginScreen">
   <div class="login-box">
     <div class="login-title-row">
-      <div class="login-icon">🏓</div>
+      <div class="login-icon" id="installIcon" onclick="triggerInstall()" title="앱 설치" style="cursor:pointer;">🏓</div>
       <div class="login-title">보탁 참석자 조사</div>
     </div>
+    <div id="installHint" style="display:none;font-size:0.65rem;color:#3498db;font-weight:700;letter-spacing:0.5px;margin-bottom:4px;text-align:center;animation:installBlink 1.5s ease infinite;">📲 아이콘을 눌러 앱 설치</div>
     <div class="login-sub">보령탁구동호회</div>
 
     <!-- 이름 입력 -->
@@ -990,6 +993,55 @@
     renderCalendar();
     updateStats();
   });
+</script>
+<script>
+// ── PWA 설치 ──
+var _deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _deferredPrompt = e;
+  // 설치 힌트 표시
+  var hint = document.getElementById('installHint');
+  if (hint) hint.style.display = 'block';
+  // 아이콘 강조
+  var icon = document.getElementById('installIcon');
+  if (icon) icon.style.textShadow = '0 0 12px rgba(52,152,219,0.8)';
+});
+
+window.triggerInstall = function() {
+  if (_deferredPrompt) {
+    _deferredPrompt.prompt();
+    _deferredPrompt.userChoice.then(function(result) {
+      if (result.outcome === 'accepted') {
+        var hint = document.getElementById('installHint');
+        if (hint) hint.style.display = 'none';
+      }
+      _deferredPrompt = null;
+    });
+  } else {
+    // iOS 또는 이미 설치된 경우 안내
+    var hint = document.getElementById('installHint');
+    if (hint) {
+      hint.textContent = '📲 Safari에서 "홈 화면에 추가"를 선택하세요';
+      hint.style.display = 'block';
+      setTimeout(function(){ hint.style.display = 'none'; }, 3000);
+    }
+  }
+};
+
+window.addEventListener('appinstalled', function() {
+  _deferredPrompt = null;
+  var hint = document.getElementById('installHint');
+  if (hint) hint.style.display = 'none';
+});
+
+// ── Service Worker 등록 ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js')
+    .then(function() { console.log('SW 등록 성공'); })
+    .catch(function(err) { console.log('SW 실패', err); });
+}
 </script>
 </body>
 </html>
