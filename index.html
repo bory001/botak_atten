@@ -220,7 +220,7 @@
   }
   /* 간소화된 이름 그리드 */
   .att-name-grid {
-    display: flex; flex-wrap: wrap; gap: 4px;
+    display: flex; flex-wrap: wrap; gap: 2px;
   }
   .att-name-chip {
     background: var(--bg); border: 1px solid var(--border);
@@ -230,7 +230,13 @@
     transition: all 0.12s; white-space: nowrap; display: inline-block;
     width: fit-content; min-width: 0;
   }
-  .att-name-chip:hover { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
+  .att-name-chip:hover { border-color: var(--primary-light); background: #eef3fa; }
+  .att-chip-tooltip {
+    position:fixed; background:rgba(26,42,51,0.95); color:white;
+    font-size:10px; font-weight:600; padding:4px 8px; border-radius:6px;
+    pointer-events:none; z-index:9999; white-space:nowrap;
+    transform:translate(-50%,-100%); margin-top:-4px;
+  }
   .att-name-chip.mine { background: var(--accent-light); border-color: var(--accent); color: #065f46; }
   .att-name-chip.mine:hover { background: #fef2f2; border-color: var(--danger); color: var(--danger); }
   /* 페이징 */
@@ -833,10 +839,18 @@
   }
 
   window.changeAttPage = function(dir) {
-    const names = selectedDate && attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
-    const totalPages = Math.ceil(names.length / ATT_PAGE_SIZE);
+    const dayData = selectedDate && attendanceData[selectedDate] ? attendanceData[selectedDate] : {};
+    const sorted = Object.entries(dayData)
+      .sort((a, b) => (a[1].registeredAt||0) - (b[1].registeredAt||0));
+    const totalPages = Math.ceil(sorted.length / ATT_PAGE_SIZE);
     attPage = Math.max(0, Math.min(attPage + dir, totalPages - 1));
-    renderAttPage(names, attPage);
+    // PC와 모바일 모두 재렌더
+    if (window.innerWidth <= 768) {
+      renderMobilePanel();
+    } else {
+      const names = sorted.map(([n]) => n);
+      renderAttPage(names, attPage);
+    }
   };
 
   // ── 모바일 패널 렌더 ──
@@ -875,28 +889,64 @@
       attCountEl.style.display = 'none';
     }
 
-    // 참석자 이름 목록 (간소화)
-    if (names.length === 0) {
+    // 참석자 이름 목록 — 등록시간 순 정렬, 페이징
+    const dayData = attendanceData[selectedDate] || {};
+    // registeredAt 기준 오름차순 정렬
+    const sorted = Object.entries(dayData)
+      .sort((a, b) => (a[1].registeredAt || 0) - (b[1].registeredAt || 0))
+      .map(([name, val]) => ({ name, registeredAt: val.registeredAt || 0 }));
+
+    const PAGE = 20;
+    const totalPages = Math.ceil(sorted.length / PAGE);
+    const page = attPage || 0;
+    const pageItems = sorted.slice(page * PAGE, page * PAGE + PAGE);
+
+    if (sorted.length === 0) {
       attGrid.innerHTML = '<div class="mdp-empty">아직 등록된 참석자가 없어요</div>';
+      attGrid.style.cssText = '';
     } else {
       attGrid.innerHTML = '';
-      attGrid.style.cssText = 'display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:0.75rem;';
-      names.forEach(name => {
+      attGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;';
+      pageItems.forEach(({ name, registeredAt }) => {
         const isMine = (name === currentUser);
         const chip = document.createElement('div');
         chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
         chip.dataset.name = name;
         chip.textContent = name;
+        // 길게 누르면 신청 일시 툴팁 표시
         setupLongPress(chip, () => {
-          const n = chip.dataset.name;
-          openConfirm(
-            `"${n}" 님의 ${formatDateKr(selectedDate)} 참석을 취소할까요?`,
-            async () => { await removeAttendance(selectedDate, n); }
-          );
+          const dt = registeredAt ? new Date(registeredAt) : null;
+          const msg = dt
+            ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`
+            : '등록일시 없음';
+          showDateTooltip(chip, msg);
         });
         attGrid.appendChild(chip);
       });
+      // 페이징
+      if (totalPages > 1) {
+        const paging = document.createElement('div');
+        paging.style.cssText = 'width:100%;display:flex;justify-content:center;align-items:center;gap:8px;margin-top:6px;';
+        paging.innerHTML = `
+          <button class="att-page-btn" ${page===0?'disabled':''} onclick="changeAttPage(-1)">◀</button>
+          <span class="att-page-info">${page+1} / ${totalPages}</span>
+          <button class="att-page-btn" ${page>=totalPages-1?'disabled':''} onclick="changeAttPage(1)">▶</button>`;
+        attGrid.appendChild(paging);
+      }
     }
+  }
+
+  // ── 툴팁 표시 ──
+  function showDateTooltip(el, msg) {
+    document.querySelectorAll('.att-chip-tooltip').forEach(t => t.remove());
+    const tip = document.createElement('div');
+    tip.className = 'att-chip-tooltip';
+    tip.textContent = msg;
+    document.body.appendChild(tip);
+    const r = el.getBoundingClientRect();
+    tip.style.left = (r.left + r.width/2) + 'px';
+    tip.style.top = (r.top + window.scrollY) + 'px';
+    setTimeout(() => tip.remove(), 2500);
   }
 
   // ── 참석 등록/취소 토글 ──
