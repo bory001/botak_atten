@@ -136,6 +136,9 @@
     color: white; padding: 5px 9px; border-radius: 16px; font-size: 11px;
     font-family: inherit; cursor: pointer; white-space: nowrap;
   }
+  .hdr-attend-btn { display:none; }
+  .hdr-attend-btn.register { background: var(--accent); border-color: var(--accent); }
+  .hdr-attend-btn.cancel { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.7); }
   @media (max-width: 480px) {
     header { padding: 0.4rem 0.75rem; }
     .header-left h1 { font-size: 13px; }
@@ -218,14 +221,14 @@
   }
   /* 간소화된 이름 그리드 */
   .att-name-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;
+    display: flex; flex-wrap: wrap; gap: 4px;
   }
   .att-name-chip {
     background: var(--bg); border: 1px solid var(--border);
-    border-radius: 6px; padding: 5px 4px;
+    border-radius: 4px; padding: 2px 6px;
     font-size: 11px; font-weight: 600; color: var(--text);
     text-align: center; cursor: pointer; user-select: none;
-    transition: all 0.12s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    transition: all 0.12s; white-space: nowrap; display: inline-block;
   }
   .att-name-chip:hover { border-color: var(--danger); background: #fef2f2; color: var(--danger); }
   .att-name-chip.mine { background: var(--accent-light); border-color: var(--accent); color: #065f46; }
@@ -403,6 +406,7 @@
         <div class="sync-dot" id="syncDot"></div>
         <span class="sync-label" id="syncLabel">연결됨</span>
       </div>
+      <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()">✅ 참석 등록</button>
       <button class="hdr-btn" onclick="doLogout()">나가기</button>
     </div>
   </header>
@@ -847,14 +851,20 @@
     const names = attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
     const isRegistered = names.includes(currentUser);
 
-    // 참석 버튼
-    btn.style.display = 'flex';
-    if (isRegistered) {
-      btn.className = 'mdp-attend-btn cancel';
-      btn.innerHTML = '❌ 참석 취소';
-    } else {
-      btn.className = 'mdp-attend-btn register';
-      btn.innerHTML = '✅ 참석 등록';
+    // 하단 참석 버튼 숨기기 (헤더로 이동)
+    btn.style.display = 'none';
+
+    // 헤더 참석 버튼 동기화
+    const hdrBtn = document.getElementById('hdrAttendBtn');
+    if (hdrBtn) {
+      hdrBtn.style.display = '';
+      if (isRegistered) {
+        hdrBtn.className = 'hdr-btn hdr-attend-btn cancel';
+        hdrBtn.innerHTML = '❌ 참석 취소';
+      } else {
+        hdrBtn.className = 'hdr-btn hdr-attend-btn register';
+        hdrBtn.innerHTML = '✅ 참석 등록';
+      }
     }
 
     // 참석자 수 뱃지
