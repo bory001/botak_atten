@@ -316,9 +316,7 @@
   @media (max-width: 380px) {
     .day-num { font-size: 12px; }
   }
-  @keyframes installBlink {
-    0%,100% { opacity:1; } 50% { opacity:0.4; }
-  }
+
 </style>
 </head>
 <body>
@@ -332,7 +330,7 @@
       <div class="login-icon" id="installIcon" onclick="triggerInstall()" title="앱 설치" style="cursor:pointer;">🏓</div>
       <div class="login-title">보탁 참석자 조사</div>
     </div>
-    <div id="installHint" style="font-size:0.65rem;color:#3498db;font-weight:700;letter-spacing:0.5px;margin-bottom:6px;text-align:center;animation:installBlink 1.5s ease infinite;">로고를 누르면 앱 설치</div>
+    <div id="pwSubMsg" style="font-size:0.68rem;color:#3498db;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:8px;text-align:center;"></div>
     <div class="login-sub">보령탁구동호회</div>
 
     <!-- 이름 입력 -->
@@ -372,7 +370,7 @@
   </div>
   <!-- 하단 캐시 새로고침 + 제작자 -->
   <div style="position:absolute;bottom:12px;left:0;right:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;">
-    <button onclick="(function(){var c=document.cookie.split(';');for(var i=0;i<c.length;i++){var e=c[i].indexOf('=');var n=e>-1?c[i].substr(0,e):c[i];document.cookie=n+'=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';}if('caches' in window){caches.keys().then(function(k){k.forEach(function(n){caches.delete(n);});});}location.reload(true);})()"
+    <button onclick="hardRefresh()"
       style="background:none;border:none;color:#ffffff;font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:inherit;padding:4px 6px;border-radius:6px;transition:color .2s;"
       onmouseenter="this.style.color='#3498db'" onmouseleave="this.style.color='#ffffff'"
       ontouchstart="this.style.color='#3498db'" ontouchend="this.style.color='#ffffff'">🔄 캐시 새로고침</button>
@@ -995,52 +993,74 @@
   });
 </script>
 <script>
-// ── PWA 설치 ──
-var _deferredPrompt = null;
+// ── PWA 설치 프롬프트 캡처 ──
+let _installPrompt = null;
+let _isInstalled = false;
 
-window.addEventListener('beforeinstallprompt', function(e) {
+window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
-  _deferredPrompt = e;
-  // 설치 힌트 표시
-  var hint = document.getElementById('installHint');
-  if (hint) hint.style.display = 'block';
-  // 아이콘 강조
-  var icon = document.getElementById('installIcon');
-  if (icon) icon.style.textShadow = '0 0 12px rgba(52,152,219,0.8)';
+  _installPrompt = e;
+  // 로고 아래 힌트 표시
+  const sub = document.getElementById('pwSubMsg');
+  if(sub) sub.textContent = '🔼 로고를 누르면 앱 설치';
 });
 
-window.triggerInstall = function() {
-  if (_deferredPrompt) {
-    _deferredPrompt.prompt();
-    _deferredPrompt.userChoice.then(function(result) {
-      if (result.outcome === 'accepted') {
-        var hint = document.getElementById('installHint');
-        if (hint) hint.style.display = 'none';
-      }
-      _deferredPrompt = null;
-    });
-  } else {
-    // iOS 또는 이미 설치된 경우 안내
-    var hint = document.getElementById('installHint');
-    if (hint) {
-      hint.textContent = '📲 Safari에서 "홈 화면에 추가"를 선택하세요';
-      hint.style.display = 'block';
-      setTimeout(function(){ hint.style.display = 'none'; }, 3000);
+// 이미 설치된 경우
+window.addEventListener('appinstalled', () => {
+  _isInstalled = true;
+  _installPrompt = null;
+  const sub = document.getElementById('pwSubMsg');
+  if(sub) sub.textContent = '';
+});
+
+// ── 캐시 새로고침 ──
+window.hardRefresh = async function(){
+  const btn = event && event.target;
+  if(btn){ btn.textContent='🔄 초기화중...'; btn.style.color='#3498db'; }
+  try{
+    if('caches' in window){
+      const keys = await caches.keys();
+      await Promise.all(keys.map(k => caches.delete(k)));
     }
-  }
+    if('serviceWorker' in navigator){
+      const regs = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r => r.unregister()));
+    }
+  } catch(e){ console.warn('캐시 삭제 오류:', e); }
+  location.reload(true);
 };
 
-window.addEventListener('appinstalled', function() {
-  _deferredPrompt = null;
-  var hint = document.getElementById('installHint');
-  if (hint) hint.style.display = 'none';
-});
+// ── 로고 클릭 → 설치 프롬프트 실행 ──
+window.triggerInstall = async function(){
+  if(_isInstalled){
+    const sub = document.getElementById('pwSubMsg');
+    if(sub){
+      sub.textContent = '✅ 이미 설치된 앱입니다';
+      setTimeout(()=>{ sub.textContent=''; }, 2000);
+    }
+    return;
+  }
+  if(!_installPrompt){
+    const sub = document.getElementById('pwSubMsg');
+    if(sub){
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      sub.textContent = isIOS ? '📲 Safari 공유 → 홈 화면에 추가' : '브라우저 메뉴에서 설치하세요';
+      setTimeout(()=>{ sub.textContent='🔼 로고를 누르면 앱 설치'; }, 3000);
+    }
+    return;
+  }
+  _installPrompt.prompt();
+  const result = await _installPrompt.userChoice;
+  if(result.outcome === 'accepted') _installPrompt = null;
+};
 
 // ── Service Worker 등록 ──
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
-    .then(function() { console.log('SW 등록 성공'); })
-    .catch(function(err) { console.log('SW 실패', err); });
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('SW registered:', reg.scope))
+      .catch(err => console.warn('SW error:', err));
+  });
 }
 </script>
 </body>
