@@ -38,7 +38,7 @@
     background: linear-gradient(rgba(10,10,15,0.25), rgba(10,10,15,0.35)),
                 url('login.png') center top / cover no-repeat;
     display:flex; flex-direction:column; align-items:center;
-    padding: 5vh 16px 20px;
+    padding: 2vh 16px 14px;
   }
   /* 하단 비번 영역 (순수 검정) */
   .login-pw-area {
@@ -46,16 +46,16 @@
     width:100%; padding-top:16px;
   }
   .login-box { display:flex; flex-direction:column; align-items:center; width:100%; }
-  .login-title-row { display:flex; align-items:center; gap:10px; margin-bottom:2px; }
+  .login-title-row { display:flex; align-items:center; gap:10px; margin-bottom:1px; }
   .login-icon { font-size:36px; line-height:1; }
   .login-title { font-size:1.4rem; font-weight:900; color:#ffffff; letter-spacing:2px; margin-bottom:0; text-shadow:0 1px 6px rgba(0,0,0,0.8); }
-  .login-sub { font-size:0.95rem; color:rgba(255,255,255,0.85); font-weight:700; margin-bottom:10px; letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
-  .login-name-wrap { width:160px; margin-bottom:12px; }
+  .login-sub { font-size:0.95rem; color:rgba(255,255,255,0.85); font-weight:700; margin-bottom:6px; letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
+  .login-name-wrap { width:auto; display:inline-flex; flex-direction:column; align-items:center; margin-bottom:8px; }
   .login-name-label { font-size:1rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:1px; margin-bottom:6px; display:block; text-align:center; text-shadow:0 1px 4px rgba(0,0,0,0.8); }
   .login-name-input {
-    width:100%; padding:11px 14px; border:1px solid #252530;
+    width:120px; padding:8px 10px; border:1px solid rgba(255,255,255,0.2);
     border-radius:10px; font-size:18px; font-family:inherit;
-    text-align:center; outline:none; background:#18181f;
+    text-align:center; outline:none; background:rgba(10,10,15,0.35);
     color:#f0f0f5; transition:border-color 0.15s; letter-spacing:1px;
   }
   .login-name-input::placeholder { color:#2a2a3a; }
