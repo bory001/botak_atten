@@ -413,6 +413,7 @@
         <span class="sync-label" id="syncLabel">연결됨</span>
       </div>
       <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">✅ 참석 등록</button>
+      <button class="hdr-btn" id="adminModeBtn" onclick="openAdminAuth()" style="background:rgba(255,165,0,0.2);border-color:rgba(255,165,0,0.5);">⚙️ 관리</button>
       <button class="hdr-btn" onclick="doLogout()">나가기</button>
     </div>
   </header>
@@ -504,6 +505,34 @@
   </div>
 </div>
 
+<!-- 관리자 인증 모달 -->
+<div class="modal-overlay" id="adminAuthModal">
+  <div class="modal-box" style="text-align:center;">
+    <div class="modal-title" id="adminAuthTitle">⚙️ 관리자 인증</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;" id="adminAuthSub">관리자 비밀번호를 입력하세요</div>
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:12px;">
+      <div class="pw-dot" id="apd0"></div><div class="pw-dot" id="apd1"></div>
+      <div class="pw-dot" id="apd2"></div><div class="pw-dot" id="apd3"></div>
+    </div>
+    <div style="font-size:11px;color:#e74c3c;min-height:16px;margin-bottom:10px;" id="adminAuthErr"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto;">
+      <button class="kbtn" onclick="adminKey('1')">1</button>
+      <button class="kbtn" onclick="adminKey('2')">2</button>
+      <button class="kbtn" onclick="adminKey('3')">3</button>
+      <button class="kbtn" onclick="adminKey('4')">4</button>
+      <button class="kbtn" onclick="adminKey('5')">5</button>
+      <button class="kbtn" onclick="adminKey('6')">6</button>
+      <button class="kbtn" onclick="adminKey('7')">7</button>
+      <button class="kbtn" onclick="adminKey('8')">8</button>
+      <button class="kbtn" onclick="adminKey('9')">9</button>
+      <div class="kbtn empty"></div>
+      <button class="kbtn" onclick="adminKey('0')">0</button>
+      <button class="kbtn del" onclick="adminKeyDel()">⌫</button>
+    </div>
+    <button class="modal-cancel" onclick="closeAdminAuth()" style="margin-top:14px;width:100%;padding:10px;">취소</button>
+  </div>
+</div>
+
 <!-- 비밀번호 변경 모달 -->
 <div class="modal-overlay" id="pwModal">
   <div class="modal-box">
@@ -550,7 +579,9 @@
   let currentPassword = '6986';
   const ADMIN_PW = '1020';
   let _lockBuf = '';
-  let attPage = 0;          // 참석자 목록 현재 페이지
+  let attPage = 0;
+  let isAdminMode = false;  // 관리자 모드 여부
+  let _adminSelectedName = null; // 관리자가 선택한 참석자          // 참석자 목록 현재 페이지
   const ATT_PAGE_SIZE = 20; // 페이지당 표시 수
 
   const LOCAL_KEY = 'botak_user_name';
@@ -913,7 +944,23 @@
         chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
         chip.dataset.name = name;
         chip.textContent = name;
-        // 길게 누르면 신청 일시 툴팁 표시
+        // 관리자 모드: 짧게 탭으로 선택 표시
+        chip.addEventListener('click', () => {
+          if (!isAdminMode) return;
+          document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
+          if (_adminSelectedName === name) {
+            _adminSelectedName = null;
+          } else {
+            _adminSelectedName = name;
+            chip.style.outline = '2px solid #ef4444';
+          }
+          // 헤더 버튼 텍스트 업데이트
+          const hb = document.getElementById('hdrAttendBtn');
+          if (hb) {
+            hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
+          }
+        });
+        // 길게 누르면 등록 일시 표시
         setupLongPress(chip, () => {
           const dt = registeredAt ? new Date(registeredAt) : null;
           const msg = dt
@@ -967,6 +1014,12 @@
   window.toggleAttendanceMobile = async function() {
     if (!selectedDate) return;
     const names = attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
+    // 관리자 모드: chip 탭으로 선택된 이름 취소
+    if (isAdminMode && _adminSelectedName) {
+      await removeAttendance(selectedDate, _adminSelectedName);
+      _adminSelectedName = null;
+      return;
+    }
     const isRegistered = names.includes(currentUser);
     if (isRegistered) {
       openConfirm(
@@ -1041,6 +1094,79 @@
     el.addEventListener('touchend', cancel);
     el.addEventListener('touchcancel', cancel);
   }
+
+  // ── 관리자 인증 키패드 ──
+  let _adminBuf = '';
+
+  function updateAdminDots() {
+    for (let i = 0; i < 4; i++) {
+      const d = document.getElementById('apd' + i);
+      if (!d) continue;
+      d.classList.remove('filled', 'error');
+      if (i < _adminBuf.length) d.classList.add('filled');
+    }
+  }
+
+  window.openAdminAuth = function() {
+    _adminBuf = '';
+    updateAdminDots();
+    document.getElementById('adminAuthErr').textContent = '';
+    // 관리자 모드 해제 시
+    if (isAdminMode) {
+      isAdminMode = false;
+      _adminSelectedName = null;
+      document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
+      const btn = document.getElementById('adminModeBtn');
+      if (btn) { btn.innerHTML = '⚙️ 관리'; btn.style.background = 'rgba(255,165,0,0.2)'; btn.style.borderColor = 'rgba(255,165,0,0.5)'; }
+      if (selectedDate) { renderMobilePanel(); renderSidebar(); }
+      showToast('관리자 모드 해제');
+      return;
+    }
+    document.getElementById('adminAuthModal').classList.add('show');
+  };
+
+  window.closeAdminAuth = function() {
+    _adminBuf = '';
+    document.getElementById('adminAuthModal').classList.remove('show');
+  };
+
+  window.adminKey = function(n) {
+    if (_adminBuf.length >= 4) return;
+    _adminBuf += n;
+    updateAdminDots();
+    document.getElementById('adminAuthErr').textContent = '';
+    if (_adminBuf.length === 4) {
+      setTimeout(() => {
+        if (_adminBuf === ADMIN_PW) {
+          isAdminMode = true;
+          closeAdminAuth();
+          const btn = document.getElementById('adminModeBtn');
+          if (btn) { btn.innerHTML = '⚙️ 관리중'; btn.style.background = 'rgba(255,100,0,0.4)'; btn.style.borderColor = 'rgba(255,100,0,0.8)'; }
+          if (selectedDate) { renderMobilePanel(); renderSidebar(); }
+          showToast('관리자 모드 활성화', 'success');
+        } else {
+          document.getElementById('adminAuthErr').textContent = '비밀번호가 틀렸어요';
+          for (let i = 0; i < 4; i++) {
+            const d = document.getElementById('apd' + i);
+            if (d) { d.classList.remove('filled'); d.classList.add('error'); }
+          }
+          _adminBuf = '';
+          setTimeout(() => {
+            for (let i = 0; i < 4; i++) {
+              const d = document.getElementById('apd' + i);
+              if (d) d.classList.remove('error');
+            }
+          }, 600);
+        }
+      }, 120);
+    }
+  };
+
+  window.adminKeyDel = function() {
+    if (!_adminBuf.length) return;
+    _adminBuf = _adminBuf.slice(0, -1);
+    updateAdminDots();
+  };
 
   // ── 확인 없이 바로 실행 ──
   function openConfirm(msg, onOk) {
