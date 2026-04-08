@@ -250,10 +250,10 @@
   .att-name-chip:hover { border-color: var(--primary-light); background: #eef3fa; }
   /* 메모 점 */
   .day-memo-dot {
-    width:6px; height:6px; border-radius:50%; background:#1a3a5c;
+    width:6px; height:6px; border-radius:50%; background:#f59e0b;
     display:inline-block; margin-right:2px; vertical-align:middle; flex-shrink:0;
   }
-  .day-cell.selected .day-memo-dot { background:#93c5fd; }
+  .day-cell.selected .day-memo-dot { background:#fde68a; }
   .day-cell-bottom { display:flex; align-items:center; gap:2px; }
   /* 메모 입력 영역 */
   .mdp-memo-row {
@@ -521,7 +521,7 @@
       <!-- 모바일 하단 패널 -->
       <div class="mobile-day-panel" id="mobileDayPanel">
         <div class="mdp-header">
-          <div style="display:flex;flex-direction:column;gap:2px;">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <div class="mdp-date" id="mdpDate">날짜를 선택하세요</div>
             <div id="mdpMemoDisplay" style="font-size:11px;color:var(--primary);font-weight:600;display:none;"></div>
           </div>
