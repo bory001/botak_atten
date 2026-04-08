@@ -250,10 +250,10 @@
   .att-name-chip:hover { border-color: var(--primary-light); background: #eef3fa; }
   /* 메모 점 */
   .day-memo-dot {
-    width:6px; height:6px; border-radius:50%; background:#10b981;
+    width:6px; height:6px; border-radius:50%; background:#1a3a5c;
     display:inline-block; margin-right:2px; vertical-align:middle; flex-shrink:0;
   }
-  .day-cell.selected .day-memo-dot { background:#6ee7b7; }
+  .day-cell.selected .day-memo-dot { background:#93c5fd; }
   .day-cell-bottom { display:flex; align-items:center; gap:2px; }
   /* 메모 입력 영역 */
   .mdp-memo-row {
@@ -485,7 +485,7 @@
 <div id="app">
   <header>
     <div class="header-left">
-      <h1>🏓 보탁 참석자 조사</h1>
+      <h1>🏓 보탁 참석자 조사 시스템</h1>
       <div class="subtitle">(보령탁구동호회)</div>
     </div>
     <div class="header-right">
@@ -521,7 +521,10 @@
       <!-- 모바일 하단 패널 -->
       <div class="mobile-day-panel" id="mobileDayPanel">
         <div class="mdp-header">
-          <div class="mdp-date" id="mdpDate">날짜를 선택하세요</div>
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <div class="mdp-date" id="mdpDate">날짜를 선택하세요</div>
+            <div id="mdpMemoDisplay" style="font-size:11px;color:var(--primary);font-weight:600;display:none;"></div>
+          </div>
           <div class="mdp-att-count" id="mdpAttCount" style="display:none;"></div>
         </div>
         <div class="mdp-att-grid" id="mdpAttGrid">
@@ -1026,13 +1029,23 @@
     // 하단 참석 버튼 숨기기 (헤더로 이동)
     btn.style.display = 'none';
 
-    // 메모 영역: 관리자 모드면 표시
+    // 메모 표시 (날짜 아래 항상)
+    const memoDisplay = document.getElementById('mdpMemoDisplay');
+    if (memoDisplay) {
+      const memoText = memoData[selectedDate] || '';
+      if (memoText) {
+        memoDisplay.textContent = '📌 ' + memoText;
+        memoDisplay.style.display = '';
+      } else {
+        memoDisplay.style.display = 'none';
+      }
+    }
+    // 메모 입력 영역: 관리자 모드면 표시
     const memoRow = document.getElementById('mdpMemoRow');
     const memoInput = document.getElementById('mdpMemoInput');
     if (memoRow) {
       memoRow.style.display = isAdminMode ? 'flex' : 'none';
-      if (memoInput && memoData[selectedDate]) memoInput.value = memoData[selectedDate];
-      else if (memoInput) memoInput.value = '';
+      if (memoInput) memoInput.value = memoData[selectedDate] || '';
     }
     // 수동등록 폼 관리자 아니면 닫기
     if (!isAdminMode) {
