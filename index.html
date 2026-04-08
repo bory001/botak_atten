@@ -451,7 +451,7 @@
           placeholder="" min="1" max="8" maxlength="1"
           onkeydown="if(event.key==='Enter') this.blur()"
           oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
-        <label class="login-jo-label">조</label>
+        <label class="login-jo-label">조명</label>
         <input type="text" class="login-jo-input" id="joInput"
           placeholder="" maxlength="5"
           onkeydown="if(event.key==='Enter') this.blur()"
@@ -687,6 +687,7 @@
   // ── 상태 ──
   let currentUser = null;
   let currentBusoo = 1; // 현재 사용자 부수
+  let currentJo = '';    // 현재 사용자 조명
   let attendanceData = {};
   let currentDate = new Date();
   let selectedDate = null;
@@ -792,7 +793,7 @@
   window.checkJoInput = function(el) {
     if (el.value.includes('조')) {
       el.value = el.value.replace(/조/g, '');
-      document.getElementById('loginError').textContent = "'조'는 빼고 숫자나 명칭만 입력해주세요";
+      document.getElementById('loginError').textContent = "'조'는 빼고 입력해주세요 (예: 1, A, 나)";
       el.classList.add('error');
       setTimeout(() => {
         el.classList.remove('error');
@@ -832,6 +833,7 @@
       if (jo) localStorage.setItem(LOCAL_JO_KEY, jo);
       currentUser = name;
       currentBusoo = parseInt(busoo) || 1;
+      currentJo = document.getElementById('joInput').value.trim();
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       const _hnEl = document.getElementById('headerUserName'); if (_hnEl) _hnEl.textContent = name;
@@ -1108,7 +1110,7 @@
     const dayData = attendanceData[selectedDate] || {};
     const sorted = Object.entries(dayData)
       .sort((a, b) => (a[1].registeredAt || 0) - (b[1].registeredAt || 0))
-      .map(([name, val]) => ({ name, busoo: val.busoo || 0, registeredAt: val.registeredAt || 0 }));
+      .map(([name, val]) => ({ name, busoo: val.busoo || 0, jo: val.jo || '', registeredAt: val.registeredAt || 0 }));
 
     if (sorted.length === 0) {
       attGrid.innerHTML = '<div class="mdp-empty">아직 등록된 참석자가 없어요</div>';
@@ -1116,6 +1118,88 @@
     } else {
       attGrid.innerHTML = '';
       attGrid.style.cssText = 'width:100%;';
+
+      // ── 월례대회 모드: 조별 정렬 ──
+      const isTournament = (memoData[selectedDate] || '').includes('월례대회');
+      if (isTournament) {
+        // 조 목록 추출 (등록된 참석자 기준, 조명 있는 사람만)
+        const joSet = [...new Set(sorted.filter(m => m.jo).map(m => m.jo))].sort();
+        // 조 없는 사람도 처리
+        const noJo = sorted.filter(m => !m.jo);
+
+        // 조별 행 생성
+        joSet.forEach(joName => {
+          const members = sorted
+            .filter(m => m.jo === joName)
+            .sort((a, b) => (a.busoo || 99) - (b.busoo || 99)); // 부수 오름차순
+          if (members.length === 0) return;
+
+          const row = document.createElement('div');
+          row.className = 'busoo-row';
+          const label = document.createElement('div');
+          label.className = 'busoo-label';
+          label.style.background = '#7c3aed';
+          label.textContent = `${joName}조`;
+          row.appendChild(label);
+          const namesWrap = document.createElement('div');
+          namesWrap.className = 'busoo-names';
+          members.forEach(({ name, busoo, registeredAt }) => {
+            const isMine = (name === currentUser);
+            const chip = document.createElement('div');
+            chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
+            chip.dataset.name = name;
+            chip.textContent = busoo ? `${busoo}${name}` : name;
+            chip.addEventListener('click', () => {
+              if (!isAdminMode) return;
+              document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
+              _adminSelectedName = (_adminSelectedName === name) ? null : name;
+              if (_adminSelectedName) chip.style.outline = '2px solid #ef4444';
+              const hb = document.getElementById('hdrAttendBtn');
+              if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
+            });
+            setupLongPress(chip, () => {
+              const dt = registeredAt ? new Date(registeredAt) : null;
+              const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
+              showDateTooltip(chip, msg);
+            });
+            namesWrap.appendChild(chip);
+          });
+          row.appendChild(namesWrap);
+          attGrid.appendChild(row);
+        });
+
+        // 조 미지정자
+        if (noJo.length > 0) {
+          const row = document.createElement('div');
+          row.className = 'busoo-row';
+          const label = document.createElement('div');
+          label.className = 'busoo-label';
+          label.style.background = '#94a3b8';
+          label.textContent = '미배정';
+          row.appendChild(label);
+          const namesWrap = document.createElement('div');
+          namesWrap.className = 'busoo-names';
+          noJo.sort((a,b)=>(a.busoo||99)-(b.busoo||99)).forEach(({ name, busoo, registeredAt }) => {
+            const isMine = (name === currentUser);
+            const chip = document.createElement('div');
+            chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
+            chip.dataset.name = name;
+            chip.textContent = busoo ? `${busoo}${name}` : name;
+            setupLongPress(chip, () => {
+              const dt = registeredAt ? new Date(registeredAt) : null;
+              const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
+              showDateTooltip(chip, msg);
+            });
+            namesWrap.appendChild(chip);
+          });
+          row.appendChild(namesWrap);
+          attGrid.appendChild(row);
+        }
+
+        return; // 월례대회 모드 완료
+      }
+
+      // ── 일반 모드: 부수별 정렬 ──
       // 부수 미지정 참석자 먼저 별도 행으로 표시
       const unassigned = sorted.filter(m => !m.busoo || m.busoo < 1 || m.busoo > 8);
       if (unassigned.length > 0) {
@@ -1304,6 +1388,7 @@
       await set(ref(db, `botak_attendance/${dateKey}/${name}`), {
         name,
         busoo: currentBusoo,
+        jo: currentJo || '',
         registeredAt: Date.now()
       });
       const [, m, d] = dateKey.split('-');
