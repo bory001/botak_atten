@@ -76,6 +76,15 @@
   }
   .login-busoo-input:focus { border-color:#3498db; }
   .login-busoo-input.error { border-color:#e74c3c; animation: shake 0.35s; }
+  .login-jo-label { font-size:1rem; font-weight:700; color:rgba(255,255,255,0.85); letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.8); white-space:nowrap; }
+  .login-jo-input {
+    width:60px; padding:4px 6px; border:1px solid rgba(255,255,255,0.2);
+    border-radius:10px; font-size:18px; font-family:inherit;
+    text-align:center; outline:none; background:rgba(10,10,15,0.35);
+    color:#f0f0f5; transition:border-color 0.15s;
+  }
+  .login-jo-input:focus { border-color:#3498db; }
+  .login-jo-input.error { border-color:#e74c3c; animation: shake 0.35s; }
   .login-name-input:focus { border-color:#3498db; }
   .login-name-input.error { border-color:#e74c3c; animation: shake 0.35s; }
   .login-saved-hint { font-size:0.68rem; color:rgba(255,255,255,0.6); margin-top:5px; text-align:center; }
@@ -442,6 +451,11 @@
           placeholder="" min="1" max="8" maxlength="1"
           onkeydown="if(event.key==='Enter') this.blur()"
           oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
+        <label class="login-jo-label">조</label>
+        <input type="text" class="login-jo-input" id="joInput"
+          placeholder="" maxlength="5"
+          onkeydown="if(event.key==='Enter') this.blur()"
+          oninput="checkJoInput(this)">
       </div>
     </div>
   </div>
@@ -535,7 +549,7 @@
         <!-- 메모 (관리자 모드에서만 표시) -->
         <div class="mdp-memo-row" id="mdpMemoRow" style="display:none;">
           <span class="mdp-memo-label" style="font-size:13px;">📝</span>
-          <input type="text" class="mdp-memo-input" id="mdpMemoInput" placeholder="일정 메모 (15자)" maxlength="15">
+          <input type="text" class="mdp-memo-input" id="mdpMemoInput" placeholder="일정 메모 (20자)" maxlength="20">
           <button class="mdp-memo-save" onclick="saveMemo()">저장</button>
         </div>
         <!-- 수동등록 폼 (관리자 모드에서만 표시) -->
@@ -687,6 +701,7 @@
 
   const LOCAL_KEY = 'botak_user_name';
   const LOCAL_BUSOO_KEY = 'botak_user_busoo';
+  const LOCAL_JO_KEY = 'botak_user_jo';
   const isMobile = () => window.innerWidth <= 768;
 
   // ── 유틸 ──
@@ -723,6 +738,8 @@
     if (saved) document.getElementById('nameLoginInput').value = saved;
     const savedBusoo = localStorage.getItem(LOCAL_BUSOO_KEY);
     if (savedBusoo) document.getElementById('busooInput').value = savedBusoo;
+    const savedJo = localStorage.getItem(LOCAL_JO_KEY);
+    if (savedJo) document.getElementById('joInput').value = savedJo;
   })();
 
   // ── 키패드 도트 업데이트 ──
@@ -771,6 +788,19 @@
     updateDots();
   };
 
+  // ── 조명 입력 검사 ──
+  window.checkJoInput = function(el) {
+    if (el.value.includes('조')) {
+      el.value = el.value.replace(/조/g, '');
+      document.getElementById('loginError').textContent = "'조'는 빼고 숫자나 명칭만 입력해주세요";
+      el.classList.add('error');
+      setTimeout(() => {
+        el.classList.remove('error');
+        document.getElementById('loginError').textContent = '';
+      }, 2000);
+    }
+  };
+
   function checkAndLogin() {
     const name = document.getElementById('nameLoginInput').value.trim();
     const nameInp = document.getElementById('nameLoginInput');
@@ -796,8 +826,10 @@
     }
     const _isAdmin = (_lockBuf === ADMIN_PW);
     if (_lockBuf === currentPassword || _isAdmin) {
+      const jo = document.getElementById('joInput').value.trim();
       localStorage.setItem(LOCAL_KEY, name);
       localStorage.setItem(LOCAL_BUSOO_KEY, busoo);
+      if (jo) localStorage.setItem(LOCAL_JO_KEY, jo);
       currentUser = name;
       currentBusoo = parseInt(busoo) || 1;
       document.getElementById('loginScreen').style.display = 'none';
