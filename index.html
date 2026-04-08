@@ -479,6 +479,7 @@
   .busoo-badge {
     display: inline-block; background: var(--primary); color: white;
     border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 700;
+    white-space: nowrap;
   }
   .att-count-num { font-weight: 800; color: var(--primary); font-size: 14px; }
   .ranking-empty { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 13px; }
@@ -1783,7 +1784,7 @@
       let html = `<table class="ranking-table">
         <thead><tr>
           <th style="width:44px;">순위</th>
-          <th style="width:36px;">부수</th>
+          <th style="width:52px;">부수</th>
           <th>성명</th>
           <th style="width:72px;">참석횟수</th>
         </tr></thead><tbody>`;
@@ -1820,7 +1821,7 @@
           <table class="ranking-table">
             <thead><tr>
               <th style="width:44px;">순위</th>
-              <th style="width:36px;">부수</th>
+              <th style="width:52px;">부수</th>
               <th>성명</th>
               <th style="width:72px;">참석횟수</th>
             </tr></thead><tbody>`;
