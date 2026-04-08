@@ -46,7 +46,7 @@
   .login-hero-content {
     position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:center;
-    justify-content:center; padding: 0 16px;
+    justify-content:flex-end; padding: 0 16px 12px;
   }
   /* 하단 비번 영역 (순수 검정) */
   .login-pw-area {
@@ -370,7 +370,7 @@
     <div class="login-hero-content">
       <div class="login-title-row">
         <div class="login-icon" id="installIcon" onclick="triggerInstall()" title="앱 설치" style="cursor:pointer;">🏓</div>
-        <div class="login-title">보탁 참석자 조사</div>
+        <div class="login-title">보탁 참석자 조사 시스템</div>
       </div>
       <div id="pwSubMsg" style="font-size:0.68rem;color:#ffffff;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.8);"></div>
       <div class="login-name-wrap">
@@ -380,7 +380,7 @@
           onkeydown="if(event.key==='Enter') this.blur()">
         <label class="login-busoo-label">부수</label>
         <input type="number" class="login-busoo-input" id="busooInput"
-          placeholder="1" min="1" max="8" maxlength="1"
+          placeholder="" min="1" max="8" maxlength="1"
           onkeydown="if(event.key==='Enter') this.blur()"
           oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
       </div>
