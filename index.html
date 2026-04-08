@@ -1128,7 +1128,9 @@
         const noJo = sorted.filter(m => !m.jo);
 
         // 조별 행 생성
-        joSet.forEach(joName => {
+        // 조별 가독성 좋은 색상 (최대 10개 조)
+        const joColors = ['#6b46c1','#c05621','#2b6cb0','#b7791f'];
+        joSet.forEach((joName, joIdx) => {
           const members = sorted
             .filter(m => m.jo === joName)
             .sort((a, b) => (a.busoo || 99) - (b.busoo || 99)); // 부수 오름차순
@@ -1138,7 +1140,7 @@
           row.className = 'busoo-row';
           const label = document.createElement('div');
           label.className = 'busoo-label';
-          label.style.background = '#7c3aed';
+          label.style.background = joColors[joIdx % joColors.length];
           label.textContent = `${joName}조`;
           row.appendChild(label);
           const namesWrap = document.createElement('div');
