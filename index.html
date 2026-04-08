@@ -46,7 +46,7 @@
   .login-hero-content {
     position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:center;
-    justify-content:flex-end; padding: 0 16px 22%;
+    justify-content:flex-end; padding: 0 16px 8%;
   }
   /* 하단 비번 영역 (순수 검정) */
   .login-pw-area {
@@ -248,6 +248,57 @@
     width: fit-content; min-width: 0;
   }
   .att-name-chip:hover { border-color: var(--primary-light); background: #eef3fa; }
+  /* 메모 점 */
+  .day-memo-dot {
+    width:6px; height:6px; border-radius:50%; background:#10b981;
+    display:inline-block; margin-right:2px; vertical-align:middle; flex-shrink:0;
+  }
+  .day-cell.selected .day-memo-dot { background:#6ee7b7; }
+  .day-cell-bottom { display:flex; align-items:center; gap:2px; }
+  /* 메모 입력 영역 */
+  .mdp-memo-row {
+    display:flex; align-items:center; gap:6px;
+    margin-top:8px; padding-top:8px; border-top:1px solid var(--border);
+  }
+  .mdp-memo-input {
+    flex:1; padding:5px 8px; border:1px solid var(--border);
+    border-radius:6px; font-size:12px; font-family:inherit; color:var(--text);
+    outline:none; background:var(--surface); transition:border-color 0.15s;
+  }
+  .mdp-memo-input:focus { border-color:var(--primary); }
+  .mdp-memo-label { font-size:11px; color:var(--text-muted); font-weight:600; white-space:nowrap; }
+  .mdp-memo-save {
+    padding:5px 10px; background:var(--primary); color:white; border:none;
+    border-radius:6px; font-size:11px; font-weight:700; font-family:inherit; cursor:pointer;
+  }
+  /* 수동등록 버튼 */
+  .mdp-manual-btn {
+    padding:5px 10px; background:rgba(245,158,11,0.15); color:#b45309;
+    border:1px solid #fcd34d; border-radius:6px; font-size:11px;
+    font-weight:700; font-family:inherit; cursor:pointer; white-space:nowrap;
+  }
+  .mdp-manual-btn:hover { background:rgba(245,158,11,0.3); }
+  /* 수동등록 폼 */
+  .mdp-manual-form {
+    display:none; margin-top:8px; padding:8px; background:#fffbeb;
+    border:1px solid #fcd34d; border-radius:8px; gap:6px;
+    flex-direction:column;
+  }
+  .mdp-manual-form.show { display:flex; }
+  .mdp-manual-row { display:flex; align-items:center; gap:6px; }
+  .mdp-manual-input {
+    flex:1; padding:6px 8px; border:1px solid var(--border);
+    border-radius:6px; font-size:13px; font-family:inherit; outline:none;
+  }
+  .mdp-manual-input:focus { border-color:var(--primary); }
+  .mdp-manual-busoo {
+    width:50px; padding:6px 4px; border:1px solid var(--border);
+    border-radius:6px; font-size:13px; font-family:inherit; outline:none; text-align:center;
+  }
+  .mdp-manual-submit {
+    padding:6px 12px; background:var(--accent); color:white; border:none;
+    border-radius:6px; font-size:12px; font-weight:700; font-family:inherit; cursor:pointer;
+  }
   /* 부수별 행 */
   .busoo-row { display:flex; align-items:flex-start; gap:4px; width:100%; margin-bottom:2px; }
   .busoo-label {
@@ -479,6 +530,22 @@
         <button class="mdp-attend-btn register" id="mdpAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">
           ✅ 참석 등록
         </button>
+        <!-- 메모 + 수동등록 (관리자 모드에서만 표시) -->
+        <div class="mdp-memo-row" id="mdpMemoRow" style="display:none;">
+          <span class="mdp-memo-label">📝</span>
+          <input type="text" class="mdp-memo-input" id="mdpMemoInput" placeholder="일정 메모 (15자)" maxlength="15">
+          <button class="mdp-memo-save" onclick="saveMemo()">저장</button>
+          <button class="mdp-manual-btn" onclick="toggleManualForm()">➕ 수동등록</button>
+        </div>
+        <!-- 수동등록 폼 -->
+        <div class="mdp-manual-form" id="mdpManualForm">
+          <div class="mdp-manual-row">
+            <input type="text" class="mdp-manual-input" id="mdpManualName" placeholder="이름" maxlength="10">
+            <input type="number" class="mdp-manual-busoo" id="mdpManualBusoo" placeholder="부수" min="1" max="8"
+              oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
+            <button class="mdp-manual-submit" onclick="submitManual()">등록</button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -613,6 +680,7 @@
   let _lockBuf = '';
   let attPage = 0;
   let isAdminMode = false;  // 관리자 모드 여부
+  let memoData = {};           // { 'YYYY-MM-DD': '메모내용' }
   let _adminSelectedName = null; // 관리자가 선택한 참석자          // 참석자 목록 현재 페이지
   const ATT_PAGE_SIZE = 20; // 페이지당 표시 수
 
@@ -782,16 +850,19 @@
     onValue(ref(db, 'botak_attendance'), (snap) => {
       attendanceData = snap.val() || {};
       renderCalendar();
-      if (selectedDate) {
-        renderSidebar();
-        renderMobilePanel();
-      }
+      if (selectedDate) { renderSidebar(); renderMobilePanel(); }
       updateStats();
       document.getElementById('syncDot').className = 'sync-dot';
       document.getElementById('syncLabel').textContent = '연결됨';
     }, () => {
       document.getElementById('syncDot').className = 'sync-dot off';
       document.getElementById('syncLabel').textContent = '오류';
+    });
+    // 메모 데이터 리스닝
+    onValue(ref(db, 'botak_memo'), (snap) => {
+      memoData = snap.val() || {};
+      renderCalendar();
+      if (selectedDate) renderMobilePanel();
     });
   }
 
@@ -827,15 +898,25 @@
       numEl.textContent = day;
       cell.appendChild(numEl);
 
-      // 참석 인원수만 표시
-      if (key && attendanceData[key]) {
-        const names = Object.keys(attendanceData[key]);
-        if (names.length > 0) {
-          const badge = document.createElement('div');
-          badge.className = 'day-att-num';
-          badge.textContent = `${names.length}명`;
-          cell.appendChild(badge);
+      // 참석 인원수 + 메모점 표시
+      if (key && (attendanceData[key] || memoData[key])) {
+        const bottom = document.createElement('div');
+        bottom.className = 'day-cell-bottom';
+        if (memoData[key]) {
+          const dot = document.createElement('span');
+          dot.className = 'day-memo-dot';
+          bottom.appendChild(dot);
         }
+        if (attendanceData[key]) {
+          const names = Object.keys(attendanceData[key]);
+          if (names.length > 0) {
+            const badge = document.createElement('div');
+            badge.className = 'day-att-num';
+            badge.textContent = `${names.length}명`;
+            bottom.appendChild(badge);
+          }
+        }
+        if (bottom.children.length > 0) cell.appendChild(bottom);
       }
 
       if (!isOther) cell.addEventListener('click', () => selectDate(key, y, m, day));
@@ -945,6 +1026,20 @@
     // 하단 참석 버튼 숨기기 (헤더로 이동)
     btn.style.display = 'none';
 
+    // 메모 영역: 관리자 모드면 표시
+    const memoRow = document.getElementById('mdpMemoRow');
+    const memoInput = document.getElementById('mdpMemoInput');
+    if (memoRow) {
+      memoRow.style.display = isAdminMode ? 'flex' : 'none';
+      if (memoInput && memoData[selectedDate]) memoInput.value = memoData[selectedDate];
+      else if (memoInput) memoInput.value = '';
+    }
+    // 수동등록 폼 관리자 아니면 닫기
+    if (!isAdminMode) {
+      const mf = document.getElementById('mdpManualForm');
+      if (mf) mf.classList.remove('show');
+    }
+
     // 헤더 참석 버튼 동기화
     const hdrBtn = document.getElementById('hdrAttendBtn');
     if (hdrBtn) {
@@ -1027,6 +1122,47 @@
       }
     }
   }
+
+  // ── 메모 저장 ──
+  window.saveMemo = async function() {
+    if (!selectedDate) return;
+    const val = document.getElementById('mdpMemoInput').value.trim();
+    try {
+      if (val) {
+        await set(ref(db, `botak_memo/${selectedDate}`), val);
+        showToast('메모가 저장되었어요 📝', 'success');
+      } else {
+        await remove(ref(db, `botak_memo/${selectedDate}`));
+        showToast('메모가 삭제되었어요');
+      }
+    } catch(e) { showToast('저장 실패: ' + e.message, 'error'); }
+  };
+
+  // ── 수동등록 폼 토글 ──
+  window.toggleManualForm = function() {
+    const form = document.getElementById('mdpManualForm');
+    if (form) form.classList.toggle('show');
+  };
+
+  // ── 수동 참석 등록 ──
+  window.submitManual = async function() {
+    if (!selectedDate) return;
+    const name = document.getElementById('mdpManualName').value.trim();
+    const busooVal = document.getElementById('mdpManualBusoo').value.trim();
+    const busooNum = parseInt(busooVal);
+    if (!name) { showToast('이름을 입력해주세요', 'error'); return; }
+    if (!busooVal || isNaN(busooNum) || busooNum < 1 || busooNum > 8) {
+      showToast('부수를 1~8로 입력해주세요', 'error'); return;
+    }
+    try {
+      await set(ref(db, `botak_attendance/${selectedDate}/${name}`), {
+        name, busoo: busooNum, registeredAt: Date.now()
+      });
+      document.getElementById('mdpManualName').value = '';
+      document.getElementById('mdpManualBusoo').value = '';
+      showToast(`${name} (${busooNum}부) 등록 완료`, 'success');
+    } catch(e) { showToast('등록 실패: ' + e.message, 'error'); }
+  };
 
   // ── 툴팁 표시 ──
   function showDateTooltip(el, msg) {
