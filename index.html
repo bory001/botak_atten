@@ -725,6 +725,28 @@
     return `${parseInt(m)}월 ${parseInt(d)}일`;
   }
 
+  // ── 해당 날짜가 그 달의 4번째 금요일인지 판별 ──
+  function isFourthFriday(dateKey) {
+    if (!dateKey) return false;
+    const d = new Date(dateKey);
+    if (d.getMonth() === 11) return false; // 12월 제외
+    if (d.getDay() !== 5) return false; // 금요일 아니면 false
+    // 같은 달 금요일 목록에서 4번째인지
+    const y = d.getFullYear(), m = d.getMonth();
+    let count = 0;
+    for (let day = 1; day <= d.getDate(); day++) {
+      if (new Date(y, m, day).getDay() === 5) count++;
+    }
+    return count === 4;
+  }
+
+  // ── 해당 dateKey의 실제 메모 반환 (4번째 금요일은 자동 월례대회) ──
+  function getMemo(dateKey) {
+    if (memoData[dateKey]) return memoData[dateKey];
+    if (isFourthFriday(dateKey)) return '월례대회';
+    return '';
+  }
+
   // ── Firebase에서 비번 로드 ──
   (async function loadPassword() {
     try {
@@ -934,10 +956,10 @@
       cell.appendChild(numEl);
 
       // 참석 인원수 + 메모점 표시
-      if (key && (attendanceData[key] || memoData[key])) {
+      if (key && (attendanceData[key] || getMemo(key))) {
         const bottom = document.createElement('div');
         bottom.className = 'day-cell-bottom';
-        if (memoData[key]) {
+        if (getMemo(key)) {
           const dot = document.createElement('span');
           dot.className = 'day-memo-dot';
           bottom.appendChild(dot);
@@ -1064,7 +1086,7 @@
     // 메모 표시 (날짜 아래 항상)
     const memoDisplay = document.getElementById('mdpMemoDisplay');
     if (memoDisplay) {
-      const memoText = memoData[selectedDate] || '';
+      const memoText = getMemo(selectedDate);
       if (memoText) {
         memoDisplay.textContent = '📌 ' + memoText;
         memoDisplay.style.display = '';
@@ -1077,7 +1099,7 @@
     const memoInput = document.getElementById('mdpMemoInput');
     if (memoRow) {
       memoRow.style.display = isAdminMode ? 'flex' : 'none';
-      if (memoInput) memoInput.value = memoData[selectedDate] || '';
+      if (memoInput) memoInput.value = memoData[selectedDate] || (isFourthFriday(selectedDate) ? '월례대회' : '');
     }
     // 수동등록 폼 관리자 모드에 따라 표시/숨김
     const manualForm = document.getElementById('mdpManualForm');
@@ -1120,7 +1142,7 @@
       attGrid.style.cssText = 'width:100%;';
 
       // ── 월례대회 모드: 조별 정렬 ──
-      const isTournament = (memoData[selectedDate] || '').includes('월례대회');
+      const isTournament = getMemo(selectedDate).includes('월례대회');
       if (isTournament) {
         // 조 목록 추출 (등록된 참석자 기준, 조명 있는 사람만)
         const joSet = [...new Set(sorted.filter(m => m.jo).map(m => m.jo))].sort();
