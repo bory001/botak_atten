@@ -166,13 +166,13 @@
   .hdr-attend-btn.cancel { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.7); }
   @media (max-width: 480px) {
     header { padding: 0.4rem 0.5rem; }
-    .header-left h1 { font-size: 14px; }
+    .header-left h1 { font-size: 12px; }
     .header-left .subtitle { font-size: 9px; padding-left: 18px; }
     .hdr-btn { font-size: 10px; padding: 4px 5px; }
     .sync-dot-wrap { display: none; }
   }
   @media (max-width: 400px) {
-    .header-left h1 { font-size: 12px; }
+    .header-left h1 { font-size: 11px; }
     .hdr-btn { font-size: 9px; padding: 4px 4px; }
     .header-right { gap: 3px; }
   }
@@ -580,7 +580,7 @@
 <div id="app">
   <header>
     <div class="header-left">
-      <h1>🏓 보탁 참석자 현황</h1>
+      <h1>🏓 보탁 참석자 조사</h1>
       <div class="subtitle">(보령탁구동호회)</div>
     </div>
     <div class="header-right">
@@ -1282,7 +1282,7 @@
           const label = document.createElement('div');
           label.className = 'busoo-label';
           label.style.background = joColors[joIdx % joColors.length];
-          label.textContent = `${joName}조`;
+          label.textContent = `${joName}`;
           row.appendChild(label);
           const namesWrap = document.createElement('div');
           namesWrap.className = 'busoo-names';
@@ -1820,7 +1820,7 @@
         const color = JO_COLORS[idx % JO_COLORS.length];
         html += `<div class="jo-rank-card">
           <div class="jo-rank-header" style="background:${color};">
-            <span>${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'🏅'} ${jd.jo}조</span>
+            <span>${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'🏅'} ${jd.jo}</span>
             <span class="jo-rank-total">총 ${jd.totalCount}회 참석</span>
           </div>
           <table class="ranking-table">
