@@ -284,7 +284,6 @@
     border:1px solid #fcd34d; border-radius:8px; gap:6px;
     flex-direction:column;
   }
-  .mdp-manual-form.show { display:flex; }
   .mdp-manual-row { display:flex; align-items:center; gap:6px; }
   .mdp-manual-input {
     flex:1; padding:6px 8px; border:1px solid var(--border);
@@ -523,7 +522,7 @@
         <div class="mdp-header">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <div class="mdp-date" id="mdpDate">날짜를 선택하세요</div>
-            <div id="mdpMemoDisplay" style="font-size:11px;color:var(--primary);font-weight:600;display:none;"></div>
+            <div id="mdpMemoDisplay" style="font-size:13px;color:var(--primary);font-weight:600;display:none;"></div>
           </div>
           <div class="mdp-att-count" id="mdpAttCount" style="display:none;"></div>
         </div>
@@ -533,20 +532,19 @@
         <button class="mdp-attend-btn register" id="mdpAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">
           ✅ 참석 등록
         </button>
-        <!-- 메모 + 수동등록 (관리자 모드에서만 표시) -->
+        <!-- 메모 (관리자 모드에서만 표시) -->
         <div class="mdp-memo-row" id="mdpMemoRow" style="display:none;">
-          <span class="mdp-memo-label">📝</span>
+          <span class="mdp-memo-label" style="font-size:13px;">📝</span>
           <input type="text" class="mdp-memo-input" id="mdpMemoInput" placeholder="일정 메모 (15자)" maxlength="15">
           <button class="mdp-memo-save" onclick="saveMemo()">저장</button>
-          <button class="mdp-manual-btn" onclick="toggleManualForm()">➕ 수동등록</button>
         </div>
-        <!-- 수동등록 폼 -->
+        <!-- 수동등록 폼 (관리자 모드에서만 표시) -->
         <div class="mdp-manual-form" id="mdpManualForm">
           <div class="mdp-manual-row">
             <input type="text" class="mdp-manual-input" id="mdpManualName" placeholder="이름" maxlength="10">
             <input type="number" class="mdp-manual-busoo" id="mdpManualBusoo" placeholder="부수" min="1" max="8"
               oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
-            <button class="mdp-manual-submit" onclick="submitManual()">등록</button>
+            <button class="mdp-manual-submit" onclick="submitManual()">수동등록</button>
           </div>
         </div>
       </div>
@@ -1047,10 +1045,10 @@
       memoRow.style.display = isAdminMode ? 'flex' : 'none';
       if (memoInput) memoInput.value = memoData[selectedDate] || '';
     }
-    // 수동등록 폼 관리자 아니면 닫기
-    if (!isAdminMode) {
-      const mf = document.getElementById('mdpManualForm');
-      if (mf) mf.classList.remove('show');
+    // 수동등록 폼 관리자 모드에 따라 표시/숨김
+    const manualForm = document.getElementById('mdpManualForm');
+    if (manualForm) {
+      manualForm.style.display = isAdminMode ? 'flex' : 'none';
     }
 
     // 헤더 참석 버튼 동기화
