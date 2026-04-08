@@ -423,6 +423,82 @@
   @media (max-width: 380px) {
     .day-num { font-size: 12px; }
   }
+  /* ── 랭킹 모달 ── */
+  #rankingModal .modal-overlay { z-index: 600; }
+  .ranking-modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: none; align-items: flex-start; justify-content: center;
+    z-index: 600; padding: 1rem; overflow-y: auto;
+  }
+  .ranking-modal-overlay.show { display: flex; }
+  .ranking-modal-box {
+    background: white; border-radius: 16px; padding: 1.5rem;
+    width: 100%; max-width: 560px; margin: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .ranking-modal-title {
+    font-size: 17px; font-weight: 800; color: var(--primary);
+    margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
+  }
+  .ranking-period-tabs {
+    display: flex; gap: 6px; margin-bottom: 1rem; flex-wrap: wrap;
+  }
+  .rp-tab {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted);
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+  }
+  .rp-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .ranking-view-tabs {
+    display: flex; gap: 6px; margin-bottom: 1rem;
+  }
+  .rv-tab {
+    padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted);
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+  }
+  .rv-tab.active { background: #6366f1; color: white; border-color: #6366f1; }
+  .ranking-table-wrap { overflow-x: auto; margin-bottom: 1rem; }
+  .ranking-table {
+    width: 100%; border-collapse: collapse; font-size: 13px;
+  }
+  .ranking-table th {
+    background: var(--primary); color: white; padding: 8px 10px;
+    text-align: center; font-size: 11px; font-weight: 700; white-space: nowrap;
+  }
+  .ranking-table th:nth-child(3) { text-align: left; }
+  .ranking-table td {
+    padding: 7px 10px; border-bottom: 1px solid var(--border);
+    text-align: center; vertical-align: middle;
+  }
+  .ranking-table td:nth-child(3) { text-align: left; font-weight: 600; }
+  .ranking-table tr:nth-child(even) td { background: #f8fafc; }
+  .ranking-table tr:hover td { background: #eff6ff; }
+  .rank-medal { font-size: 15px; }
+  .rank-num { font-weight: 800; color: var(--text-muted); font-size: 12px; }
+  .busoo-badge {
+    display: inline-block; background: var(--primary); color: white;
+    border-radius: 4px; padding: 1px 6px; font-size: 10px; font-weight: 700;
+  }
+  .att-count-num { font-weight: 800; color: var(--primary); font-size: 14px; }
+  .ranking-empty { text-align: center; padding: 2rem; color: var(--text-muted); font-size: 13px; }
+  .ranking-close-btn {
+    width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer; font-weight: 600;
+  }
+  .ranking-period-info {
+    font-size: 11px; color: var(--text-muted); margin-bottom: 0.75rem; font-weight: 500;
+  }
+  /* 조별 랭킹 */
+  .jo-rank-grid { display: flex; flex-direction: column; gap: 1rem; }
+  .jo-rank-card {
+    border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  .jo-rank-header {
+    padding: 8px 14px; font-size: 13px; font-weight: 800;
+    color: white; display: flex; align-items: center; gap: 8px;
+  }
+  .jo-rank-total { font-size: 11px; opacity: 0.85; font-weight: 600; }
 
 </style>
 </head>
@@ -498,7 +574,7 @@
 <div id="app">
   <header>
     <div class="header-left">
-      <h1>🏓 보탁 참석자 조사 시스템</h1>
+      <h1>🏓 보탁 참석자 조사</h1>
       <div class="subtitle">(보령탁구동호회)</div>
     </div>
     <div class="header-right">
@@ -508,6 +584,7 @@
         <span class="sync-label" id="syncLabel">연결됨</span>
       </div>
       <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">✅ 참석 등록</button>
+      <button class="hdr-btn" onclick="openRankingModal()" style="background:rgba(99,102,241,0.3);border-color:rgba(99,102,241,0.7);">🏆 통계</button>
       <button class="hdr-btn" id="adminModeBtn" onclick="openAdminAuth()" style="background:rgba(255,165,0,0.2);border-color:rgba(255,165,0,0.5);">⚙️ 관리자</button>
       <button class="hdr-btn" onclick="doLogout()">나가기</button>
     </div>
@@ -663,6 +740,35 @@
       <button class="modal-cancel" onclick="closePwModal()">취소</button>
       <button class="modal-confirm" onclick="changePassword()">변경하기</button>
     </div>
+  </div>
+</div>
+
+<!-- 랭킹/통계 모달 -->
+<div class="ranking-modal-overlay" id="rankingModal">
+  <div class="ranking-modal-box">
+    <div class="ranking-modal-title">🏆 참석자 랭킹</div>
+
+    <!-- 기간 탭 -->
+    <div class="ranking-period-tabs">
+      <button class="rp-tab active" onclick="setRankPeriod('month', this)">📅 월간</button>
+      <button class="rp-tab" onclick="setRankPeriod('half', this)">📆 반기</button>
+      <button class="rp-tab" onclick="setRankPeriod('year', this)">🗓️ 연간</button>
+    </div>
+
+    <!-- 뷰 탭 -->
+    <div class="ranking-view-tabs">
+      <button class="rv-tab active" onclick="setRankView('personal', this)">👤 개인 랭킹</button>
+      <button class="rv-tab" onclick="setRankView('jo', this)">👥 조별 랭킹</button>
+    </div>
+
+    <div class="ranking-period-info" id="rankPeriodInfo"></div>
+
+    <!-- 랭킹 내용 -->
+    <div class="ranking-table-wrap" id="rankingContent">
+      <div class="ranking-empty">데이터를 불러오는 중...</div>
+    </div>
+
+    <button class="ranking-close-btn" onclick="closeRankingModal()">닫기</button>
   </div>
 </div>
 
@@ -1558,7 +1664,188 @@
     onOk();
   }
 
-  // ── 달력 이동 ──
+  // ── 랭킹/통계 모달 ──
+  let _rankPeriod = 'month';
+  let _rankView = 'personal';
+
+  // 조별 색상 (4개 조)
+  const JO_COLORS = ['#6b46c1', '#c05621', '#2b6cb0', '#b7791f'];
+
+  window.openRankingModal = function() {
+    document.getElementById('rankingModal').classList.add('show');
+    renderRanking();
+  };
+
+  window.closeRankingModal = function() {
+    document.getElementById('rankingModal').classList.remove('show');
+  };
+
+  window.setRankPeriod = function(period, btn) {
+    _rankPeriod = period;
+    document.querySelectorAll('.rp-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderRanking();
+  };
+
+  window.setRankView = function(view, btn) {
+    _rankView = view;
+    document.querySelectorAll('.rv-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderRanking();
+  };
+
+  function getRankDateRange() {
+    const now = new Date();
+    const y = now.getFullYear(), m = now.getMonth();
+    if (_rankPeriod === 'month') {
+      const start = `${y}-${String(m+1).padStart(2,'0')}-01`;
+      const end = `${y}-${String(m+1).padStart(2,'0')}-31`;
+      return { start, end, label: `${y}년 ${m+1}월` };
+    } else if (_rankPeriod === 'half') {
+      // 현재 반기: 1~6월 or 7~12월
+      const isFirstHalf = m < 6;
+      const startM = isFirstHalf ? 1 : 7;
+      const endM = isFirstHalf ? 6 : 12;
+      return {
+        start: `${y}-${String(startM).padStart(2,'0')}-01`,
+        end: `${y}-${String(endM).padStart(2,'0')}-31`,
+        label: `${y}년 ${isFirstHalf ? '상반기 (1~6월)' : '하반기 (7~12월)'}`
+      };
+    } else {
+      return {
+        start: `${y}-01-01`,
+        end: `${y}-12-31`,
+        label: `${y}년 연간`
+      };
+    }
+  }
+
+  function calcRankingData() {
+    const { start, end } = getRankDateRange();
+    // 개인별 참석 집계
+    const personMap = {}; // { name: { count, busoo, jo } }
+    const joMap = {};     // { joName: { count, members: Set } }
+
+    Object.entries(attendanceData).forEach(([dateKey, dayData]) => {
+      if (dateKey < start || dateKey > end) return;
+      Object.entries(dayData).forEach(([name, val]) => {
+        if (!personMap[name]) {
+          personMap[name] = { count: 0, busoo: val.busoo || 0, jo: val.jo || '' };
+        }
+        personMap[name].count++;
+        // jo 최신값 반영
+        if (val.jo) personMap[name].jo = val.jo;
+        if (val.busoo) personMap[name].busoo = val.busoo;
+
+        // 조별 집계
+        const joName = val.jo || '';
+        if (joName) {
+          if (!joMap[joName]) joMap[joName] = { count: 0, members: {} };
+          joMap[joName].count++;
+          if (!joMap[joName].members[name]) joMap[joName].members[name] = 0;
+          joMap[joName].members[name]++;
+        }
+      });
+    });
+
+    // 개인 랭킹 (참석횟수 내림차순, 같으면 부수 오름차순)
+    const personalRank = Object.entries(personMap)
+      .map(([name, d]) => ({ name, ...d }))
+      .sort((a, b) => b.count - a.count || (a.busoo||99) - (b.busoo||99));
+
+    // 조별 랭킹 (총 참석 내림차순)
+    const joRank = Object.entries(joMap)
+      .map(([jo, d]) => ({
+        jo,
+        totalCount: d.count,
+        members: Object.entries(d.members)
+          .map(([name, count]) => ({ name, count, busoo: personMap[name]?.busoo || 0 }))
+          .sort((a, b) => b.count - a.count || (a.busoo||99) - (b.busoo||99))
+      }))
+      .sort((a, b) => b.totalCount - a.totalCount);
+
+    return { personalRank, joRank };
+  }
+
+  function renderRanking() {
+    const { label } = getRankDateRange();
+    document.getElementById('rankPeriodInfo').textContent = `📊 기간: ${label}`;
+
+    const { personalRank, joRank } = calcRankingData();
+    const content = document.getElementById('rankingContent');
+
+    if (_rankView === 'personal') {
+      const top30 = personalRank.slice(0, 30);
+      if (top30.length === 0) {
+        content.innerHTML = '<div class="ranking-empty">해당 기간에 참석 데이터가 없습니다</div>';
+        return;
+      }
+      let html = `<table class="ranking-table">
+        <thead><tr>
+          <th style="width:44px;">순위</th>
+          <th style="width:36px;">부수</th>
+          <th>성명</th>
+          <th style="width:72px;">참석횟수</th>
+        </tr></thead><tbody>`;
+      top30.forEach((p, i) => {
+        const rank = i + 1;
+        let medal = '';
+        if (rank === 1) medal = '🥇';
+        else if (rank === 2) medal = '🥈';
+        else if (rank === 3) medal = '🥉';
+        const isMe = (p.name === currentUser);
+        html += `<tr ${isMe ? 'style="background:#fffbeb;"' : ''}>
+          <td>${medal ? `<span class="rank-medal">${medal}</span>` : `<span class="rank-num">${rank}</span>`}</td>
+          <td><span class="busoo-badge">${p.busoo || '-'}부</span></td>
+          <td>${p.name}${isMe ? ' <span style="font-size:10px;color:#059669;font-weight:700;">★나</span>' : ''}</td>
+          <td><span class="att-count-num">${p.count}</span><span style="font-size:10px;color:var(--text-muted);margin-left:2px;">회</span></td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      content.innerHTML = html;
+    } else {
+      // 조별 랭킹
+      if (joRank.length === 0) {
+        content.innerHTML = '<div class="ranking-empty">해당 기간에 조 참석 데이터가 없습니다<br><small style="font-size:11px;margin-top:4px;display:block;">조명을 등록한 참석자 데이터가 필요합니다</small></div>';
+        return;
+      }
+      let html = '<div class="jo-rank-grid">';
+      joRank.forEach((jd, idx) => {
+        const color = JO_COLORS[idx % JO_COLORS.length];
+        html += `<div class="jo-rank-card">
+          <div class="jo-rank-header" style="background:${color};">
+            <span>${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'🏅'} ${jd.jo}조</span>
+            <span class="jo-rank-total">총 ${jd.totalCount}회 참석</span>
+          </div>
+          <table class="ranking-table">
+            <thead><tr>
+              <th style="width:44px;">순위</th>
+              <th style="width:36px;">부수</th>
+              <th>성명</th>
+              <th style="width:72px;">참석횟수</th>
+            </tr></thead><tbody>`;
+        jd.members.slice(0, 30).forEach((m, mi) => {
+          const isMe = (m.name === currentUser);
+          html += `<tr ${isMe ? 'style="background:#fffbeb;"' : ''}>
+            <td><span class="rank-num">${mi + 1}</span></td>
+            <td><span class="busoo-badge">${m.busoo || '-'}부</span></td>
+            <td>${m.name}${isMe ? ' <span style="font-size:10px;color:#059669;font-weight:700;">★나</span>' : ''}</td>
+            <td><span class="att-count-num">${m.count}</span><span style="font-size:10px;color:var(--text-muted);margin-left:2px;">회</span></td>
+          </tr>`;
+        });
+        html += `</tbody></table></div>`;
+      });
+      html += '</div>';
+      content.innerHTML = html;
+    }
+  }
+
+  // 모달 외부 클릭 닫기
+  document.getElementById('rankingModal').addEventListener('click', function(e) {
+    if (e.target === this) closeRankingModal();
+  });
+
+
   document.getElementById('prevBtn').addEventListener('click', () => {
     currentDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
     renderCalendar();
