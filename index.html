@@ -146,7 +146,7 @@
   }
   .header-left h1 { font-size: 15px; font-weight: 700; white-space: nowrap; }
   .header-left .subtitle { font-size: 10px; opacity: 0.7; white-space: nowrap; padding-left: 22px; }
-  .header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
   .user-badge {
     display: flex; align-items: center; gap: 5px;
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
@@ -159,17 +159,22 @@
   .sync-label { font-size: 10px; color: #6ee7b7; }
   .hdr-btn {
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-    color: white; padding: 5px 9px; border-radius: 16px; font-size: 11px;
+    color: white; padding: 5px 7px; border-radius: 16px; font-size: 11px;
     font-family: inherit; cursor: pointer; white-space: nowrap;
   }
   .hdr-attend-btn.register { background: var(--accent); border-color: var(--accent); }
   .hdr-attend-btn.cancel { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.7); }
   @media (max-width: 480px) {
-    header { padding: 0.4rem 0.75rem; }
-    .header-left h1 { font-size: 13px; }
-    .header-left .subtitle { font-size: 9px; padding-left: 20px; }
-    .hdr-btn { font-size: 10px; padding: 4px 7px; }
+    header { padding: 0.4rem 0.5rem; }
+    .header-left h1 { font-size: 12px; }
+    .header-left .subtitle { font-size: 9px; padding-left: 18px; }
+    .hdr-btn { font-size: 10px; padding: 4px 5px; }
     .sync-dot-wrap { display: none; }
+  }
+  @media (max-width: 400px) {
+    .header-left h1 { font-size: 11px; }
+    .hdr-btn { font-size: 9px; padding: 4px 4px; }
+    .header-right { gap: 3px; }
   }
 
   /* ── 레이아웃 ── */
@@ -1776,7 +1781,7 @@
     const content = document.getElementById('rankingContent');
 
     if (_rankView === 'personal') {
-      const top30 = personalRank.slice(0, 30);
+      const top30 = personalRank.slice(0, 50);
       if (top30.length === 0) {
         content.innerHTML = '<div class="ranking-empty">해당 기간에 참석 데이터가 없습니다</div>';
         return;
@@ -1825,7 +1830,7 @@
               <th>성명</th>
               <th style="width:72px;">참석횟수</th>
             </tr></thead><tbody>`;
-        jd.members.slice(0, 30).forEach((m, mi) => {
+        jd.members.slice(0, 50).forEach((m, mi) => {
           const isMe = (m.name === currentUser);
           html += `<tr ${isMe ? 'style="background:#fffbeb;"' : ''}>
             <td><span class="rank-num">${mi + 1}</span></td>
