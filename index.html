@@ -46,7 +46,7 @@
   .login-hero-content {
     position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:center;
-    justify-content:flex-end; padding: 0 16px 8%;
+    justify-content:flex-end; padding: 0 16px 22%;
   }
   /* 하단 비번 영역 (순수 검정) */
   .login-pw-area {
@@ -248,6 +248,15 @@
     width: fit-content; min-width: 0;
   }
   .att-name-chip:hover { border-color: var(--primary-light); background: #eef3fa; }
+  /* 부수별 행 */
+  .busoo-row { display:flex; align-items:flex-start; gap:4px; width:100%; margin-bottom:2px; }
+  .busoo-label {
+    font-size:10px; font-weight:700; color:white; background:var(--primary);
+    border-radius:4px; padding:2px 5px; white-space:nowrap; flex-shrink:0;
+    min-width:24px; text-align:center; line-height:1.6;
+  }
+  .busoo-names { display:flex; flex-wrap:wrap; gap:2px; flex:1; }
+  .busoo-empty { display:none; }
   .att-chip-tooltip {
     position:fixed; background:rgba(26,42,51,0.95); color:white;
     font-size:10px; font-weight:600; padding:4px 8px; border-radius:6px;
@@ -595,6 +604,7 @@
 
   // ── 상태 ──
   let currentUser = null;
+  let currentBusoo = 1; // 현재 사용자 부수
   let attendanceData = {};
   let currentDate = new Date();
   let selectedDate = null;
@@ -720,6 +730,7 @@
       localStorage.setItem(LOCAL_KEY, name);
       localStorage.setItem(LOCAL_BUSOO_KEY, busoo);
       currentUser = name;
+      currentBusoo = parseInt(busoo) || 1;
       document.getElementById('loginScreen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
       const _hnEl = document.getElementById('headerUserName'); if (_hnEl) _hnEl.textContent = name;
@@ -955,30 +966,36 @@
       attCountEl.style.display = 'none';
     }
 
-    // 참석자 이름 목록 — 등록시간 순 정렬, 페이징
+    // 부수별 행으로 표시 (등록순 정렬)
     const dayData = attendanceData[selectedDate] || {};
-    // registeredAt 기준 오름차순 정렬
     const sorted = Object.entries(dayData)
       .sort((a, b) => (a[1].registeredAt || 0) - (b[1].registeredAt || 0))
-      .map(([name, val]) => ({ name, registeredAt: val.registeredAt || 0 }));
-
-    const PAGE = 20;
-    const totalPages = Math.ceil(sorted.length / PAGE);
-    const page = attPage || 0;
-    const pageItems = sorted.slice(page * PAGE, page * PAGE + PAGE);
+      .map(([name, val]) => ({ name, busoo: val.busoo || 0, registeredAt: val.registeredAt || 0 }));
 
     if (sorted.length === 0) {
       attGrid.innerHTML = '<div class="mdp-empty">아직 등록된 참석자가 없어요</div>';
       attGrid.style.cssText = '';
     } else {
       attGrid.innerHTML = '';
-      attGrid.style.cssText = 'display:flex;flex-wrap:wrap;gap:2px;align-content:flex-start;';
-      pageItems.forEach(({ name, registeredAt }) => {
-        const isMine = (name === currentUser);
-        const chip = document.createElement('div');
-        chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
-        chip.dataset.name = name;
-        chip.textContent = name;
+      attGrid.style.cssText = 'width:100%;';
+      // 1~8부 행 생성
+      for (let b = 1; b <= 8; b++) {
+        const members = sorted.filter(m => m.busoo === b);
+        if (members.length === 0) continue; // 해당 부수 없으면 행 생략
+        const row = document.createElement('div');
+        row.className = 'busoo-row';
+        const label = document.createElement('div');
+        label.className = 'busoo-label';
+        label.textContent = `${b}부`;
+        row.appendChild(label);
+        const namesWrap = document.createElement('div');
+        namesWrap.className = 'busoo-names';
+        members.forEach(({ name, registeredAt }) => {
+          const isMine = (name === currentUser);
+          const chip = document.createElement('div');
+          chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
+          chip.dataset.name = name;
+          chip.textContent = name;
         // 관리자 모드: 짧게 탭으로 선택 표시
         chip.addEventListener('click', () => {
           if (!isAdminMode) return;
@@ -1003,17 +1020,10 @@
             : '등록일시 없음';
           showDateTooltip(chip, msg);
         });
-        attGrid.appendChild(chip);
-      });
-      // 페이징
-      if (totalPages > 1) {
-        const paging = document.createElement('div');
-        paging.style.cssText = 'width:100%;display:flex;justify-content:center;align-items:center;gap:8px;margin-top:6px;';
-        paging.innerHTML = `
-          <button class="att-page-btn" ${page===0?'disabled':''} onclick="changeAttPage(-1)">◀</button>
-          <span class="att-page-info">${page+1} / ${totalPages}</span>
-          <button class="att-page-btn" ${page>=totalPages-1?'disabled':''} onclick="changeAttPage(1)">▶</button>`;
-        attGrid.appendChild(paging);
+          namesWrap.appendChild(chip);
+        });
+        row.appendChild(namesWrap);
+        attGrid.appendChild(row);
       }
     }
   }
@@ -1071,6 +1081,7 @@
     try {
       await set(ref(db, `botak_attendance/${dateKey}/${name}`), {
         name,
+        busoo: currentBusoo,
         registeredAt: Date.now()
       });
       const [, m, d] = dateKey.split('-');
