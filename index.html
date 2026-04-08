@@ -35,10 +35,18 @@
   /* 상단 이미지 오버레이 영역 (타이틀 + 성명 입력까지) */
   .login-hero-area {
     width:100%;
+    position:relative;
+    /* 원본 비율 유지: 768/1376 = 55.8% */
+    padding-bottom: 55.8%;
     background: linear-gradient(rgba(10,10,15,0.25), rgba(10,10,15,0.35)),
-                url('login.png') center top / cover no-repeat;
+                url('login.png') center center / 100% 100% no-repeat;
+    flex-shrink: 0;
+  }
+  /* 이미지 위 텍스트 절대 배치 */
+  .login-hero-content {
+    position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:center;
-    padding: 2vh 16px 14px;
+    justify-content:center; padding: 0 16px;
   }
   /* 하단 비번 영역 (순수 검정) */
   .login-pw-area {
@@ -359,21 +367,23 @@
 
   <!-- ① 상단: 배경 이미지 + 타이틀 + 성명 입력 오버레이 -->
   <div class="login-hero-area">
-    <div class="login-title-row">
-      <div class="login-icon" id="installIcon" onclick="triggerInstall()" title="앱 설치" style="cursor:pointer;">🏓</div>
-      <div class="login-title">보탁 참석자 조사</div>
-    </div>
-    <div id="pwSubMsg" style="font-size:0.68rem;color:#ffffff;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.8);"></div>
-    <div class="login-name-wrap">
-      <label class="login-name-label">성명</label>
-      <input type="text" class="login-name-input" id="nameLoginInput"
-        placeholder="홍길동" maxlength="10"
-        onkeydown="if(event.key==='Enter') this.blur()">
-      <label class="login-busoo-label">부수</label>
-      <input type="number" class="login-busoo-input" id="busooInput"
-        placeholder="1" min="1" max="8" maxlength="1"
-        onkeydown="if(event.key==='Enter') this.blur()"
-        oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
+    <div class="login-hero-content">
+      <div class="login-title-row">
+        <div class="login-icon" id="installIcon" onclick="triggerInstall()" title="앱 설치" style="cursor:pointer;">🏓</div>
+        <div class="login-title">보탁 참석자 조사</div>
+      </div>
+      <div id="pwSubMsg" style="font-size:0.68rem;color:#ffffff;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.8);"></div>
+      <div class="login-name-wrap">
+        <label class="login-name-label">성명</label>
+        <input type="text" class="login-name-input" id="nameLoginInput"
+          placeholder="홍길동" maxlength="10"
+          onkeydown="if(event.key==='Enter') this.blur()">
+        <label class="login-busoo-label">부수</label>
+        <input type="number" class="login-busoo-input" id="busooInput"
+          placeholder="1" min="1" max="8" maxlength="1"
+          onkeydown="if(event.key==='Enter') this.blur()"
+          oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
+      </div>
     </div>
   </div>
 
