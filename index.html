@@ -1269,7 +1269,8 @@
 
       // 1~8부 행 생성
       for (let b = 1; b <= 8; b++) {
-        const members = sorted.filter(m => m.busoo === b);
+        const members = sorted.filter(m => m.busoo === b)
+          .sort((a, b) => a.name.localeCompare(b.name, 'ko'));
         if (members.length === 0) continue; // 해당 부수 없으면 행 생략
         const row = document.createElement('div');
         row.className = 'busoo-row';
@@ -1567,12 +1568,21 @@
 let _installPrompt = null;
 let _isInstalled = false;
 
+// 이미 설치(standalone)로 실행 중이면 설치됨으로 간주
+if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+  _isInstalled = true;
+}
+
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   _installPrompt = e;
+  _isInstalled = false;
   // 로고 아래 힌트 표시
   const sub = document.getElementById('pwSubMsg');
   if(sub) sub.textContent = '🔼 로고를 누르면 앱 설치';
+  // 로고 강조
+  const icon = document.getElementById('installIcon');
+  if(icon) icon.style.filter = 'drop-shadow(0 0 8px rgba(52,152,219,0.9))';
 });
 
 // 이미 설치된 경우
@@ -1581,6 +1591,8 @@ window.addEventListener('appinstalled', () => {
   _installPrompt = null;
   const sub = document.getElementById('pwSubMsg');
   if(sub) sub.textContent = '';
+  const icon = document.getElementById('installIcon');
+  if(icon) icon.style.filter = '';
 });
 
 // ── 캐시 새로고침 ──
@@ -1614,8 +1626,12 @@ window.triggerInstall = async function(){
     const sub = document.getElementById('pwSubMsg');
     if(sub){
       const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-      sub.textContent = isIOS ? '📲 Safari 공유 → 홈 화면에 추가' : '브라우저 메뉴에서 설치하세요';
-      setTimeout(()=>{ sub.textContent='🔼 로고를 누르면 앱 설치'; }, 3000);
+      if(isIOS){
+        sub.textContent = '📲 Safari 공유버튼 → 홈 화면에 추가';
+      } else {
+        sub.textContent = '브라우저 주소창 오른쪽 설치 아이콘을 눌러주세요';
+      }
+      setTimeout(()=>{ sub.textContent = _isInstalled ? '' : '🔼 로고를 누르면 앱 설치'; }, 4000);
     }
     return;
   }
