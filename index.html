@@ -440,6 +440,7 @@
     background: white; border-radius: 16px; padding: 1.5rem;
     width: 100%; max-width: 560px; margin: auto;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    max-height: 90vh; overflow-y: auto;
   }
   .ranking-modal-title {
     font-size: 17px; font-weight: 800; color: var(--primary);
@@ -759,6 +760,32 @@
       <button class="rp-tab active" onclick="setRankPeriod('month', this)">📅 월간</button>
       <button class="rp-tab" onclick="setRankPeriod('half', this)">📆 반기</button>
       <button class="rp-tab" onclick="setRankPeriod('year', this)">🗓️ 연간</button>
+    </div>
+
+    <!-- 세부 기간 선택기 -->
+    <div id="rankDetailSelector" style="display:flex;align-items:center;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">
+      <!-- 월간: 연도+월 선택 -->
+      <div id="rankMonthSel" style="display:flex;align-items:center;gap:6px;">
+        <select id="rankSelYear" onchange="renderRanking()" style="padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;"></select>
+        <select id="rankSelMonth" onchange="renderRanking()" style="padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+          <option value="1">1월</option><option value="2">2월</option><option value="3">3월</option>
+          <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+          <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+          <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+        </select>
+      </div>
+      <!-- 반기: 연도+상/하반기 선택 -->
+      <div id="rankHalfSel" style="display:none;align-items:center;gap:6px;">
+        <select id="rankSelHalfYear" onchange="renderRanking()" style="padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;"></select>
+        <select id="rankSelHalf" onchange="renderRanking()" style="padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;">
+          <option value="1">상반기 (1~6월)</option>
+          <option value="2">하반기 (7~12월)</option>
+        </select>
+      </div>
+      <!-- 연간: 연도 선택 -->
+      <div id="rankYearSel" style="display:none;align-items:center;gap:6px;">
+        <select id="rankSelYearOnly" onchange="renderRanking()" style="padding:5px 8px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;"></select>
+      </div>
     </div>
 
     <!-- 뷰 탭 -->
@@ -1678,9 +1705,37 @@
   const JO_COLORS = ['#6b46c1', '#c05621', '#2b6cb0', '#b7791f'];
 
   window.openRankingModal = function() {
+    _rankPeriod = 'month';
+    _rankView = 'personal';
+    document.querySelectorAll('.rp-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+    document.querySelectorAll('.rv-tab').forEach((t, i) => t.classList.toggle('active', i === 0));
+
+    // 연도 목록 생성 (Firebase 데이터 기준 최소~현재)
+    const now = new Date();
+    const curY = now.getFullYear();
+    const years = new Set([curY]);
+    Object.keys(attendanceData).forEach(k => years.add(parseInt(k.slice(0,4))));
+    const sortedYears = [...years].sort((a,b) => b - a);
+
+    ['rankSelYear','rankSelHalfYear','rankSelYearOnly'].forEach(id => {
+      const sel = document.getElementById(id);
+      sel.innerHTML = sortedYears.map(y => `<option value="${y}">${y}년</option>`).join('');
+      sel.value = curY;
+    });
+    document.getElementById('rankSelMonth').value = now.getMonth() + 1;
+    document.getElementById('rankSelHalf').value = now.getMonth() < 6 ? 1 : 2;
+
+    // 선택기 표시 초기화
+    updateRankSelector();
     document.getElementById('rankingModal').classList.add('show');
     renderRanking();
   };
+
+  function updateRankSelector() {
+    document.getElementById('rankMonthSel').style.display = _rankPeriod === 'month' ? 'flex' : 'none';
+    document.getElementById('rankHalfSel').style.display  = _rankPeriod === 'half'  ? 'flex' : 'none';
+    document.getElementById('rankYearSel').style.display  = _rankPeriod === 'year'  ? 'flex' : 'none';
+  }
 
   window.closeRankingModal = function() {
     document.getElementById('rankingModal').classList.remove('show');
@@ -1690,6 +1745,7 @@
     _rankPeriod = period;
     document.querySelectorAll('.rp-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
+    updateRankSelector();
     renderRanking();
   };
 
@@ -1701,28 +1757,25 @@
   };
 
   function getRankDateRange() {
-    const now = new Date();
-    const y = now.getFullYear(), m = now.getMonth();
     if (_rankPeriod === 'month') {
-      const start = `${y}-${String(m+1).padStart(2,'0')}-01`;
-      const end = `${y}-${String(m+1).padStart(2,'0')}-31`;
-      return { start, end, label: `${y}년 ${m+1}월` };
+      const y = parseInt(document.getElementById('rankSelYear')?.value || new Date().getFullYear());
+      const m = parseInt(document.getElementById('rankSelMonth')?.value || new Date().getMonth() + 1);
+      const start = `${y}-${String(m).padStart(2,'0')}-01`;
+      const end   = `${y}-${String(m).padStart(2,'0')}-31`;
+      return { start, end, label: `${y}년 ${m}월` };
     } else if (_rankPeriod === 'half') {
-      // 현재 반기: 1~6월 or 7~12월
-      const isFirstHalf = m < 6;
-      const startM = isFirstHalf ? 1 : 7;
-      const endM = isFirstHalf ? 6 : 12;
+      const y = parseInt(document.getElementById('rankSelHalfYear')?.value || new Date().getFullYear());
+      const half = parseInt(document.getElementById('rankSelHalf')?.value || 1);
+      const startM = half === 1 ? 1 : 7;
+      const endM   = half === 1 ? 6 : 12;
       return {
         start: `${y}-${String(startM).padStart(2,'0')}-01`,
-        end: `${y}-${String(endM).padStart(2,'0')}-31`,
-        label: `${y}년 ${isFirstHalf ? '상반기 (1~6월)' : '하반기 (7~12월)'}`
+        end:   `${y}-${String(endM).padStart(2,'0')}-31`,
+        label: `${y}년 ${half === 1 ? '상반기 (1~6월)' : '하반기 (7~12월)'}`
       };
     } else {
-      return {
-        start: `${y}-01-01`,
-        end: `${y}-12-31`,
-        label: `${y}년 연간`
-      };
+      const y = parseInt(document.getElementById('rankSelYearOnly')?.value || new Date().getFullYear());
+      return { start: `${y}-01-01`, end: `${y}-12-31`, label: `${y}년 연간` };
     }
   }
 
