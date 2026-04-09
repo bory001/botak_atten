@@ -428,7 +428,28 @@
   @media (max-width: 380px) {
     .day-num { font-size: 12px; }
   }
-  /* ── 랭킹 모달 ── */
+  /* ── 브라우저 안내 배너 ── */
+  #browserBanner {
+    display: none; position: fixed; inset: 0; z-index: 99999;
+    background: rgba(0,0,0,0.85); align-items: center; justify-content: center; padding: 1.5rem;
+  }
+  #browserBanner.show { display: flex; }
+  .browser-banner-box {
+    background: white; border-radius: 16px; padding: 1.75rem;
+    width: 100%; max-width: 340px; text-align: center;
+  }
+  .browser-banner-icon { font-size: 48px; margin-bottom: 0.75rem; }
+  .browser-banner-title { font-size: 16px; font-weight: 800; color: #1a3a5c; margin-bottom: 0.5rem; }
+  .browser-banner-desc { font-size: 13px; color: #7a8ba0; line-height: 1.7; margin-bottom: 1.25rem; }
+  .browser-banner-btn {
+    display: block; width: 100%; padding: 12px; margin-bottom: 8px;
+    border-radius: 10px; font-size: 14px; font-weight: 700;
+    font-family: inherit; cursor: pointer; border: none;
+  }
+  .browser-banner-btn.primary { background: #1a3a5c; color: white; }
+  .browser-banner-btn.secondary { background: #f4f6f9; color: #1a3a5c; border: 1px solid #dde3ec; }
+
+
   #rankingModal .modal-overlay { z-index: 600; }
   .ranking-modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.6);
@@ -747,6 +768,20 @@
       <button class="modal-cancel" onclick="closePwModal()">취소</button>
       <button class="modal-confirm" onclick="changePassword()">변경하기</button>
     </div>
+  </div>
+</div>
+
+<!-- 크롬 아닌 브라우저 안내 배너 -->
+<div id="browserBanner">
+  <div class="browser-banner-box">
+    <div class="browser-banner-icon">🌐</div>
+    <div class="browser-banner-title">크롬 브라우저를 권장합니다</div>
+    <div class="browser-banner-desc">
+      현재 크롬이 아닌 브라우저로 접속 중입니다.<br>
+      원활한 사용을 위해 크롬을 기본 브라우저로 설정해 주세요.
+    </div>
+    <button class="browser-banner-btn primary" onclick="goToDefaultBrowserSetting()">⚙️ 기본 브라우저 설정하기</button>
+    <button class="browser-banner-btn secondary" onclick="closeBrowserBanner()">그냥 계속하기</button>
   </div>
 </div>
 
@@ -1917,7 +1952,44 @@
   });
 </script>
 <script>
-// ── PWA 설치 프롬프트 캡처 ──
+// ── 브라우저 감지 및 크롬 안내 ──
+(function checkBrowser() {
+  const ua = navigator.userAgent;
+  const isChrome = /Chrome/.test(ua) && /Google Inc/.test(navigator.vendor);
+  const isAndroid = /Android/.test(ua);
+
+  // 크롬이 아니고 안드로이드인 경우에만 안내
+  if (isAndroid && !isChrome) {
+    // 한 번 닫은 경우 하루 동안 다시 안 보이게
+    const dismissed = localStorage.getItem('browserBannerDismissed');
+    if (dismissed && Date.now() - parseInt(dismissed) < 86400000) return;
+    document.getElementById('browserBanner').classList.add('show');
+  }
+})();
+
+window.goToDefaultBrowserSetting = function() {
+  const ua = navigator.userAgent;
+  // 안드로이드: intent URL로 기본앱 설정 화면 이동 시도
+  // 직접 설정 화면으로 가는 intent
+  const intentUrl = 'intent://settings/default_apps#Intent;scheme=android-app;package=com.android.settings;end';
+  const fallbackUrl = 'https://support.google.com/chrome/answer/95417?hl=ko'; // 크롬 기본브라우저 설정 안내 페이지
+
+  // intent 방식 시도 (안드로이드 네이티브)
+  try {
+    window.location.href = intentUrl;
+  } catch(e) {}
+
+  // 1.5초 후에도 페이지가 그대로면 구글 안내 페이지로 이동
+  setTimeout(() => {
+    window.open(fallbackUrl, '_blank');
+  }, 1500);
+};
+
+window.closeBrowserBanner = function() {
+  document.getElementById('browserBanner').classList.remove('show');
+  localStorage.setItem('browserBannerDismissed', Date.now().toString());
+};
+
 let _installPrompt = null;
 let _isInstalled = false;
 
