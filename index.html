@@ -552,9 +552,9 @@
   /* 참석 칩 시각 표시 */
   .att-time-chip {
     background: var(--bg); border: 1px solid var(--border);
-    border-radius: 4px; padding: 1px 3px;
-    font-size: 10px; font-weight: 600; color: var(--text);
-    text-align: center; display: block; margin-top: 1px;
+    border-radius: 4px; padding: 2px 3px;
+    font-size: 12px; font-weight: 600; color: var(--text);
+    text-align: center; display: block;
     white-space: nowrap; width: 100%;
   }
   .att-name-chip-wrap {
@@ -566,6 +566,10 @@
   }
   .att-name-chip-wrap .att-time-chip {
     border-top-left-radius: 0; border-top-right-radius: 0;
+  }
+  /* mine(내 칩)일 때 시각도 동일 색상 */
+  .att-name-chip-wrap.mine-wrap .att-time-chip {
+    background: var(--accent-light); border-color: var(--accent); color: #065f46;
   }
 
 </style>
@@ -1272,7 +1276,7 @@
       const userData = (selectedDate && attendanceData[selectedDate] && attendanceData[selectedDate][name]) || {};
       const arrTime = userData.arrivalTime || '';
       if (arrTime) {
-        html += `<div class="att-name-chip-wrap" data-name="${name}">
+        html += `<div class="att-name-chip-wrap${isMine ? ' mine-wrap' : ''}" data-name="${name}">
           <div class="att-name-chip ${isMine ? 'mine' : ''}" data-name="${name}">${name}</div>
           <div class="att-time-chip">${arrTime}</div>
         </div>`;
@@ -1424,7 +1428,7 @@
             let container;
             if (arrivalTime) {
               container = document.createElement('div');
-              container.className = 'att-name-chip-wrap';
+              container.className = 'att-name-chip-wrap' + (isMine ? ' mine-wrap' : '');
               container.dataset.name = name;
               const chip = document.createElement('div');
               chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
@@ -1478,7 +1482,7 @@
             let container;
             if (arrivalTime) {
               container = document.createElement('div');
-              container.className = 'att-name-chip-wrap';
+              container.className = 'att-name-chip-wrap' + (isMine ? ' mine-wrap' : '');
               container.dataset.name = name;
               const chip = document.createElement('div');
               chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
@@ -1527,7 +1531,7 @@
           let container;
           if (arrivalTime) {
             container = document.createElement('div');
-            container.className = 'att-name-chip-wrap';
+            container.className = 'att-name-chip-wrap' + (isMine ? ' mine-wrap' : '');
             container.dataset.name = name;
             const chip = document.createElement('div');
             chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
@@ -1579,7 +1583,7 @@
           let container;
           if (arrivalTime) {
             container = document.createElement('div');
-            container.className = 'att-name-chip-wrap';
+            container.className = 'att-name-chip-wrap' + (isMine ? ' mine-wrap' : '');
             container.dataset.name = name;
             const chip = document.createElement('div');
             chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
