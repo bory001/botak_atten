@@ -146,6 +146,7 @@
   }
   .header-left h1 { font-size: 17px; font-weight: 700; white-space: nowrap; }
   .header-left .subtitle { font-size: 12px; opacity: 0.7; white-space: nowrap; padding-left: 22px; }
+  .header-left { flex-shrink: 1; min-width: 0; overflow: hidden; }
   .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
   .user-badge {
     display: flex; align-items: center; gap: 5px;
@@ -165,16 +166,23 @@
   .hdr-attend-btn.register { background: var(--accent); border-color: var(--accent); }
   .hdr-attend-btn.cancel { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.7); }
   @media (max-width: 480px) {
-    header { padding: 0.4rem 0.5rem; }
+    header { padding: 0.4rem 0.4rem; gap: 4px; }
     .header-left h1 { font-size: 14px; }
     .header-left .subtitle { font-size: 11px; padding-left: 18px; }
     .hdr-btn { font-size: 10px; padding: 4px 5px; }
+    .header-right { gap: 3px; }
     .sync-dot-wrap { display: none; }
   }
   @media (max-width: 400px) {
+    header { padding: 0.35rem 0.3rem; gap: 3px; }
     .header-left h1 { font-size: 13px; }
-    .hdr-btn { font-size: 9px; padding: 4px 4px; }
-    .header-right { gap: 3px; }
+    .header-left .subtitle { font-size: 10px; padding-left: 16px; }
+    .hdr-btn { font-size: 9px; padding: 4px 4px; border-radius: 12px; }
+    .header-right { gap: 2px; }
+  }
+  @media (max-width: 360px) {
+    .header-left h1 { font-size: 12px; }
+    .hdr-btn { font-size: 8px; padding: 3px 4px; }
   }
 
   /* ── 레이아웃 ── */
@@ -658,7 +666,7 @@
       <button class="hdr-btn hdr-attend-btn" id="hdrTimeBtn" onclick="openTimeModal()" style="display:none;">⏰ 시각등록</button>
       <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">✅ 참석 등록</button>
       <button class="hdr-btn" onclick="openRankingModal()" style="background:rgba(99,102,241,0.3);border-color:rgba(99,102,241,0.7);">🏆 통계</button>
-      <button class="hdr-btn" id="adminModeBtn" onclick="openAdminAuth()" style="background:rgba(255,165,0,0.2);border-color:rgba(255,165,0,0.5);">⚙️ 관리자</button>
+      <button class="hdr-btn" id="adminModeBtn" onclick="openAdminAuth()" style="background:rgba(255,165,0,0.2);border-color:rgba(255,165,0,0.5);">⚙️ 관리</button>
       <button class="hdr-btn" onclick="doLogout()">나가기</button>
     </div>
   </header>
