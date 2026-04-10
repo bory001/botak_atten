@@ -620,16 +620,17 @@
   .mdb-paste-btn { padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
   .mdb-upload-btn { padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
   .mdb-list-wrap { max-height: 300px; overflow-y: auto; margin-top: 0.5rem; border: 1px solid var(--border); border-radius: 8px; }
-  .mdb-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  .mdb-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: auto; }
   .mdb-table th { background: var(--primary); color: white; padding: 8px 8px; text-align: left; font-size: 11px; font-weight: 700; position: sticky; top: 0; z-index: 1; }
-  .mdb-table td { padding: 8px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mdb-table td { padding: 8px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .mdb-table th:last-child, .mdb-table td:last-child { width: 44px; text-align: center; padding: 4px 4px; }
   .mdb-table tr:last-child td { border-bottom: none; }
   .mdb-table tr:nth-child(even) td { background: #f8fafc; }
   .mdb-table tr:hover td { background: #eff6ff; }
   .mdb-del-btn {
     padding: 4px 10px; background: #fef2f2; color: var(--danger);
     border: 1px solid #fecaca; border-radius: 6px; font-size: 11px;
-    font-family: inherit; cursor: pointer; white-space: nowrap; display: block; width: 100%;
+    font-family: inherit; cursor: pointer; white-space: nowrap;
   }
   .mdb-del-btn:hover { background: #fee2e2; }
   .mdb-count { font-size: 11px; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600; }
@@ -1002,9 +1003,9 @@
       <div class="mdb-list-wrap">
         <table class="mdb-table">
           <thead><tr>
-            <th style="width:28%;">이름</th>
+            <th>이름</th>
             <th>연락처</th>
-            <th style="width:44px;">삭제</th>
+            <th>삭제</th>
           </tr></thead>
           <tbody id="mdbTableBody"></tbody>
         </table>
