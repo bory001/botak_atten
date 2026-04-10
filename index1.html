@@ -2113,6 +2113,7 @@
   }
 
   // ── 회원 DB 로드 (앱 시작 시) ──
+  async function loadMemberData() {
     try {
       const snap = await get(ref(db, 'botak_members'));
       memberData = snap.exists() ? (snap.val() || {}) : {};
