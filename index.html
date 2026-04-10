@@ -1805,7 +1805,13 @@
       if (hourSel) hourSel.value = h;
       if (minSel) { const rounded = Math.round(m / 10) * 10 % 60; minSel.value = rounded; }
     }
-    // 시각 미등록 시: select 현재 값 그대로 유지 (초기값 7:30은 HTML 기본값으로만 설정)
+    // 시각 미등록 시: localStorage 최근값 복원, 없으면 HTML 기본값(7:30) 유지
+    if (!hasTime) {
+      const lastH = localStorage.getItem('botak_last_time_h');
+      const lastM = localStorage.getItem('botak_last_time_m');
+      if (lastH && hourSel) hourSel.value = parseInt(lastH);
+      if (lastM && minSel) minSel.value = parseInt(lastM);
+    }
     document.getElementById('timeModal').classList.add('show');
   };
 
@@ -1826,6 +1832,8 @@
       return;
     }
     const timeStr = `${h}:${String(m).padStart(2,'0')}`;
+    localStorage.setItem('botak_last_time_h', h);
+    localStorage.setItem('botak_last_time_m', m);
     setLoading(true);
     try {
       await set(ref(db, `botak_attendance/${selectedDate}/${currentUser}/arrivalTime`), timeStr);
