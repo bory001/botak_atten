@@ -580,6 +580,48 @@
     background: var(--accent-light); border-color: var(--accent); color: #065f46;
   }
 
+  /* ── 회원DB 모달 ── */
+  .memberdb-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: none; align-items: flex-start; justify-content: center;
+    z-index: 650; padding: 0.75rem; overflow-y: auto;
+  }
+  .memberdb-overlay.show { display: flex; }
+  .memberdb-box {
+    background: white; border-radius: 16px; padding: 1.25rem;
+    width: 100%; max-width: 560px; margin: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .memberdb-title { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
+  .mdb-tabs { display: flex; gap: 6px; margin-bottom: 1rem; }
+  .mdb-tab { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .mdb-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+  .mdb-input-row { display: flex; gap: 6px; margin-bottom: 0.6rem; align-items: center; }
+  .mdb-input { flex: 1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; color: var(--text); outline: none; }
+  .mdb-input:focus { border-color: var(--primary); }
+  .mdb-add-btn { padding: 8px 14px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; }
+  .mdb-paste-area { width: 100%; min-height: 90px; padding: 8px 10px; border: 1.5px dashed var(--border); border-radius: 8px; font-size: 12px; font-family: inherit; color: var(--text); outline: none; resize: vertical; margin-bottom: 6px; transition: border-color 0.15s; box-sizing: border-box; }
+  .mdb-paste-area:focus { border-color: var(--primary); }
+  .mdb-paste-hint { font-size: 11px; color: var(--text-muted); margin-bottom: 0.6rem; line-height: 1.7; }
+  .mdb-btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.6rem; }
+  .mdb-paste-btn { padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
+  .mdb-upload-btn { padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
+  .mdb-list-wrap { max-height: 320px; overflow-y: auto; margin-top: 0.6rem; border: 1px solid var(--border); border-radius: 8px; }
+  .mdb-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .mdb-table th { background: var(--primary); color: white; padding: 7px 10px; text-align: left; font-size: 11px; font-weight: 700; position: sticky; top: 0; z-index: 1; }
+  .mdb-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .mdb-table tr:last-child td { border-bottom: none; }
+  .mdb-table tr:nth-child(even) td { background: #f8fafc; }
+  .mdb-table tr:hover td { background: #eff6ff; }
+  .mdb-del-btn { padding: 2px 8px; background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; border-radius: 6px; font-size: 11px; font-family: inherit; cursor: pointer; }
+  .mdb-del-btn:hover { background: #fee2e2; }
+  .mdb-count { font-size: 11px; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600; }
+  .mdb-err { font-size: 12px; color: var(--danger); min-height: 16px; margin-bottom: 0.4rem; }
+  .mdb-close-btn { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer; font-weight: 600; margin-top: 0.75rem; }
+  .mdb-search { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; margin-bottom: 0.5rem; box-sizing: border-box; }
+  .mdb-search:focus { border-color: var(--primary); }
+  #mdbFileInput { display: none; }
+
 </style>
 </head>
 <body>
@@ -665,6 +707,7 @@
       </div>
       <button class="hdr-btn hdr-attend-btn" id="hdrTimeBtn" onclick="openTimeModal()" style="display:none;">⏰ 시각등록</button>
       <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">✅ 참석 등록</button>
+      <button class="hdr-btn" id="memberDbBtn" onclick="openMemberDb()" style="display:none;background:rgba(16,185,129,0.25);border-color:rgba(16,185,129,0.7);">👥 회원DB</button>
       <button class="hdr-btn" onclick="openRankingModal()" style="background:rgba(99,102,241,0.3);border-color:rgba(99,102,241,0.7);">🏆 통계</button>
       <button class="hdr-btn" id="adminModeBtn" onclick="openAdminAuth()" style="background:rgba(255,165,0,0.2);border-color:rgba(255,165,0,0.5);">⚙️ 관리자</button>
       <button class="hdr-btn" onclick="doLogout()">나가기</button>
@@ -701,6 +744,7 @@
         <div class="mdp-att-grid" id="mdpAttGrid">
           <div class="mdp-empty">날짜를 선택해 주세요</div>
         </div>
+        <div class="long-press-hint" id="mdpChipHint" style="display:none;">이름 탭 → 문자 | 길게 누르면 등록 취소</div>
         <button class="mdp-attend-btn register" id="mdpAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">
           ✅ 참석 등록
         </button>
@@ -879,6 +923,79 @@
     </div>
 
     <button class="ranking-close-btn" onclick="closeRankingModal()">닫기</button>
+  </div>
+</div>
+
+<!-- 회원DB 모달 -->
+<div class="memberdb-overlay" id="memberDbModal">
+  <div class="memberdb-box">
+    <div class="memberdb-title">👥 회원 DB 관리</div>
+
+    <!-- 탭 -->
+    <div class="mdb-tabs">
+      <button class="mdb-tab active" id="mdbTab1" onclick="switchMdbTab('single')">✏️ 개별 입력</button>
+      <button class="mdb-tab" id="mdbTab2" onclick="switchMdbTab('paste')">📋 일괄 붙여넣기</button>
+      <button class="mdb-tab" id="mdbTab3" onclick="switchMdbTab('excel')">📊 엑셀 업로드</button>
+    </div>
+
+    <!-- 개별 입력 -->
+    <div id="mdbPanelSingle">
+      <div class="mdb-err" id="mdbSingleErr"></div>
+      <div class="mdb-input-row">
+        <input class="mdb-input" id="mdbSingleName" placeholder="이름" maxlength="10">
+        <input class="mdb-input" id="mdbSinglePhone" placeholder="연락처 (010-0000-0000)" maxlength="13"
+          oninput="this.value=this.value.replace(/[^0-9-]/g,'')">
+        <button class="mdb-add-btn" onclick="mdbAddSingle()">추가</button>
+      </div>
+    </div>
+
+    <!-- 일괄 붙여넣기 -->
+    <div id="mdbPanelPaste" style="display:none;">
+      <div class="mdb-paste-hint">
+        • 한 줄에 <b>이름, 연락처</b> 형식으로 입력 (쉼표·탭·공백 모두 인식)<br>
+        • 예) <code>홍길동 010-1234-5678</code> 또는 <code>홍길동,01012345678</code><br>
+        • 엑셀에서 두 열(이름·연락처) 복사 후 붙여넣기도 가능
+      </div>
+      <textarea class="mdb-paste-area" id="mdbPasteArea" placeholder="홍길동 010-1234-5678&#10;김철수 010-9876-5432&#10;..."></textarea>
+      <div class="mdb-err" id="mdbPasteErr"></div>
+      <div class="mdb-btn-row">
+        <button class="mdb-paste-btn" onclick="mdbAddPaste()">📋 붙여넣기 등록</button>
+      </div>
+    </div>
+
+    <!-- 엑셀 업로드 -->
+    <div id="mdbPanelExcel" style="display:none;">
+      <div class="mdb-paste-hint">
+        • 엑셀 첫 번째 열: <b>이름</b>, 두 번째 열: <b>연락처</b><br>
+        • .xlsx / .xls / .csv 파일 지원<br>
+        • 1행이 헤더(이름·연락처 등)면 자동으로 건너뜀
+      </div>
+      <div class="mdb-err" id="mdbExcelErr"></div>
+      <div class="mdb-btn-row">
+        <button class="mdb-upload-btn" onclick="document.getElementById('mdbFileInput').click()">📊 파일 선택</button>
+        <span id="mdbFileName" style="font-size:12px;color:var(--text-muted);align-self:center;"></span>
+      </div>
+      <input type="file" id="mdbFileInput" accept=".xlsx,.xls,.csv" onchange="mdbHandleFile(this)">
+    </div>
+
+    <!-- 검색 + 목록 -->
+    <div style="margin-top:0.75rem;">
+      <div class="mdb-count" id="mdbCount">총 0명</div>
+      <input class="mdb-search" id="mdbSearch" placeholder="🔍 이름 또는 연락처 검색" oninput="renderMdbList()">
+      <div class="mdb-list-wrap">
+        <table class="mdb-table">
+          <thead><tr>
+            <th style="width:36px;">No</th>
+            <th>이름</th>
+            <th>연락처</th>
+            <th style="width:50px;">삭제</th>
+          </tr></thead>
+          <tbody id="mdbTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <button class="mdb-close-btn" onclick="closeMemberDb()">닫기</button>
   </div>
 </div>
 
@@ -1153,6 +1270,7 @@
 
   // ── Firebase 리스너 ──
   function startListening() {
+    loadMemberData(); // 회원DB 미리 로드
     onValue(ref(db, 'botak_attendance'), (snap) => {
       attendanceData = snap.val() || {};
       renderCalendar();
@@ -1300,16 +1418,19 @@
         <button class="att-page-btn" id="attNextBtn" ${page >= totalPages - 1 ? 'disabled' : ''} onclick="changeAttPage(1)">▶</button>
       </div>`;
     }
-    html += `<div class="long-press-hint">이름을 길게 누르면 등록 취소</div>`;
+    html += `<div class="long-press-hint">이름을 길게 누르면 등록 취소 | 짧게 누르면 문자</div>`;
     attList.innerHTML = html;
 
-    attList.querySelectorAll('.att-name-chip').forEach(chip => {
-      setupLongPress(chip, () => {
-        const name = chip.dataset.name;
-        openConfirm(
-          `"${name}" 님의 ${formatDateKr(selectedDate)} 참석을 취소할까요?`,
-          async () => { await removeAttendance(selectedDate, name); }
-        );
+    attList.querySelectorAll('.att-name-chip, .att-name-chip-wrap').forEach(el => {
+      const name = el.dataset.name;
+      el.addEventListener('click', () => handleChipTap(name));
+      setupLongPress(el, () => {
+        const userData = (selectedDate && attendanceData[selectedDate] && attendanceData[selectedDate][name]) || {};
+        const dt = userData.registeredAt ? new Date(userData.registeredAt) : null;
+        const msg = dt
+          ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`
+          : '등록일시 없음';
+        showDateTooltip(el, msg);
       });
     });
   }
@@ -1384,11 +1505,14 @@
     updateTimeToggleBtns(isRegistered);
 
     // 참석자 수 뱃지
+    const chipHint = document.getElementById('mdpChipHint');
     if (names.length > 0) {
       attCountEl.style.display = '';
       attCountEl.textContent = `${names.length}명`;
+      if (chipHint) chipHint.style.display = '';
     } else {
       attCountEl.style.display = 'none';
+      if (chipHint) chipHint.style.display = 'none';
     }
 
     // 부수별 행으로 표시 (등록순 정렬)
@@ -1454,14 +1578,7 @@
               container.textContent = chipText;
             }
             const chip = container.querySelector ? (container.querySelector('.att-name-chip') || container) : container;
-            container.addEventListener('click', () => {
-              if (!isAdminMode) return;
-              document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
-              _adminSelectedName = (_adminSelectedName === name) ? null : name;
-              if (_adminSelectedName) chip.style.outline = '2px solid #ef4444';
-              const hb = document.getElementById('hdrAttendBtn');
-              if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
-            });
+            container.addEventListener('click', () => handleChipTap(name, container));
             setupLongPress(container, () => {
               const dt = registeredAt ? new Date(registeredAt) : null;
               const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
@@ -1554,14 +1671,7 @@
             container.dataset.name = name; container.textContent = name;
           }
           const mainChip = container.querySelector ? (container.querySelector('.att-name-chip') || container) : container;
-          container.addEventListener('click', () => {
-            if (!isAdminMode) return;
-            document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
-            if (_adminSelectedName === name) { _adminSelectedName = null; }
-            else { _adminSelectedName = name; mainChip.style.outline = '2px solid #ef4444'; }
-            const hb = document.getElementById('hdrAttendBtn');
-            if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
-          });
+          container.addEventListener('click', () => handleChipTap(name, mainChip));
           setupLongPress(container, () => {
             const dt = registeredAt ? new Date(registeredAt) : null;
             const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
@@ -1606,14 +1716,7 @@
             container.dataset.name = name; container.textContent = name;
           }
           const mainChip = container.querySelector ? (container.querySelector('.att-name-chip') || container) : container;
-          container.addEventListener('click', () => {
-            if (!isAdminMode) return;
-            document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
-            if (_adminSelectedName === name) { _adminSelectedName = null; }
-            else { _adminSelectedName = name; mainChip.style.outline = '2px solid #ef4444'; }
-            const hb = document.getElementById('hdrAttendBtn');
-            if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
-          });
+          container.addEventListener('click', () => handleChipTap(name, mainChip));
           setupLongPress(container, () => {
             const dt = registeredAt ? new Date(registeredAt) : null;
             const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
@@ -1918,6 +2021,8 @@
       document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
       const btn = document.getElementById('adminModeBtn');
       if (btn) { btn.innerHTML = '⚙️ 관리자'; btn.style.background = 'rgba(255,165,0,0.2)'; btn.style.borderColor = 'rgba(255,165,0,0.5)'; }
+      const mdbBtn = document.getElementById('memberDbBtn');
+      if (mdbBtn) mdbBtn.style.display = 'none';
       if (selectedDate) { renderMobilePanel(); renderSidebar(); }
       showToast('관리자 모드 해제');
       return;
@@ -1942,6 +2047,8 @@
           closeAdminAuth();
           const btn = document.getElementById('adminModeBtn');
           if (btn) { btn.innerHTML = '⚙️ 관리중'; btn.style.background = 'rgba(255,100,0,0.4)'; btn.style.borderColor = 'rgba(255,100,0,0.8)'; }
+          const mdbBtn = document.getElementById('memberDbBtn');
+          if (mdbBtn) mdbBtn.style.display = 'inline-block';
           if (selectedDate) { renderMobilePanel(); renderSidebar(); }
           showToast('관리자 모드 활성화', 'success');
         } else {
@@ -1972,6 +2079,232 @@
   function openConfirm(msg, onOk) {
     onOk();
   }
+
+  // ══════════════════════════════════════════
+  // ── 회원DB ──
+  // ══════════════════════════════════════════
+  let memberData = {}; // { 이름: '010-xxxx-xxxx' }
+  let _mdbTab = 'single';
+
+  // ── 칩 탭 핸들러: 관리자=선택, 일반=문자연결 ──
+  function handleChipTap(name, chipEl) {
+    if (isAdminMode) {
+      // 관리자 모드: 기존 선택/취소 로직
+      const mainEl = chipEl || document.querySelector(`.att-name-chip[data-name="${name}"]`);
+      document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
+      if (_adminSelectedName === name) {
+        _adminSelectedName = null;
+      } else {
+        _adminSelectedName = name;
+        if (mainEl) mainEl.style.outline = '2px solid #ef4444';
+      }
+      const hb = document.getElementById('hdrAttendBtn');
+      if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
+      return;
+    }
+    // 일반 모드: 회원DB에서 번호 조회 → 문자 앱 열기
+    const phone = memberData[name];
+    if (phone) {
+      const digits = phone.replace(/[^0-9]/g, '');
+      window.location.href = `sms:${digits}`;
+    } else {
+      showToast(`"${name}" 님의 연락처가 등록되어 있지 않아요`, '');
+    }
+  }
+
+  // ── 회원 DB 로드 (앱 시작 시) ──
+  async function loadMemberData() {
+    try {
+      const snap = await get(ref(db, 'botak_members'));
+      memberData = snap.exists() ? (snap.val() || {}) : {};
+    } catch(e) { memberData = {}; }
+  }
+
+  window.openMemberDb = async function() {
+    await loadMemberData();
+    renderMdbList();
+    switchMdbTab('single');
+    document.getElementById('memberDbModal').classList.add('show');
+  };
+
+  window.closeMemberDb = function() {
+    document.getElementById('memberDbModal').classList.remove('show');
+  };
+
+  window.switchMdbTab = function(tab) {
+    _mdbTab = tab;
+    ['single','paste','excel'].forEach(t => {
+      document.getElementById('mdbPanel' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = t === tab ? '' : 'none';
+      document.getElementById('mdbTab' + ({'single':1,'paste':2,'excel':3}[t])).classList.toggle('active', t === tab);
+    });
+  };
+
+  // 전화번호 포맷 정규화
+  function normalizePhone(raw) {
+    const digits = raw.replace(/[^0-9]/g, '');
+    if (digits.length === 11) return `${digits.slice(0,3)}-${digits.slice(3,7)}-${digits.slice(7)}`;
+    if (digits.length === 10) return `${digits.slice(0,3)}-${digits.slice(3,6)}-${digits.slice(6)}`;
+    return raw.trim();
+  }
+
+  // 회원 저장 (Firebase)
+  async function saveMember(name, phone) {
+    const n = name.trim();
+    const p = normalizePhone(phone);
+    if (!n) return '이름을 입력해주세요';
+    if (!/^010-\d{4}-\d{4}$/.test(p) && !/^01[0-9]-\d{3,4}-\d{4}$/.test(p)) return '연락처 형식이 올바르지 않습니다';
+    await set(ref(db, `botak_members/${n}`), p);
+    memberData[n] = p;
+    return null;
+  }
+
+  // 개별 추가
+  window.mdbAddSingle = async function() {
+    const name = document.getElementById('mdbSingleName').value.trim();
+    const phone = document.getElementById('mdbSinglePhone').value.trim();
+    const errEl = document.getElementById('mdbSingleErr');
+    errEl.textContent = '';
+    const err = await saveMember(name, phone);
+    if (err) { errEl.textContent = err; return; }
+    document.getElementById('mdbSingleName').value = '';
+    document.getElementById('mdbSinglePhone').value = '';
+    renderMdbList();
+    showToast(`${name} 등록 완료 ✓`, 'success');
+  };
+
+  // 일괄 붙여넣기 파싱
+  window.mdbAddPaste = async function() {
+    const raw = document.getElementById('mdbPasteArea').value.trim();
+    const errEl = document.getElementById('mdbPasteErr');
+    errEl.textContent = '';
+    if (!raw) { errEl.textContent = '내용을 입력해주세요'; return; }
+    const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+    let ok = 0, fail = 0, failList = [];
+    for (const line of lines) {
+      // 탭, 쉼표, 공백으로 분리
+      const parts = line.split(/[\t,]+/).map(p => p.trim()).filter(Boolean);
+      if (parts.length < 2) {
+        // 공백으로 마지막 토큰이 번호인 경우
+        const m = line.match(/^(.+?)\s+(01[0-9][0-9\-]+)$/);
+        if (m) { parts[0] = m[1].trim(); parts[1] = m[2].trim(); }
+        else { fail++; failList.push(line); continue; }
+      }
+      const name = parts[0], phone = parts[parts.length === 2 ? 1 : parts.length - 1];
+      const err = await saveMember(name, phone);
+      if (err) { fail++; failList.push(`${name} (${err})`); } else ok++;
+    }
+    renderMdbList();
+    if (ok > 0) {
+      document.getElementById('mdbPasteArea').value = '';
+      showToast(`${ok}명 등록 완료${fail > 0 ? `, ${fail}명 실패` : ''} ✓`, ok > 0 ? 'success' : '');
+    }
+    if (fail > 0) errEl.textContent = `실패 항목: ${failList.slice(0,3).join(' / ')}${failList.length > 3 ? ' 외 ' + (failList.length-3) + '건' : ''}`;
+  };
+
+  // 엑셀/CSV 업로드
+  window.mdbHandleFile = async function(input) {
+    const file = input.files[0];
+    if (!file) return;
+    document.getElementById('mdbFileName').textContent = file.name;
+    const errEl = document.getElementById('mdbExcelErr');
+    errEl.textContent = '';
+
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (ext === 'csv') {
+      const text = await file.text();
+      await parseCsvAndSave(text, errEl);
+    } else {
+      // xlsx: SheetJS CDN 동적 로드
+      if (!window.XLSX) {
+        await new Promise((res, rej) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+          s.onload = res; s.onerror = rej;
+          document.head.appendChild(s);
+        });
+      }
+      const buf = await file.arrayBuffer();
+      const wb = XLSX.read(buf, { type: 'array' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      await parseRowsAndSave(rows, errEl);
+    }
+    input.value = '';
+  };
+
+  async function parseCsvAndSave(text, errEl) {
+    const rows = text.split('\n').map(l => l.split(',').map(c => c.replace(/"/g,'').trim()));
+    await parseRowsAndSave(rows, errEl);
+  }
+
+  async function parseRowsAndSave(rows, errEl) {
+    let ok = 0, fail = 0, failList = [];
+    // 첫 데이터 행 찾기 (헤더 건너뜀)
+    let startRow = 0;
+    if (rows.length > 0) {
+      const first = rows[0];
+      if (first.length >= 2 && !/\d{3}/.test(String(first[1]))) startRow = 1;
+    }
+    // 1열이 연번인지 감지: 데이터 첫 행 기준으로 1열이 순수 숫자면 연번으로 간주
+    let nameCol = 0, phoneCol = 1;
+    const sampleRow = rows[startRow];
+    if (sampleRow && sampleRow.length >= 3) {
+      const firstVal = String(sampleRow[0]).trim();
+      if (/^\d+$/.test(firstVal)) {
+        // 1열이 연번 → 2열=이름, 3열=연락처
+        nameCol = 1; phoneCol = 2;
+      }
+    }
+    for (let i = startRow; i < rows.length; i++) {
+      const cols = rows[i];
+      if (!cols || cols.length <= phoneCol) continue;
+      const name = String(cols[nameCol] || '').trim();
+      const phone = String(cols[phoneCol] || '').trim();
+      if (!name && !phone) continue;
+      const err = await saveMember(name, phone);
+      if (err) { fail++; failList.push(`${name}`); } else ok++;
+    }
+    renderMdbList();
+    showToast(`${ok}명 등록 완료${fail > 0 ? `, ${fail}명 실패` : ''} ✓`, ok > 0 ? 'success' : '');
+    if (fail > 0 && errEl) errEl.textContent = `형식 오류: ${failList.slice(0,3).join(', ')}${failList.length > 3 ? ' 외' : ''}`;
+  }
+
+  // 회원 삭제
+  window.mdbDelete = async function(name) {
+    if (!confirm(`"${name}" 님을 삭제할까요?`)) return;
+    await remove(ref(db, `botak_members/${name}`));
+    delete memberData[name];
+    renderMdbList();
+    showToast(`${name} 삭제 완료`);
+  };
+
+  // 목록 렌더
+  function renderMdbList() {
+    const q = (document.getElementById('mdbSearch')?.value || '').trim().toLowerCase();
+    const entries = Object.entries(memberData)
+      .filter(([n, p]) => !q || n.toLowerCase().includes(q) || p.includes(q))
+      .sort((a, b) => a[0].localeCompare(b[0], 'ko'));
+    document.getElementById('mdbCount').textContent = `총 ${Object.keys(memberData).length}명 (표시 ${entries.length}명)`;
+    const tbody = document.getElementById('mdbTableBody');
+    if (!tbody) return;
+    if (entries.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted);">등록된 회원이 없어요</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = entries.map(([name, phone], i) =>
+      `<tr>
+        <td style="color:var(--text-muted);font-size:11px;">${i+1}</td>
+        <td style="font-weight:600;">${name}</td>
+        <td style="color:var(--text-muted);">${phone}</td>
+        <td><button class="mdb-del-btn" onclick="mdbDelete('${name.replace(/'/g,"\\'")}')">삭제</button></td>
+      </tr>`
+    ).join('');
+  }
+
+  // 모달 외부 클릭 닫기
+  document.getElementById('memberDbModal').addEventListener('click', function(e) {
+    if (e.target === this) closeMemberDb();
+  });
 
   // ── 랭킹/통계 모달 ──
   let _rankPeriod = 'month';
