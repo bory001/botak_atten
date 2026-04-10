@@ -553,7 +553,7 @@
   .att-time-chip {
     background: var(--bg); border: 1px solid var(--border);
     border-radius: 4px; padding: 1px 3px;
-    font-size: 10px; font-weight: 600; color: var(--text-muted);
+    font-size: 10px; font-weight: 600; color: var(--text);
     text-align: center; display: block; margin-top: 1px;
     white-space: nowrap; width: 100%;
   }
@@ -880,13 +880,13 @@
       <select class="time-select" id="timeHourSel">
         <option value="1">1</option><option value="2">2</option><option value="3">3</option>
         <option value="4">4</option><option value="5">5</option><option value="6">6</option>
-        <option value="7">7</option><option value="8">8</option><option value="9">9</option>
+        <option value="7" selected>7</option><option value="8">8</option><option value="9">9</option>
         <option value="10">10</option><option value="11">11</option><option value="12">12</option>
       </select>
       <span class="time-colon">:</span>
       <select class="time-select" id="timeMinSel">
         <option value="0">00</option><option value="10">10</option><option value="20">20</option>
-        <option value="30">30</option><option value="40">40</option><option value="50">50</option>
+        <option value="30" selected>30</option><option value="40">40</option><option value="50">50</option>
       </select>
     </div>
     <div class="time-modal-err" id="timeModalErr"></div>
@@ -1800,10 +1800,8 @@
       const m = parseInt(parts[1]) || 0;
       if (hourSel) hourSel.value = h;
       if (minSel) { const rounded = Math.round(m / 10) * 10 % 60; minSel.value = rounded; }
-    } else {
-      if (hourSel) hourSel.value = 7;
-      if (minSel) minSel.value = 30;
     }
+    // 시각 미등록 시: select 현재 값 그대로 유지 (초기값 7:30은 HTML 기본값으로만 설정)
     document.getElementById('timeModal').classList.add('show');
   };
 
