@@ -505,30 +505,20 @@
     padding: 8px 14px; font-size: 13px; font-weight: 800;
     color: white; display: flex; align-items: center; gap: 8px;
   }
-  /* ── 시각등록 토글 버튼 ── */
-  .time-toggle-wrap {
-    display: flex; gap: 4px; margin-bottom: 6px;
+  /* ── 시각등록 단일 토글 버튼 (PC 사이드바) ── */
+  .my-attend-btn.time-single-btn {
+    background: rgba(16,185,129,0.1); color: #065f46;
+    border: 1.5px solid #6ee7b7; margin-bottom: 6px;
   }
-  .time-toggle-btn {
-    flex: 1; padding: 7px 6px; border-radius: 8px; font-size: 12px;
-    font-weight: 700; font-family: inherit; cursor: pointer;
-    border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted);
-    transition: all 0.15s; white-space: nowrap;
-    opacity: 0.4; pointer-events: none;
+  .my-attend-btn.time-single-btn:hover { background: rgba(16,185,129,0.2); }
+  .my-attend-btn.time-single-btn.has-time {
+    background: rgba(59,130,246,0.12); color: #1d4ed8;
+    border-color: #93c5fd;
   }
-  .time-toggle-btn.active-mode {
-    opacity: 1; pointer-events: auto;
-  }
-  .time-toggle-btn.active-mode:hover { background: #eef3fa; border-color: var(--primary-light); }
-  .time-toggle-btn.selected {
-    background: var(--primary); color: white; border-color: var(--primary);
-    opacity: 1; pointer-events: auto;
-  }
-  /* 헤더용 시각 버튼은 hdr-btn 기반이므로 별도 처리 */
-  #hdrTimeRegBtn, #hdrTimeModBtn {
-    opacity: 1 !important; pointer-events: auto !important;
-    flex: unset;
-  }
+  .my-attend-btn.time-single-btn.has-time:hover { background: rgba(59,130,246,0.22); }
+  /* 헤더 시각 버튼 (모바일) - register 스타일 기반 */
+  .hdr-attend-btn.time-reg { background: rgba(16,185,129,0.35); border-color: rgba(16,185,129,0.8); }
+  .hdr-attend-btn.time-mod { background: rgba(59,130,246,0.35); border-color: rgba(59,130,246,0.8); }
   /* 시각 입력 모달 */
   .time-modal-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.45);
@@ -661,8 +651,7 @@
         <div class="sync-dot" id="syncDot"></div>
         <span class="sync-label" id="syncLabel">연결됨</span>
       </div>
-      <button class="hdr-btn time-toggle-btn" id="hdrTimeRegBtn" onclick="openTimeModal('reg')" style="display:none;">⏰ 시각등록</button>
-      <button class="hdr-btn time-toggle-btn" id="hdrTimeModBtn" onclick="openTimeModal('mod')" style="display:none;">✏️ 시각수정</button>
+      <button class="hdr-btn hdr-attend-btn" id="hdrTimeBtn" onclick="openTimeModal()" style="display:none;">⏰ 시각등록</button>
       <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">✅ 참석 등록</button>
       <button class="hdr-btn" onclick="openRankingModal()" style="background:rgba(99,102,241,0.3);border-color:rgba(99,102,241,0.7);">🏆 통계</button>
       <button class="hdr-btn" id="adminModeBtn" onclick="openAdminAuth()" style="background:rgba(255,165,0,0.2);border-color:rgba(255,165,0,0.5);">⚙️ 관리자</button>
@@ -731,10 +720,9 @@
 
         <!-- 내 참석 등록/취소 버튼 -->
         <div class="my-attend-section">
-          <div class="time-toggle-wrap" id="timeToggleWrap">
-            <button class="time-toggle-btn" id="timeRegBtn" onclick="openTimeModal('reg')">⏰ 시각등록</button>
-            <button class="time-toggle-btn" id="timeModBtn" onclick="openTimeModal('mod')">✏️ 시각수정</button>
-          </div>
+          <button class="my-attend-btn time-single-btn" id="timeToggleBtn" onclick="openTimeModal()" style="display:none;">
+            ⏰ 시각등록
+          </button>
           <button class="my-attend-btn register" id="attendBtn" onclick="toggleAttendance()" disabled>
             ✅ 참석 등록
           </button>
@@ -1286,7 +1274,7 @@
       if (arrTime) {
         html += `<div class="att-name-chip-wrap" data-name="${name}">
           <div class="att-name-chip ${isMine ? 'mine' : ''}" data-name="${name}">${name}</div>
-          <div class="att-time-chip">참석시각 ${arrTime}</div>
+          <div class="att-time-chip">${arrTime}</div>
         </div>`;
       } else {
         html += `<div class="att-name-chip ${isMine ? 'mine' : ''}" data-name="${name}">${name}</div>`;
@@ -1444,7 +1432,7 @@
               chip.textContent = chipText;
               const timeChip = document.createElement('div');
               timeChip.className = 'att-time-chip';
-              timeChip.textContent = `참석시각 ${arrivalTime}`;
+              timeChip.textContent = `${arrivalTime}`;
               container.appendChild(chip);
               container.appendChild(timeChip);
             } else {
@@ -1498,7 +1486,7 @@
               chip.textContent = chipText;
               const timeChip = document.createElement('div');
               timeChip.className = 'att-time-chip';
-              timeChip.textContent = `참석시각 ${arrivalTime}`;
+              timeChip.textContent = `${arrivalTime}`;
               container.appendChild(chip);
               container.appendChild(timeChip);
             } else {
@@ -1546,7 +1534,7 @@
             chip.dataset.name = name; chip.textContent = name;
             const timeChip = document.createElement('div');
             timeChip.className = 'att-time-chip';
-            timeChip.textContent = `참석시각 ${arrivalTime}`;
+            timeChip.textContent = `${arrivalTime}`;
             container.appendChild(chip); container.appendChild(timeChip);
           } else {
             container = document.createElement('div');
@@ -1598,7 +1586,7 @@
             chip.dataset.name = name; chip.textContent = name;
             const timeChip = document.createElement('div');
             timeChip.className = 'att-time-chip';
-            timeChip.textContent = `참석시각 ${arrivalTime}`;
+            timeChip.textContent = `${arrivalTime}`;
             container.appendChild(chip); container.appendChild(timeChip);
           } else {
             container = document.createElement('div');
@@ -1753,78 +1741,66 @@
       attendanceData[selectedDate][currentUser] &&
       !!attendanceData[selectedDate][currentUser].arrivalTime;
 
-    // PC 사이드바 버튼
-    const regBtn = document.getElementById('timeRegBtn');
-    const modBtn = document.getElementById('timeModBtn');
-    if (regBtn && modBtn) {
+    // PC 사이드바 단일 버튼
+    const pcBtn = document.getElementById('timeToggleBtn');
+    if (pcBtn) {
       if (isRegistered) {
-        regBtn.classList.add('active-mode');
+        pcBtn.style.display = '';
         if (hasTime) {
-          regBtn.classList.remove('selected');
-          modBtn.classList.add('active-mode');
-          modBtn.classList.add('selected');
+          const t = attendanceData[selectedDate][currentUser].arrivalTime;
+          pcBtn.className = 'my-attend-btn time-single-btn has-time';
+          pcBtn.innerHTML = `✏️ 시각수정 (${t})`;
         } else {
-          regBtn.classList.add('selected');
-          modBtn.classList.remove('active-mode');
-          modBtn.classList.remove('selected');
+          pcBtn.className = 'my-attend-btn time-single-btn';
+          pcBtn.innerHTML = '⏰ 시각등록';
         }
       } else {
-        regBtn.classList.remove('active-mode','selected');
-        modBtn.classList.remove('active-mode','selected');
+        pcBtn.style.display = 'none';
       }
     }
-    // 모바일 헤더 버튼
-    const hdrReg = document.getElementById('hdrTimeRegBtn');
-    const hdrMod = document.getElementById('hdrTimeModBtn');
-    if (hdrReg && hdrMod) {
+
+    // 모바일 헤더 단일 버튼
+    const hdrBtn = document.getElementById('hdrTimeBtn');
+    if (hdrBtn) {
       if (isRegistered) {
-        hdrReg.style.display = 'inline-block';
+        hdrBtn.style.display = 'inline-block';
         if (hasTime) {
-          hdrReg.classList.remove('selected');
-          hdrReg.style.background = 'rgba(255,255,255,0.15)';
-          hdrMod.style.display = 'inline-block';
-          hdrMod.classList.add('selected');
-          hdrMod.style.background = 'var(--primary-light)';
+          const t = attendanceData[selectedDate][currentUser].arrivalTime;
+          hdrBtn.className = 'hdr-btn hdr-attend-btn time-mod';
+          hdrBtn.innerHTML = `✏️ ${t}`;
         } else {
-          hdrReg.classList.add('selected');
-          hdrReg.style.background = 'var(--primary-light)';
-          hdrMod.style.display = 'none';
+          hdrBtn.className = 'hdr-btn hdr-attend-btn time-reg';
+          hdrBtn.innerHTML = '⏰ 시각등록';
         }
       } else {
-        hdrReg.style.display = 'none';
-        hdrMod.style.display = 'none';
+        hdrBtn.style.display = 'none';
       }
     }
   }
 
-  // ── 시각 모달 열기 ──
-  window.openTimeModal = function(mode) {
+  // ── 시각 모달 열기 (단일 함수, 등록/수정 자동 판단) ──
+  window.openTimeModal = function() {
     if (!selectedDate) return;
-    _timeModalMode = mode;
+    const hasTime = selectedDate && attendanceData[selectedDate] &&
+      attendanceData[selectedDate][currentUser] &&
+      !!attendanceData[selectedDate][currentUser].arrivalTime;
+    _timeModalMode = hasTime ? 'mod' : 'reg';
+
     const titleEl = document.getElementById('timeModalTitle');
     const errEl = document.getElementById('timeModalErr');
     if (errEl) errEl.textContent = '';
-    if (titleEl) titleEl.textContent = mode === 'reg' ? '⏰ 참석 시각 등록' : '✏️ 참석 시각 수정';
+    if (titleEl) titleEl.textContent = hasTime ? '✏️ 참석 시각 수정' : '⏰ 참석 시각 등록';
 
-    // 기존 시각 있으면 기본값으로 설정
-    const existing = selectedDate && attendanceData[selectedDate] &&
-      attendanceData[selectedDate][currentUser] &&
-      attendanceData[selectedDate][currentUser].arrivalTime;
-    if (existing) {
-      const parts = existing.replace(/[^\d:]/g, '').split(':');
+    const hourSel = document.getElementById('timeHourSel');
+    const minSel = document.getElementById('timeMinSel');
+    if (hasTime) {
+      const existing = attendanceData[selectedDate][currentUser].arrivalTime;
+      const parts = existing.split(':');
       const h = parseInt(parts[0]) || 7;
-      const m = parseInt(parts[1]) || 30;
-      const hourSel = document.getElementById('timeHourSel');
-      const minSel = document.getElementById('timeMinSel');
+      const m = parseInt(parts[1]) || 0;
       if (hourSel) hourSel.value = h;
-      if (minSel) {
-        // 가장 가까운 10분 단위
-        const rounded = Math.round(m / 10) * 10 % 60;
-        minSel.value = rounded;
-      }
+      if (minSel) { const rounded = Math.round(m / 10) * 10 % 60; minSel.value = rounded; }
     } else {
-      const hourSel = document.getElementById('timeHourSel');
-      const minSel = document.getElementById('timeMinSel');
       if (hourSel) hourSel.value = 7;
       if (minSel) minSel.value = 30;
     }
