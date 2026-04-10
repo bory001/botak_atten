@@ -584,41 +584,58 @@
   .memberdb-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.6);
     display: none; align-items: flex-start; justify-content: center;
-    z-index: 650; padding: 0.75rem; overflow-y: auto;
+    z-index: 650; padding: 0.5rem; overflow-y: auto;
   }
   .memberdb-overlay.show { display: flex; }
   .memberdb-box {
-    background: white; border-radius: 16px; padding: 1.25rem;
+    background: white; border-radius: 16px; padding: 1rem;
     width: 100%; max-width: 560px; margin: auto;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
   }
-  .memberdb-title { font-size: 16px; font-weight: 800; color: var(--primary); margin-bottom: 1rem; display: flex; align-items: center; gap: 8px; }
-  .mdb-tabs { display: flex; gap: 6px; margin-bottom: 1rem; }
-  .mdb-tab { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted); cursor: pointer; font-family: inherit; transition: all 0.15s; }
+  .memberdb-title { font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 0.75rem; display: flex; align-items: center; gap: 6px; }
+  .mdb-tabs { display: flex; gap: 5px; margin-bottom: 0.75rem; }
+  .mdb-tab {
+    flex: 1; padding: 7px 4px; border-radius: 10px; font-size: 12px; font-weight: 700;
+    border: 1.5px solid var(--border); background: var(--bg); color: var(--text-muted);
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+    white-space: nowrap; text-align: center;
+  }
   .mdb-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
-  .mdb-input-row { display: flex; gap: 6px; margin-bottom: 0.6rem; align-items: center; }
-  .mdb-input { flex: 1; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; color: var(--text); outline: none; }
+  .mdb-input-row { display: flex; gap: 5px; margin-bottom: 0.6rem; align-items: stretch; }
+  .mdb-input {
+    flex: 1; padding: 9px 8px; border: 1px solid var(--border);
+    border-radius: 8px; font-size: 13px; font-family: inherit; color: var(--text); outline: none;
+    min-width: 0;
+  }
   .mdb-input:focus { border-color: var(--primary); }
-  .mdb-add-btn { padding: 8px 14px; background: var(--accent); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; white-space: nowrap; }
+  .mdb-add-btn {
+    padding: 9px 12px; background: var(--accent); color: white; border: none;
+    border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit;
+    cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  }
   .mdb-paste-area { width: 100%; min-height: 90px; padding: 8px 10px; border: 1.5px dashed var(--border); border-radius: 8px; font-size: 12px; font-family: inherit; color: var(--text); outline: none; resize: vertical; margin-bottom: 6px; transition: border-color 0.15s; box-sizing: border-box; }
   .mdb-paste-area:focus { border-color: var(--primary); }
   .mdb-paste-hint { font-size: 11px; color: var(--text-muted); margin-bottom: 0.6rem; line-height: 1.7; }
   .mdb-btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.6rem; }
   .mdb-paste-btn { padding: 8px 16px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
   .mdb-upload-btn { padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 8px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
-  .mdb-list-wrap { max-height: 320px; overflow-y: auto; margin-top: 0.6rem; border: 1px solid var(--border); border-radius: 8px; }
-  .mdb-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .mdb-table th { background: var(--primary); color: white; padding: 7px 10px; text-align: left; font-size: 11px; font-weight: 700; position: sticky; top: 0; z-index: 1; }
-  .mdb-table td { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .mdb-list-wrap { max-height: 300px; overflow-y: auto; margin-top: 0.5rem; border: 1px solid var(--border); border-radius: 8px; }
+  .mdb-table { width: 100%; border-collapse: collapse; font-size: 13px; table-layout: fixed; }
+  .mdb-table th { background: var(--primary); color: white; padding: 8px 8px; text-align: left; font-size: 11px; font-weight: 700; position: sticky; top: 0; z-index: 1; }
+  .mdb-table td { padding: 8px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .mdb-table tr:last-child td { border-bottom: none; }
   .mdb-table tr:nth-child(even) td { background: #f8fafc; }
   .mdb-table tr:hover td { background: #eff6ff; }
-  .mdb-del-btn { padding: 2px 8px; background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; border-radius: 6px; font-size: 11px; font-family: inherit; cursor: pointer; }
+  .mdb-del-btn {
+    padding: 4px 10px; background: #fef2f2; color: var(--danger);
+    border: 1px solid #fecaca; border-radius: 6px; font-size: 11px;
+    font-family: inherit; cursor: pointer; white-space: nowrap; display: block; width: 100%;
+  }
   .mdb-del-btn:hover { background: #fee2e2; }
   .mdb-count { font-size: 11px; color: var(--text-muted); margin-bottom: 0.4rem; font-weight: 600; }
   .mdb-err { font-size: 12px; color: var(--danger); min-height: 16px; margin-bottom: 0.4rem; }
-  .mdb-close-btn { width: 100%; padding: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer; font-weight: 600; margin-top: 0.75rem; }
-  .mdb-search { width: 100%; padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; margin-bottom: 0.5rem; box-sizing: border-box; }
+  .mdb-close-btn { width: 100%; padding: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; cursor: pointer; font-weight: 600; margin-top: 0.75rem; }
+  .mdb-search { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; outline: none; margin-bottom: 0.4rem; box-sizing: border-box; }
   .mdb-search:focus { border-color: var(--primary); }
   #mdbFileInput { display: none; }
 
@@ -933,9 +950,9 @@
 
     <!-- 탭 -->
     <div class="mdb-tabs">
-      <button class="mdb-tab active" id="mdbTab1" onclick="switchMdbTab('single')">✏️ 개별 입력</button>
-      <button class="mdb-tab" id="mdbTab2" onclick="switchMdbTab('paste')">📋 일괄 붙여넣기</button>
-      <button class="mdb-tab" id="mdbTab3" onclick="switchMdbTab('excel')">📊 엑셀 업로드</button>
+      <button class="mdb-tab active" id="mdbTab1" onclick="switchMdbTab('single')">✏️ 개별입력</button>
+      <button class="mdb-tab" id="mdbTab2" onclick="switchMdbTab('paste')">📋 일괄입력</button>
+      <button class="mdb-tab" id="mdbTab3" onclick="switchMdbTab('excel')">📊 엑셀업로드</button>
     </div>
 
     <!-- 개별 입력 -->
@@ -985,10 +1002,9 @@
       <div class="mdb-list-wrap">
         <table class="mdb-table">
           <thead><tr>
-            <th style="width:36px;">No</th>
-            <th>이름</th>
+            <th style="width:38%;">이름</th>
             <th>연락처</th>
-            <th style="width:50px;">삭제</th>
+            <th style="width:44px;">삭제</th>
           </tr></thead>
           <tbody id="mdbTableBody"></tbody>
         </table>
@@ -2291,11 +2307,10 @@
       tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:1.5rem;color:var(--text-muted);">등록된 회원이 없어요</td></tr>`;
       return;
     }
-    tbody.innerHTML = entries.map(([name, phone], i) =>
+    tbody.innerHTML = entries.map(([name, phone]) =>
       `<tr>
-        <td style="color:var(--text-muted);font-size:11px;">${i+1}</td>
         <td style="font-weight:600;">${name}</td>
-        <td style="color:var(--text-muted);">${phone}</td>
+        <td style="color:var(--text-muted);font-size:12px;">${phone}</td>
         <td><button class="mdb-del-btn" onclick="mdbDelete('${name.replace(/'/g,"\\'")}')">삭제</button></td>
       </tr>`
     ).join('');
