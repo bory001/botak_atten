@@ -762,7 +762,7 @@
         <div class="mdp-att-grid" id="mdpAttGrid">
           <div class="mdp-empty">날짜를 선택해 주세요</div>
         </div>
-        <div class="long-press-hint" id="mdpChipHint" style="display:none;">이름 탭 → 문자 | 길게 누르면 등록 시각</div>
+        <div class="long-press-hint" id="mdpChipHint" style="display:none;">이름 탭 → 문자 보내기 | 길게 누르면 등록 시각 조회</div>
         <button class="mdp-attend-btn register" id="mdpAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">
           ✅ 참석 등록
         </button>
@@ -1555,7 +1555,10 @@
 
         // 조별 행 생성
         // 조별 가독성 좋은 색상 (최대 10개 조)
-        const joColors = ['#111111','#e91e8c','#c05621','#2b6cb0'];
+        const joColors = ['#111111','#e91e8c','#9b1c1c','#2b6cb0'];
+        // 가나다순 기준으로 조명→색상 매핑 생성 (랭킹에서 공유)
+        _joColorMap = {};
+        joSet.forEach((jn, ji) => { _joColorMap[jn] = joColors[ji % joColors.length]; });
         joSet.forEach((joName, joIdx) => {
           const members = sorted
             .filter(m => m.jo === joName)
@@ -2327,7 +2330,9 @@
   let _rankView = 'personal';
 
   // 조별 색상 (4개 조)
-  const JO_COLORS = ['#111111', '#e91e8c', '#c05621', '#2b6cb0'];
+  const JO_COLORS = ['#111111', '#e91e8c', '#9b1c1c', '#2b6cb0'];
+  // 조명→색상 매핑 (가나다순 기준, 월례대회·랭킹 공유)
+  let _joColorMap = {};
 
   window.openRankingModal = function() {
     _rankPeriod = 'month';
@@ -2495,7 +2500,8 @@
       }
       let html = '<div class="jo-rank-grid">';
       joRank.forEach((jd, idx) => {
-        const color = JO_COLORS[idx % JO_COLORS.length];
+        // 가나다순 매핑이 있으면 사용, 없으면 JO_COLORS 순환
+        const color = (_joColorMap && _joColorMap[jd.jo]) ? _joColorMap[jd.jo] : JO_COLORS[idx % JO_COLORS.length];
         html += `<div class="jo-rank-card">
           <div class="jo-rank-header" style="background:${color};">
             <span>${idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'🏅'} ${jd.jo}</span>
