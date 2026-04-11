@@ -762,7 +762,7 @@
         <div class="mdp-att-grid" id="mdpAttGrid">
           <div class="mdp-empty">날짜를 선택해 주세요</div>
         </div>
-        <div class="long-press-hint" id="mdpChipHint" style="display:none;">이름 탭 → 문자 | 길게 누르면 등록 취소</div>
+        <div class="long-press-hint" id="mdpChipHint" style="display:none;">이름 탭 → 문자 | 길게 누르면 등록 시각</div>
         <button class="mdp-attend-btn register" id="mdpAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">
           ✅ 참석 등록
         </button>
@@ -1555,7 +1555,7 @@
 
         // 조별 행 생성
         // 조별 가독성 좋은 색상 (최대 10개 조)
-        const joColors = ['#6b46c1','#c05621','#2b6cb0','#b7791f'];
+        const joColors = ['#111111','#e91e8c','#c05621','#2b6cb0'];
         joSet.forEach((joName, joIdx) => {
           const members = sorted
             .filter(m => m.jo === joName)
@@ -2327,7 +2327,7 @@
   let _rankView = 'personal';
 
   // 조별 색상 (4개 조)
-  const JO_COLORS = ['#6b46c1', '#c05621', '#2b6cb0', '#b7791f'];
+  const JO_COLORS = ['#111111', '#e91e8c', '#c05621', '#2b6cb0'];
 
   window.openRankingModal = function() {
     _rankPeriod = 'month';
