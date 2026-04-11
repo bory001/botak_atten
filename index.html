@@ -46,8 +46,17 @@
   .login-hero-content {
     position:absolute; inset:0;
     display:flex; flex-direction:column; align-items:center;
-    justify-content:flex-end; padding: 0 16px 8%;
+    justify-content:center; padding: 0 16px;
   }
+  /* 이미지 아래 성명/부수/조명 입력 영역 */
+  .login-name-area {
+    width: 100%;
+    background: #0a0a0f;
+    padding: 14px 16px 8px;
+    display: flex;
+    justify-content: center;
+  }
+
   /* 하단 비번 영역 (순수 검정) */
   .login-pw-area {
     display:flex; flex-direction:column; align-items:center;
@@ -657,22 +666,26 @@
         <div class="login-title">보탁 참석자 조사 시스템</div>
       </div>
       <div id="pwSubMsg" style="font-size:0.68rem;color:#ffffff;font-weight:700;letter-spacing:1px;min-height:16px;margin-bottom:4px;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,0.8);"></div>
-      <div class="login-name-wrap">
-        <label class="login-name-label">성명</label>
-        <input type="text" class="login-name-input" id="nameLoginInput"
-          placeholder="홍길동" maxlength="10"
-          onkeydown="if(event.key==='Enter') this.blur()">
-        <label class="login-busoo-label">부수</label>
-        <input type="number" class="login-busoo-input" id="busooInput"
-          placeholder="" min="1" max="8" maxlength="1"
-          onkeydown="if(event.key==='Enter') this.blur()"
-          oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
-        <label class="login-jo-label">조명</label>
-        <input type="text" class="login-jo-input" id="joInput"
-          placeholder="" maxlength="5"
-          onkeydown="if(event.key==='Enter') this.blur()"
-          oninput="checkJoInput(this)">
-      </div>
+    </div>
+  </div>
+
+  <!-- ① 이미지 아래: 성명/부수/조명 입력 -->
+  <div class="login-name-area">
+    <div class="login-name-wrap">
+      <label class="login-name-label" style="color:rgba(255,255,255,0.85);">성명</label>
+      <input type="text" class="login-name-input" id="nameLoginInput"
+        placeholder="홍길동" maxlength="10"
+        onkeydown="if(event.key==='Enter') this.blur()">
+      <label class="login-busoo-label" style="color:rgba(255,255,255,0.85);">부수</label>
+      <input type="number" class="login-busoo-input" id="busooInput"
+        placeholder="" min="1" max="8" maxlength="1"
+        onkeydown="if(event.key==='Enter') this.blur()"
+        oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
+      <label class="login-jo-label" style="color:rgba(255,255,255,0.85);">조명</label>
+      <input type="text" class="login-jo-input" id="joInput"
+        placeholder="" maxlength="5"
+        onkeydown="if(event.key==='Enter') this.blur()"
+        oninput="checkJoInput(this)">
     </div>
   </div>
 
