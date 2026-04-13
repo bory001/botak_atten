@@ -1195,7 +1195,7 @@
     if (isFourthFriday(dateKey)) return '월례대회';
     if (dateKey) {
       const dow = new Date(dateKey).getDay();
-      if (leagueDays.includes(dow)) return '리그';
+      if (leagueDays.includes(dow)) return '리그날';
     }
     return '';
   }
