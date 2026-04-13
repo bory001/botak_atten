@@ -802,7 +802,7 @@
         <div class="mdp-header">
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
             <div class="mdp-date" id="mdpDate">날짜를 선택하세요</div>
-            <div id="mdpMemoDisplay" style="font-size:13px;color:var(--primary);font-weight:600;display:none;"></div>
+            <div id="mdpMemoDisplay" style="font-size:13px;color:var(--primary);font-weight:600;display:none;"><span id="mdpMemoEmoji" style="font-size:15px;"></span><span id="mdpMemoText"></span></div>
           </div>
           <div class="mdp-att-count" id="mdpAttCount" style="display:none;"></div>
         </div>
@@ -1635,7 +1635,10 @@
     if (memoDisplay) {
       const memoText = getMemo(selectedDate);
       if (memoText) {
-        memoDisplay.textContent = getMemoEmojiForDate(selectedDate) + ' ' + memoText;
+        const emojiEl = document.getElementById('mdpMemoEmoji');
+        const textEl = document.getElementById('mdpMemoText');
+        if (emojiEl) emojiEl.textContent = getMemoEmojiForDate(selectedDate) + ' ';
+        if (textEl) textEl.textContent = memoText;
         memoDisplay.style.display = '';
       } else {
         memoDisplay.style.display = 'none';
