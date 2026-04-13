@@ -154,6 +154,42 @@
   }
   .modal-error { font-size: 12px; color: var(--danger); min-height: 16px; margin-bottom: 0.25rem; }
 
+  /* ── 연락처 액션 팝업 ── */
+  .contact-popup-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: none; align-items: flex-end; justify-content: center;
+    z-index: 800; padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  .contact-popup-overlay.show { display: flex; }
+  .contact-popup {
+    background: white; border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px; padding: 1.25rem 1rem 1.5rem;
+    animation: slideUpSheet 0.22s ease;
+  }
+  @keyframes slideUpSheet { from{transform:translateY(100%)} to{transform:translateY(0)} }
+  .contact-popup-name {
+    font-size: 15px; font-weight: 800; color: var(--primary);
+    text-align: center; margin-bottom: 1rem;
+  }
+  .contact-popup-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .contact-action-btn {
+    padding: 14px 10px; border-radius: 14px; border: none;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; gap: 6px; transition: all 0.15s;
+  }
+  .contact-action-btn .ca-icon { font-size: 26px; line-height: 1; }
+  .contact-action-btn.call  { background: #e8f5e9; color: #1b5e20; }
+  .contact-action-btn.call:active  { background: #c8e6c9; }
+  .contact-action-btn.sms   { background: #e3f2fd; color: #0d47a1; }
+  .contact-action-btn.sms:active   { background: #bbdefb; }
+  .contact-popup-cancel {
+    margin-top: 10px; width: 100%; padding: 13px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer; color: var(--text-muted);
+  }
+
   /* ── 앱 ── */
   #app { display: none; }
 
@@ -823,7 +859,7 @@
         <div class="mdp-att-grid" id="mdpAttGrid">
           <div class="mdp-empty">날짜를 선택해 주세요</div>
         </div>
-        <div class="long-press-hint" id="mdpChipHint" style="display:none;">이름 클릭 → 문자 보내기 | 길게 누르면 등록시각 조회</div>
+        <div class="long-press-hint" id="mdpChipHint" style="display:none;">이름 클릭 → 전화/문자 선택 | 길게 누르면 등록시각 조회</div>
         <button class="mdp-attend-btn register" id="mdpAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">
           ✅ 참석 등록
         </button>
@@ -1136,6 +1172,22 @@
   </div>
 </div>
 
+<!-- 연락처 액션 팝업 -->
+<div class="contact-popup-overlay" id="contactPopup" onclick="closeContactPopup(event)">
+  <div class="contact-popup">
+    <div class="contact-popup-name" id="contactPopupName"></div>
+    <div class="contact-popup-btns">
+      <button class="contact-action-btn call" onclick="doContactAction('call')">
+        <span class="ca-icon">📞</span>전화하기
+      </button>
+      <button class="contact-action-btn sms" onclick="doContactAction('sms')">
+        <span class="ca-icon">💬</span>문자보내기
+      </button>
+    </div>
+    <button class="contact-popup-cancel" onclick="closeContactPopup()">취소</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- 시각등록 모달 -->
@@ -1196,6 +1248,7 @@
   let memoData = {};           // { 'YYYY-MM-DD': '메모내용' }
   let leagueDays = [2, 6];     // 리그 요일 (0=일,1=월,...,6=토), 기본 화,토
   let _memoEmoji = '';          // 현재 선택된 메모 이모지
+  let _contactPhone = '';       // 연락처 팝업용 전화번호
   let _adminSelectedName = null; // 관리자가 선택한 참석자          // 참석자 목록 현재 페이지
   const ATT_PAGE_SIZE = 20; // 페이지당 표시 수
   let _timeModalMode = 'reg'; // 'reg' | 'mod'
@@ -1597,7 +1650,7 @@
         <button class="att-page-btn" id="attNextBtn" ${page >= totalPages - 1 ? 'disabled' : ''} onclick="changeAttPage(1)">▶</button>
       </div>`;
     }
-    html += `<div class="long-press-hint">이름 클릭 → 문자 보내기 | 길게 누르면 등록시각 조회</div>`;
+    html += `<div class="long-press-hint">이름 클릭 → 전화/문자 선택 | 길게 누르면 등록시각 조회</div>`;
     attList.innerHTML = html;
 
     attList.querySelectorAll('.att-name-chip, .att-name-chip-wrap').forEach(el => {
@@ -2313,10 +2366,9 @@
   let memberData = {}; // { 이름: '010-xxxx-xxxx' }
   let _mdbTab = 'single';
 
-  // ── 칩 탭 핸들러: 관리자=선택, 일반=문자연결 ──
+  // ── 칩 탭 핸들러: 관리자=선택, 일반=전화/문자 팝업 ──
   function handleChipTap(name, chipEl) {
     if (isAdminMode) {
-      // 관리자 모드: 기존 선택/취소 로직
       const mainEl = chipEl || document.querySelector(`.att-name-chip[data-name="${name}"]`);
       document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
       if (_adminSelectedName === name) {
@@ -2329,15 +2381,33 @@
       if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
       return;
     }
-    // 일반 모드: 회원DB에서 번호 조회 → 문자 앱 열기
+    // 일반 모드: 연락처 팝업 표시
     const phone = memberData[name];
     if (phone) {
-      const digits = phone.replace(/[^0-9]/g, '');
-      window.location.href = `sms:${digits}`;
+      _contactPhone = phone.replace(/[^0-9]/g, '');
+      document.getElementById('contactPopupName').textContent = `📋 ${name}`;
+      document.getElementById('contactPopup').classList.add('show');
     } else {
       showToast(`"${name}" 님의 연락처가 등록되어 있지 않아요`, '');
     }
   }
+
+  window.closeContactPopup = function(e) {
+    if (e && e.target !== document.getElementById('contactPopup')) return;
+    document.getElementById('contactPopup').classList.remove('show');
+    _contactPhone = '';
+  };
+
+  window.doContactAction = function(type) {
+    document.getElementById('contactPopup').classList.remove('show');
+    if (!_contactPhone) return;
+    if (type === 'call') {
+      window.location.href = `tel:${_contactPhone}`;
+    } else {
+      window.location.href = `sms:${_contactPhone}`;
+    }
+    _contactPhone = '';
+  };
 
   // ── 회원 DB 로드 (앱 시작 시) ──
   async function loadMemberData() {
