@@ -691,7 +691,21 @@
 
   <!-- ① 상단: 배경 이미지 + 타이틀 + 성명 입력 오버레이 -->
   <div class="login-hero-area">
-    <video class="login-hero-video" src="login.mp4?v=2" autoplay loop muted playsinline></video>
+    <video class="login-hero-video" id="loginVideo" autoplay muted playsinline></video>
+    <script>
+      (function() {
+        const v = document.getElementById('loginVideo');
+        const playlist = ['login.mp4?v=1', 'login2.mp4?v=1'];
+        let idx = 0;
+        v.src = playlist[idx];
+        v.play();
+        v.addEventListener('ended', function() {
+          idx = (idx + 1) % playlist.length;
+          v.src = playlist[idx];
+          v.play();
+        });
+      })();
+    </script>
     <div class="login-hero-overlay"></div>
     <div class="login-hero-content">
       <div class="login-title-row">
