@@ -291,7 +291,7 @@
   .att-name-chip:hover { border-color: var(--primary-light); background: #eef3fa; }
   /* 메모 점 */
   .day-memo-dot {
-    font-size:10px; line-height:1;
+    font-size:11px; line-height:1;
     display:inline-block; margin-right:1px; vertical-align:middle; flex-shrink:0;
   }
   .day-cell.selected .day-memo-dot { opacity:0.9; }
@@ -821,12 +821,13 @@
               <button class="memo-emoji-btn" onclick="selectMemoEmoji('🎂')">🎂</button>
               <button class="memo-emoji-btn" onclick="selectMemoEmoji('🎉')">🎉</button>
               <button class="memo-emoji-btn" onclick="selectMemoEmoji('🏆')">🏆</button>
-              <button class="memo-emoji-btn" onclick="selectMemoEmoji('🍽️')">🍽️</button>
+              <button class="memo-emoji-btn" onclick="selectMemoEmoji('🥘')">🥘</button>
               <button class="memo-emoji-btn" onclick="selectMemoEmoji('🚌')">🚌</button>
               <button class="memo-emoji-btn" onclick="selectMemoEmoji('🌸')">🌸</button>
               <button class="memo-emoji-btn" onclick="selectMemoEmoji('❌')">❌</button>
               <button class="memo-emoji-btn" onclick="selectMemoEmoji('📢')">📢</button>
               <button class="memo-emoji-btn" onclick="selectMemoEmoji('🏓')">🏓</button>
+              <button class="memo-emoji-btn" onclick="selectMemoEmoji('❤️')">❤️</button>
             </div>
           </div>
           <span id="memoEmojiPreview" style="font-size:16px;flex-shrink:0;min-width:20px;"></span>
@@ -1253,6 +1254,8 @@
       const e = getMemoEmoji(memoData[dateKey]);
       if (e) return e;
     }
+    // 월례대회 기본 이모지
+    if (isFourthFriday(dateKey)) return '🏆';
     // 리그날 기본 이모지
     if (dateKey) {
       const dow = new Date(dateKey).getDay();
