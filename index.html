@@ -1253,7 +1253,11 @@
 
     <!-- 관리자 전용 편집 영역 -->
     <div id="daejinEditArea">
-      <div class="daejin-assign-title">리그 수 선택</div>
+      <div class="daejin-assign-title">판수 / 리그 수 선택</div>
+      <div class="daejin-league-row" id="daejinGameRow">
+        <button class="daejin-league-sel" onclick="setDaejinGameCount(3)">3판</button>
+        <button class="daejin-league-sel" onclick="setDaejinGameCount(5)">5판</button>
+      </div>
       <div class="daejin-league-row" id="daejinLeagueRow">
         <button class="daejin-league-sel" onclick="setDaejinLeagueCount(1)">1리그</button>
         <button class="daejin-league-sel" onclick="setDaejinLeagueCount(2)">2리그</button>
@@ -1268,7 +1272,7 @@
 
     <!-- 결과 (모두 조회 가능) -->
     <div class="daejin-result" id="daejinResult" style="display:none;">
-      <div class="daejin-result-title">📋 대진표</div>
+      <div class="daejin-result-title" id="daejinResultTitle">📋 대진표</div>
       <div class="daejin-result-list" id="daejinResultList"></div>
     </div>
 
@@ -1579,6 +1583,7 @@
   // ── 대진 기능 ──
   // ══════════════════════════════════════════
   let _daejinLeagueCount = parseInt(localStorage.getItem('daejin_league_count') || '2');
+  let _daejinGameCount = parseInt(localStorage.getItem('daejin_game_count') || '3');
   let _daejinActive = null;    // 현재 클릭 중인 리그번호 (1~N)
   let _daejinMap = {};         // { name: leagueNum }
   let _daejinDate = null;
@@ -1617,10 +1622,15 @@
     if (e.target === document.getElementById('daejinModal')) closeDaejin();
   };
 
+  window.setDaejinGameCount = function(n) {
+    _daejinGameCount = n;
+    localStorage.setItem('daejin_game_count', n);
+    renderDaejinSheet();
+  };
+
   window.setDaejinLeagueCount = function(n) {
     _daejinLeagueCount = n;
     localStorage.setItem('daejin_league_count', n);
-    // 기존 배정 중 범위 초과 제거
     Object.keys(_daejinMap).forEach(name => {
       if (_daejinMap[name] > n) delete _daejinMap[name];
     });
@@ -1654,11 +1664,19 @@
   };
 
   function renderDaejinSheet() {
+    // 판수 버튼 강조
+    document.querySelectorAll('#daejinGameRow .daejin-league-sel').forEach((btn, i) => {
+      const val = [3, 5][i];
+      btn.classList.toggle('active', val === _daejinGameCount);
+    });
     // 리그 수 선택 버튼 강조
-    document.querySelectorAll('.daejin-league-sel').forEach((btn, i) => {
+    document.querySelectorAll('#daejinLeagueRow .daejin-league-sel').forEach((btn, i) => {
       const val = [1, 2, 4][i];
       btn.classList.toggle('active', val === _daejinLeagueCount);
     });
+    // 대진표 타이틀에 판수 표시
+    const resultTitle = document.getElementById('daejinResultTitle');
+    if (resultTitle) resultTitle.textContent = `📋 대진표(${_daejinGameCount}판)`;
 
     // 리그 버튼 렌더
     const lbtns = document.getElementById('daejinLBtns');
