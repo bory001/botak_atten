@@ -491,11 +491,12 @@
     animation: slideUpSheet 0.22s ease; max-height: 90vh; overflow-y: auto;
   }
   .daejin-title { font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 0.9rem; text-align: center; }
-  .daejin-league-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 1rem; }
+  .daejin-sel-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 8px; flex-wrap: nowrap; }
+  .daejin-league-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 8px; flex-wrap: nowrap; }
   .daejin-league-sel {
-    padding: 7px 18px; border-radius: 20px; border: 2px solid var(--border);
-    font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer;
-    background: var(--bg); color: var(--text-muted); transition: all 0.15s;
+    padding: 5px 12px; border-radius: 16px; border: 2px solid var(--border);
+    font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer;
+    background: var(--bg); color: var(--text-muted); transition: all 0.15s; white-space: nowrap;
   }
   .daejin-league-sel.active { background: #6d28d9; color: white; border-color: #6d28d9; }
   .daejin-assign-area { margin-bottom: 1rem; }
@@ -520,7 +521,7 @@
   .daejin-result-list { display: flex; flex-direction: column; gap: 4px; }
   .daejin-result-item {
     font-size: 13px; font-weight: 600; color: var(--text);
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden;
   }
   .daejin-result-badge {
     font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px;
@@ -1254,14 +1255,13 @@
     <!-- 관리자 전용 편집 영역 -->
     <div id="daejinEditArea">
       <div class="daejin-assign-title">판수 / 리그 수 선택</div>
-      <div class="daejin-league-row" id="daejinGameRow">
-        <button class="daejin-league-sel" onclick="setDaejinGameCount(3)">3판</button>
-        <button class="daejin-league-sel" onclick="setDaejinGameCount(5)">5판</button>
-      </div>
-      <div class="daejin-league-row" id="daejinLeagueRow">
-        <button class="daejin-league-sel" onclick="setDaejinLeagueCount(1)">1리그</button>
-        <button class="daejin-league-sel" onclick="setDaejinLeagueCount(2)">2리그</button>
-        <button class="daejin-league-sel" onclick="setDaejinLeagueCount(4)">4리그</button>
+      <div style="display:flex;gap:6px;justify-content:center;flex-wrap:nowrap;margin-bottom:10px;">
+        <button class="daejin-league-sel" id="dgame3" onclick="setDaejinGameCount(3)">3판</button>
+        <button class="daejin-league-sel" id="dgame5" onclick="setDaejinGameCount(5)">5판</button>
+        <div style="width:1px;background:var(--border);margin:0 2px;"></div>
+        <button class="daejin-league-sel" id="dleague1" onclick="setDaejinLeagueCount(1)">1리그</button>
+        <button class="daejin-league-sel" id="dleague2" onclick="setDaejinLeagueCount(2)">2리그</button>
+        <button class="daejin-league-sel" id="dleague4" onclick="setDaejinLeagueCount(4)">4리그</button>
       </div>
       <div class="daejin-assign-area">
         <div class="daejin-assign-title">리그 선택 후 선수 클릭</div>
@@ -1665,14 +1665,12 @@
 
   function renderDaejinSheet() {
     // 판수 버튼 강조
-    document.querySelectorAll('#daejinGameRow .daejin-league-sel').forEach((btn, i) => {
-      const val = [3, 5][i];
-      btn.classList.toggle('active', val === _daejinGameCount);
+    [[3,'dgame3'],[5,'dgame5']].forEach(([v,id]) => {
+      const b = document.getElementById(id); if(b) b.classList.toggle('active', v === _daejinGameCount);
     });
     // 리그 수 선택 버튼 강조
-    document.querySelectorAll('#daejinLeagueRow .daejin-league-sel').forEach((btn, i) => {
-      const val = [1, 2, 4][i];
-      btn.classList.toggle('active', val === _daejinLeagueCount);
+    [[1,'dleague1'],[2,'dleague2'],[4,'dleague4']].forEach(([v,id]) => {
+      const b = document.getElementById(id); if(b) b.classList.toggle('active', v === _daejinLeagueCount);
     });
     // 대진표 타이틀에 판수 표시
     const resultTitle = document.getElementById('daejinResultTitle');
@@ -1731,22 +1729,26 @@
       resultList.innerHTML = '';
       for (let i = 1; i <= _daejinLeagueCount; i++) {
         if (grouped[i].length === 0) continue;
-        const row = document.createElement('div');
-        row.className = 'daejin-result-item';
-        const badge = document.createElement('span');
-        badge.className = 'daejin-result-badge';
-        badge.style.background = leagueColor(i) + '22';
-        badge.style.color = leagueColor(i);
-        badge.textContent = `${i}리그`;
-        const names_str = grouped[i]
-          .sort((a, b) => (a.busoo || 99) - (b.busoo || 99))
-          .map(m => `${m.busoo}${m.name}`)
-          .join(', ');
-        const nameSpan = document.createElement('span');
-        nameSpan.textContent = names_str;
-        row.appendChild(badge);
-        row.appendChild(nameSpan);
-        resultList.appendChild(row);
+        const members = grouped[i].sort((a, b) => (a.busoo || 99) - (b.busoo || 99));
+        // 5명씩 줄 나누기
+        for (let r = 0; r < members.length; r += 5) {
+          const chunk = members.slice(r, r + 5);
+          const row = document.createElement('div');
+          row.className = 'daejin-result-item';
+          // 첫 줄만 배지 표시, 이후 줄은 들여쓰기
+          const badge = document.createElement('span');
+          badge.className = 'daejin-result-badge';
+          badge.style.background = leagueColor(i) + '22';
+          badge.style.color = leagueColor(i);
+          badge.style.visibility = r === 0 ? 'visible' : 'hidden';
+          badge.textContent = `${i}리그`;
+          const nameSpan = document.createElement('span');
+          nameSpan.style.whiteSpace = 'nowrap';
+          nameSpan.textContent = chunk.map(m => `${m.busoo}${m.name}`).join(', ');
+          row.appendChild(badge);
+          row.appendChild(nameSpan);
+          resultList.appendChild(row);
+        }
       }
     } else {
       resultEl.style.display = 'none';
