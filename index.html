@@ -926,7 +926,7 @@
             <div id="mdpMemoDisplay" style="font-size:13px;color:var(--primary);font-weight:600;display:none;"><span id="mdpMemoEmoji" style="font-size:15px;"></span><span id="mdpMemoText"></span></div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;">
-            <button class="daejin-btn" id="daejinBtn" onclick="openDaejin()" style="display:none;">🎯 대진</button>
+            <button class="daejin-btn" id="daejinBtn" onclick="openDaejin()" style="display:none;">📋 대진표</button>
             <div class="mdp-att-count" id="mdpAttCount" style="display:none;"></div>
           </div>
         </div>
@@ -1251,30 +1251,36 @@
   <div class="daejin-sheet">
     <div class="daejin-title">🎯 대진 배치</div>
 
-    <!-- 리그 수 선택 -->
-    <div class="daejin-assign-title">리그 수 선택</div>
-    <div class="daejin-league-row" id="daejinLeagueRow">
-      <button class="daejin-league-sel" onclick="setDaejinLeagueCount(1)">1리그</button>
-      <button class="daejin-league-sel" onclick="setDaejinLeagueCount(2)">2리그</button>
-      <button class="daejin-league-sel" onclick="setDaejinLeagueCount(4)">4리그</button>
+    <!-- 관리자 전용 편집 영역 -->
+    <div id="daejinEditArea">
+      <div class="daejin-assign-title">리그 수 선택</div>
+      <div class="daejin-league-row" id="daejinLeagueRow">
+        <button class="daejin-league-sel" onclick="setDaejinLeagueCount(1)">1리그</button>
+        <button class="daejin-league-sel" onclick="setDaejinLeagueCount(2)">2리그</button>
+        <button class="daejin-league-sel" onclick="setDaejinLeagueCount(4)">4리그</button>
+      </div>
+      <div class="daejin-assign-area">
+        <div class="daejin-assign-title">리그 선택 후 선수 클릭</div>
+        <div class="daejin-league-btns" id="daejinLBtns"></div>
+        <div class="daejin-members" id="daejinMembers"></div>
+      </div>
     </div>
 
-    <!-- 리그 버튼 + 참석자 -->
-    <div class="daejin-assign-area">
-      <div class="daejin-assign-title">리그 선택 후 선수 클릭</div>
-      <div class="daejin-league-btns" id="daejinLBtns"></div>
-      <div class="daejin-members" id="daejinMembers"></div>
-    </div>
-
-    <!-- 결과 -->
+    <!-- 결과 (모두 조회 가능) -->
     <div class="daejin-result" id="daejinResult" style="display:none;">
       <div class="daejin-result-title">📋 대진표</div>
       <div class="daejin-result-list" id="daejinResultList"></div>
     </div>
 
-    <div class="daejin-footer">
-      <button class="daejin-cancel-btn" onclick="closeDaejin()">닫기</button>
-      <button class="daejin-save-btn" onclick="saveDaejin()">💾 저장</button>
+    <div id="daejinFooter">
+      <div class="daejin-footer">
+        <button class="daejin-cancel-btn" onclick="closeDaejin()">닫기</button>
+        <button class="daejin-save-btn" onclick="saveDaejin()">💾 저장</button>
+      </div>
+    </div>
+    <!-- 일반 모드 닫기 버튼 -->
+    <div id="daejinViewFooter" style="display:none;margin-top:1rem;">
+      <button class="daejin-cancel-btn" style="width:100%;" onclick="closeDaejin()">닫기</button>
     </div>
   </div>
 </div>
@@ -1589,6 +1595,16 @@
       renderDaejinSheet();
     }).catch(() => renderDaejinSheet());
 
+    // 관리자/일반 모드에 따라 편집 영역 표시
+    const editArea = document.getElementById('daejinEditArea');
+    const footer = document.getElementById('daejinFooter');
+    const viewFooter = document.getElementById('daejinViewFooter');
+    const title = document.querySelector('#daejinModal .daejin-title');
+    if (editArea) editArea.style.display = isAdminMode ? '' : 'none';
+    if (footer) footer.style.display = isAdminMode ? '' : 'none';
+    if (viewFooter) viewFooter.style.display = isAdminMode ? 'none' : '';
+    if (title) title.textContent = isAdminMode ? '🎯 대진 설정' : '📋 대진표';
+
     document.getElementById('daejinModal').classList.add('show');
   };
 
@@ -1618,11 +1634,17 @@
   };
 
   window.daejinAssign = function(name) {
+    // 이미 배정된 선수는 리그 미선택이어도 해제 가능
     if (_daejinActive === null) {
-      showToast('리그 버튼을 먼저 선택하세요', '');
+      if (_daejinMap[name] !== undefined) {
+        delete _daejinMap[name];
+        renderDaejinSheet();
+      } else {
+        showToast('리그 버튼을 먼저 선택하세요', '');
+      }
       return;
     }
-    // 이미 같은 리그면 해제
+    // 이미 같은 리그면 해제, 다른 리그면 교체
     if (_daejinMap[name] === _daejinActive) {
       delete _daejinMap[name];
     } else {
@@ -2027,7 +2049,10 @@
       attCountEl.style.display = '';
       attCountEl.textContent = `${names.length}명`;
       if (chipHint) chipHint.style.display = '';
-      if (daejinBtn) daejinBtn.style.display = 'inline-block';
+      if (daejinBtn) {
+        daejinBtn.style.display = 'inline-block';
+        daejinBtn.textContent = isAdminMode ? '🎯 대진설정' : '📋 대진표';
+      }
     } else {
       attCountEl.style.display = 'none';
       if (chipHint) chipHint.style.display = 'none';
