@@ -2436,6 +2436,21 @@
     setLoading(true);
     try {
       await remove(ref(db, `botak_attendance/${dateKey}/${name}`));
+      // 대진표에서도 해당 선수 삭제
+      try {
+        const djSnap = await get(ref(db, `botak_daejin/${dateKey}`));
+        if (djSnap.exists()) {
+          const djData = djSnap.val();
+          if (djData[name] !== undefined) {
+            delete djData[name];
+            if (Object.keys(djData).length > 0) {
+              await set(ref(db, `botak_daejin/${dateKey}`), djData);
+            } else {
+              await remove(ref(db, `botak_daejin/${dateKey}`));
+            }
+          }
+        }
+      } catch(e2) { /* 대진 삭제 실패는 무시 */ }
       showToast(`"${name}" 님의 참석이 취소되었습니다`);
     } catch(e) {
       showToast('취소 실패: ' + e.message, 'error');
