@@ -470,6 +470,77 @@
   .mdp-attend-btn.cancel { background: #fef2f2; color: var(--danger); border: 1.5px solid #fecaca; }
   .mdp-attend-btn.cancel:hover { background: #fee2e2; }
 
+  /* ── 대진 ── */
+  .daejin-btn {
+    font-size: 11px; font-weight: 700; padding: 3px 9px;
+    background: rgba(139,92,246,0.12); color: #6d28d9;
+    border: 1.5px solid #c4b5fd; border-radius: 12px;
+    cursor: pointer; font-family: inherit; white-space: nowrap;
+    transition: background 0.15s;
+  }
+  .daejin-btn:active { background: rgba(139,92,246,0.25); }
+  .daejin-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: flex-end; justify-content: center;
+    z-index: 900; padding-bottom: env(safe-area-inset-bottom,0);
+  }
+  .daejin-overlay.show { display: flex; }
+  .daejin-sheet {
+    background: white; border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 520px; padding: 1.2rem 1rem 1.5rem;
+    animation: slideUpSheet 0.22s ease; max-height: 90vh; overflow-y: auto;
+  }
+  .daejin-title { font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 0.9rem; text-align: center; }
+  .daejin-league-row { display: flex; gap: 8px; justify-content: center; margin-bottom: 1rem; }
+  .daejin-league-sel {
+    padding: 7px 18px; border-radius: 20px; border: 2px solid var(--border);
+    font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer;
+    background: var(--bg); color: var(--text-muted); transition: all 0.15s;
+  }
+  .daejin-league-sel.active { background: #6d28d9; color: white; border-color: #6d28d9; }
+  .daejin-assign-area { margin-bottom: 1rem; }
+  .daejin-assign-title { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .daejin-league-btns { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .daejin-lbtn {
+    padding: 6px 14px; border-radius: 16px; border: 2px solid var(--border);
+    font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer;
+    background: var(--bg); color: var(--text); transition: all 0.15s;
+  }
+  .daejin-lbtn.active { border-color: #6d28d9; background: rgba(109,40,217,0.08); color: #6d28d9; }
+  .daejin-members { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.5rem; }
+  .daejin-chip {
+    padding: 5px 10px; border-radius: 12px; border: 1.5px solid var(--border);
+    font-size: 12px; font-weight: 600; cursor: pointer; background: white;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .daejin-chip:active { background: var(--bg); }
+  .daejin-chip.assigned { opacity: 0.4; }
+  .daejin-result { margin-top: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+  .daejin-result-title { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 6px; }
+  .daejin-result-list { display: flex; flex-direction: column; gap: 4px; }
+  .daejin-result-item {
+    font-size: 13px; font-weight: 600; color: var(--text);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .daejin-result-badge {
+    font-size: 10px; font-weight: 700; padding: 1px 7px; border-radius: 8px;
+    background: rgba(109,40,217,0.1); color: #6d28d9; white-space: nowrap;
+  }
+  .daejin-result-remove {
+    font-size: 10px; color: var(--danger); cursor: pointer; margin-left: auto;
+    background: none; border: none; font-family: inherit; padding: 2px 4px;
+  }
+  .daejin-footer { display: flex; gap: 8px; margin-top: 1rem; }
+  .daejin-save-btn {
+    flex: 1; padding: 12px; background: #6d28d9; color: white; border: none;
+    border-radius: 12px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer;
+  }
+  .daejin-cancel-btn {
+    flex: 1; padding: 12px; background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;
+    color: var(--text-muted);
+  }
+
   /* ── 토스트 ── */
   .toast {
     position: fixed; bottom: 1.5rem; left: 50%;
@@ -731,7 +802,7 @@
     <script>
       (function() {
         const v = document.getElementById('loginVideo');
-        const playlist = ['login.mp4?v=1', 'login2.mp4?v=2'];
+        const playlist = ['login.mp4?v=1', 'login2.mp4?v=1'];
         let idx = 0;
         v.src = playlist[idx];
         v.play();
@@ -854,7 +925,10 @@
             <div class="mdp-date" id="mdpDate">날짜를 선택하세요</div>
             <div id="mdpMemoDisplay" style="font-size:13px;color:var(--primary);font-weight:600;display:none;"><span id="mdpMemoEmoji" style="font-size:15px;"></span><span id="mdpMemoText"></span></div>
           </div>
-          <div class="mdp-att-count" id="mdpAttCount" style="display:none;"></div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button class="daejin-btn" id="daejinBtn" onclick="openDaejin()" style="display:none;">🎯 대진</button>
+            <div class="mdp-att-count" id="mdpAttCount" style="display:none;"></div>
+          </div>
         </div>
         <div class="mdp-att-grid" id="mdpAttGrid">
           <div class="mdp-empty">날짜를 선택해 주세요</div>
@@ -1172,6 +1246,39 @@
   </div>
 </div>
 
+<!-- 대진 모달 -->
+<div class="daejin-overlay" id="daejinModal" onclick="daejinOverlayClick(event)">
+  <div class="daejin-sheet">
+    <div class="daejin-title">🎯 대진 배치</div>
+
+    <!-- 리그 수 선택 -->
+    <div class="daejin-assign-title">리그 수 선택</div>
+    <div class="daejin-league-row" id="daejinLeagueRow">
+      <button class="daejin-league-sel" onclick="setDaejinLeagueCount(1)">1리그</button>
+      <button class="daejin-league-sel" onclick="setDaejinLeagueCount(2)">2리그</button>
+      <button class="daejin-league-sel" onclick="setDaejinLeagueCount(4)">4리그</button>
+    </div>
+
+    <!-- 리그 버튼 + 참석자 -->
+    <div class="daejin-assign-area">
+      <div class="daejin-assign-title">리그 선택 후 선수 클릭</div>
+      <div class="daejin-league-btns" id="daejinLBtns"></div>
+      <div class="daejin-members" id="daejinMembers"></div>
+    </div>
+
+    <!-- 결과 -->
+    <div class="daejin-result" id="daejinResult" style="display:none;">
+      <div class="daejin-result-title">📋 대진표</div>
+      <div class="daejin-result-list" id="daejinResultList"></div>
+    </div>
+
+    <div class="daejin-footer">
+      <button class="daejin-cancel-btn" onclick="closeDaejin()">닫기</button>
+      <button class="daejin-save-btn" onclick="saveDaejin()">💾 저장</button>
+    </div>
+  </div>
+</div>
+
 <!-- 연락처 액션 팝업 -->
 <div class="contact-popup-overlay" id="contactPopup" onclick="closeContactPopup(event)">
   <div class="contact-popup">
@@ -1462,6 +1569,170 @@
     }
   }
 
+  // ══════════════════════════════════════════
+  // ── 대진 기능 ──
+  // ══════════════════════════════════════════
+  let _daejinLeagueCount = parseInt(localStorage.getItem('daejin_league_count') || '2');
+  let _daejinActive = null;    // 현재 클릭 중인 리그번호 (1~N)
+  let _daejinMap = {};         // { name: leagueNum }
+  let _daejinDate = null;
+
+  window.openDaejin = function() {
+    if (!selectedDate) return;
+    _daejinDate = selectedDate;
+    _daejinMap = {};
+    _daejinActive = null;
+
+    // Firebase에서 기존 대진 데이터 로드
+    get(ref(db, `botak_daejin/${selectedDate}`)).then(snap => {
+      if (snap.exists()) _daejinMap = snap.val();
+      renderDaejinSheet();
+    }).catch(() => renderDaejinSheet());
+
+    document.getElementById('daejinModal').classList.add('show');
+  };
+
+  window.closeDaejin = function() {
+    document.getElementById('daejinModal').classList.remove('show');
+    _daejinActive = null;
+  };
+
+  window.daejinOverlayClick = function(e) {
+    if (e.target === document.getElementById('daejinModal')) closeDaejin();
+  };
+
+  window.setDaejinLeagueCount = function(n) {
+    _daejinLeagueCount = n;
+    localStorage.setItem('daejin_league_count', n);
+    // 기존 배정 중 범위 초과 제거
+    Object.keys(_daejinMap).forEach(name => {
+      if (_daejinMap[name] > n) delete _daejinMap[name];
+    });
+    _daejinActive = null;
+    renderDaejinSheet();
+  };
+
+  window.daejinSelectLeague = function(n) {
+    _daejinActive = (_daejinActive === n) ? null : n;
+    renderDaejinSheet();
+  };
+
+  window.daejinAssign = function(name) {
+    if (_daejinActive === null) {
+      showToast('리그 버튼을 먼저 선택하세요', '');
+      return;
+    }
+    // 이미 같은 리그면 해제
+    if (_daejinMap[name] === _daejinActive) {
+      delete _daejinMap[name];
+    } else {
+      _daejinMap[name] = _daejinActive;
+    }
+    renderDaejinSheet();
+  };
+
+  function renderDaejinSheet() {
+    // 리그 수 선택 버튼 강조
+    document.querySelectorAll('.daejin-league-sel').forEach((btn, i) => {
+      const val = [1, 2, 4][i];
+      btn.classList.toggle('active', val === _daejinLeagueCount);
+    });
+
+    // 리그 버튼 렌더
+    const lbtns = document.getElementById('daejinLBtns');
+    lbtns.innerHTML = '';
+    for (let i = 1; i <= _daejinLeagueCount; i++) {
+      const count = Object.values(_daejinMap).filter(v => v === i).length;
+      const btn = document.createElement('button');
+      btn.className = 'daejin-lbtn' + (_daejinActive === i ? ' active' : '');
+      btn.textContent = `${i}리그 (${count}명)`;
+      btn.onclick = () => daejinSelectLeague(i);
+      lbtns.appendChild(btn);
+    }
+
+    // 참석자 칩 렌더
+    const names = _daejinDate && attendanceData[_daejinDate]
+      ? Object.keys(attendanceData[_daejinDate]) : [];
+    const sorted = [...names].sort((a, b) => {
+      const ba = (attendanceData[_daejinDate][a]?.busoo || 99);
+      const bb = (attendanceData[_daejinDate][b]?.busoo || 99);
+      return ba - bb;
+    });
+
+    const membersEl = document.getElementById('daejinMembers');
+    membersEl.innerHTML = '';
+    sorted.forEach(name => {
+      const assigned = _daejinMap[name];
+      const busoo = attendanceData[_daejinDate]?.[name]?.busoo || '';
+      const chip = document.createElement('div');
+      chip.className = 'daejin-chip' + (assigned ? ' assigned' : '');
+      chip.style.borderColor = assigned ? leagueColor(assigned) : '';
+      chip.style.color = assigned ? leagueColor(assigned) : '';
+      chip.innerHTML = assigned
+        ? `<span style="font-size:10px;font-weight:800;">${assigned}리그</span> ${busoo}${name}`
+        : `${busoo}${name}`;
+      chip.onclick = () => daejinAssign(name);
+      membersEl.appendChild(chip);
+    });
+
+    // 결과 렌더
+    const resultEl = document.getElementById('daejinResult');
+    const resultList = document.getElementById('daejinResultList');
+    const entries = Object.entries(_daejinMap);
+    if (entries.length > 0) {
+      resultEl.style.display = '';
+      // 리그별 정렬
+      const grouped = {};
+      for (let i = 1; i <= _daejinLeagueCount; i++) grouped[i] = [];
+      entries.forEach(([name, lg]) => {
+        const busoo = attendanceData[_daejinDate]?.[name]?.busoo || '';
+        if (grouped[lg]) grouped[lg].push({ name, busoo });
+      });
+      resultList.innerHTML = '';
+      for (let i = 1; i <= _daejinLeagueCount; i++) {
+        if (grouped[i].length === 0) continue;
+        const row = document.createElement('div');
+        row.className = 'daejin-result-item';
+        const badge = document.createElement('span');
+        badge.className = 'daejin-result-badge';
+        badge.style.background = leagueColor(i) + '22';
+        badge.style.color = leagueColor(i);
+        badge.textContent = `${i}리그`;
+        const names_str = grouped[i]
+          .sort((a, b) => (a.busoo || 99) - (b.busoo || 99))
+          .map(m => `${m.busoo}${m.name}`)
+          .join(', ');
+        const nameSpan = document.createElement('span');
+        nameSpan.textContent = names_str;
+        row.appendChild(badge);
+        row.appendChild(nameSpan);
+        resultList.appendChild(row);
+      }
+    } else {
+      resultEl.style.display = 'none';
+    }
+  }
+
+  function leagueColor(n) {
+    const colors = ['#6d28d9','#0d47a1','#1b5e20','#b45309'];
+    return colors[(n - 1) % colors.length];
+  }
+
+  window.saveDaejin = async function() {
+    if (!_daejinDate) return;
+    try {
+      if (Object.keys(_daejinMap).length > 0) {
+        await set(ref(db, `botak_daejin/${_daejinDate}`), _daejinMap);
+      } else {
+        await remove(ref(db, `botak_daejin/${_daejinDate}`));
+      }
+      closeDaejin();
+      showToast('대진이 저장되었어요 🎯', 'success');
+    } catch(e) {
+      showToast('저장 실패: ' + e.message, 'error');
+    }
+  };
+
   window.doLogout = function() {
     window.close();
     setTimeout(function() {
@@ -1751,13 +2022,16 @@
 
     // 참석자 수 뱃지
     const chipHint = document.getElementById('mdpChipHint');
+    const daejinBtn = document.getElementById('daejinBtn');
     if (names.length > 0) {
       attCountEl.style.display = '';
       attCountEl.textContent = `${names.length}명`;
       if (chipHint) chipHint.style.display = '';
+      if (daejinBtn) daejinBtn.style.display = 'inline-block';
     } else {
       attCountEl.style.display = 'none';
       if (chipHint) chipHint.style.display = 'none';
+      if (daejinBtn) daejinBtn.style.display = 'none';
     }
 
     // 부수별 행으로 표시 (등록순 정렬)
