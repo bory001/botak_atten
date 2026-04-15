@@ -1171,14 +1171,35 @@
 <div class="modal-overlay" id="pwModal">
   <div class="modal-box">
     <div class="modal-title">🔑 비밀번호 변경</div>
-    <div id="pwCurrentRow">
-      <label class="modal-label">현재 비밀번호</label>
-      <input type="password" class="modal-input" id="pwCurrent" placeholder="현재 비밀번호 입력">
+    <!-- 탭 -->
+    <div style="display:flex;gap:6px;margin-bottom:1rem;" id="pwTabRow">
+      <button id="pwTab1" onclick="switchPwTab('user')"
+        style="flex:1;padding:7px;border-radius:8px;border:2px solid var(--primary);background:var(--primary);color:white;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;">
+        👤 사용자 비번
+      </button>
+      <button id="pwTab2" onclick="switchPwTab('admin')"
+        style="flex:1;padding:7px;border-radius:8px;border:2px solid var(--border);background:var(--bg);color:var(--text-muted);font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;">
+        ⚙️ 관리자 비번
+      </button>
     </div>
-    <label class="modal-label">새 비밀번호</label>
-    <input type="password" class="modal-input" id="pwNew" placeholder="새 비밀번호 입력">
-    <label class="modal-label">새 비밀번호 확인</label>
-    <input type="password" class="modal-input" id="pwConfirm" placeholder="새 비밀번호 다시 입력">
+    <!-- 사용자 비번 탭 -->
+    <div id="pwTabUser">
+      <div id="pwCurrentRow">
+        <label class="modal-label">현재 비밀번호</label>
+        <input type="password" class="modal-input" id="pwCurrent" placeholder="현재 비밀번호 입력">
+      </div>
+      <label class="modal-label">새 비밀번호</label>
+      <input type="password" class="modal-input" id="pwNew" placeholder="새 비밀번호 입력">
+      <label class="modal-label">새 비밀번호 확인</label>
+      <input type="password" class="modal-input" id="pwConfirm" placeholder="새 비밀번호 다시 입력">
+    </div>
+    <!-- 관리자 비번 탭 -->
+    <div id="pwTabAdmin" style="display:none;">
+      <label class="modal-label">새 관리자 비밀번호</label>
+      <input type="password" class="modal-input" id="pwAdminNew" placeholder="새 관리자 비밀번호 입력">
+      <label class="modal-label">새 관리자 비밀번호 확인</label>
+      <input type="password" class="modal-input" id="pwAdminConfirm" placeholder="새 관리자 비밀번호 다시 입력">
+    </div>
     <div class="modal-error" id="pwError"></div>
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closePwModal()">취소</button>
@@ -1547,7 +1568,8 @@
   let currentDate = new Date();
   let selectedDate = null;
   let currentPassword = '6986';
-  const ADMIN_PW = '6986';
+  const MASTER_PW = '6986';  // 마스터 비번 (코드 고정, 변경불가)
+  let adminPassword = '6986'; // 관리자 비번 (Firebase 저장, 변경가능)
   let _lockBuf = '';
   let attPage = 0;
   let isAdminMode = false;  // 관리자 모드 여부
@@ -1642,6 +1664,13 @@
     try {
       const snap = await get(ref(db, 'botak_config/password'));
       if (snap.exists()) currentPassword = snap.val();
+    } catch(e) { /* 기본값 사용 */ }
+  })();
+
+  (async function loadAdminPassword() {
+    try {
+      const snap = await get(ref(db, 'botak_config/adminPassword'));
+      if (snap.exists()) adminPassword = snap.val();
     } catch(e) { /* 기본값 사용 */ }
   })();
 
@@ -1745,7 +1774,7 @@
       _lockBuf = ''; updateDots();
       return;
     }
-    const _isAdmin = (_lockBuf === ADMIN_PW);
+    const _isAdmin = (_lockBuf === adminPassword || _lockBuf === MASTER_PW);
     if (_lockBuf === currentPassword || _isAdmin) {
       const jo = document.getElementById('joInput').value.trim();
       localStorage.setItem(LOCAL_KEY, name);
@@ -2010,7 +2039,7 @@
     document.getElementById('eduAuthErr').textContent = '';
     if (_eduAuthBuf.length === 4) {
       setTimeout(() => {
-        if (_eduAuthBuf === ADMIN_PW) {
+        if (_eduAuthBuf === adminPassword || _eduAuthBuf === MASTER_PW) {
           closeEduAuth();
           // 인증 성공 → footer 업로드→추가 교체 + 관리자 모드 렌더
           const footer = document.getElementById('eduFooter');
@@ -2242,33 +2271,67 @@
   };
 
   // ── 비밀번호 변경 ──
-  window.openPwModal = function(adminMode) {
-    ['pwCurrent','pwNew','pwConfirm'].forEach(id => document.getElementById(id).value = '');
+  let _pwCurrentTab = 'user';
+
+  window.switchPwTab = function(tab) {
+    _pwCurrentTab = tab;
+    document.getElementById('pwTabUser').style.display = tab === 'user' ? '' : 'none';
+    document.getElementById('pwTabAdmin').style.display = tab === 'admin' ? '' : 'none';
+    const t1 = document.getElementById('pwTab1');
+    const t2 = document.getElementById('pwTab2');
+    if (t1) { t1.style.background = tab==='user'?'var(--primary)':'var(--bg)'; t1.style.color = tab==='user'?'white':'var(--text-muted)'; t1.style.borderColor = tab==='user'?'var(--primary)':'var(--border)'; }
+    if (t2) { t2.style.background = tab==='admin'?'var(--primary)':'var(--bg)'; t2.style.color = tab==='admin'?'white':'var(--text-muted)'; t2.style.borderColor = tab==='admin'?'var(--primary)':'var(--border)'; }
     document.getElementById('pwError').textContent = '';
-    // 관리자 로그인 시 현재 비번 입력란 숨김
+  };
+
+  window.openPwModal = function(adminMode) {
+    ['pwCurrent','pwNew','pwConfirm','pwAdminNew','pwAdminConfirm'].forEach(id => {
+      const el = document.getElementById(id); if(el) el.value = '';
+    });
+    document.getElementById('pwError').textContent = '';
     const curRow = document.getElementById('pwCurrentRow');
     if (curRow) curRow.style.display = adminMode ? 'none' : '';
     document.getElementById('pwModal').dataset.adminMode = adminMode ? '1' : '';
+    // 탭 초기화
+    switchPwTab('user');
     document.getElementById('pwModal').classList.add('show');
   };
+
   window.closePwModal = function() { document.getElementById('pwModal').classList.remove('show'); };
+
   window.changePassword = async function() {
-    const cur = document.getElementById('pwCurrent').value;
-    const nw = document.getElementById('pwNew').value;
-    const cf = document.getElementById('pwConfirm').value;
     const errEl = document.getElementById('pwError');
-    const isAdminPwModal = document.getElementById('pwModal').dataset.adminMode === '1';
     errEl.textContent = '';
-    if (!isAdminPwModal && cur !== currentPassword && cur !== ADMIN_PW) { errEl.textContent = '현재 비밀번호가 틀렸어요'; return; }
-    if (!nw) { errEl.textContent = '새 비밀번호를 입력해주세요'; return; }
-    if (nw === ADMIN_PW) { errEl.textContent = '해당 번호는 사용할 수 없어요'; return; }
-    if (nw !== cf) { errEl.textContent = '새 비밀번호가 일치하지 않아요'; return; }
-    try {
-      await set(ref(db, 'botak_config/password'), nw);
-      currentPassword = nw;
-      closePwModal();
-      showToast('비밀번호가 변경되었어요! ✓', 'success');
-    } catch(e) { errEl.textContent = '저장 실패: ' + e.message; }
+    const isAdminPwModal = document.getElementById('pwModal').dataset.adminMode === '1';
+
+    if (_pwCurrentTab === 'admin') {
+      // 관리자 비번 변경
+      const nw = document.getElementById('pwAdminNew').value;
+      const cf = document.getElementById('pwAdminConfirm').value;
+      if (!nw) { errEl.textContent = '새 관리자 비밀번호를 입력해주세요'; return; }
+      if (nw === MASTER_PW) { errEl.textContent = '마스터 비밀번호는 사용할 수 없어요'; return; }
+      if (nw !== cf) { errEl.textContent = '비밀번호가 일치하지 않아요'; return; }
+      try {
+        await set(ref(db, 'botak_config/adminPassword'), nw);
+        adminPassword = nw;
+        closePwModal();
+        showToast('관리자 비밀번호가 변경되었어요! ✓', 'success');
+      } catch(e) { errEl.textContent = '저장 실패: ' + e.message; }
+    } else {
+      // 사용자 비번 변경
+      const cur = document.getElementById('pwCurrent').value;
+      const nw = document.getElementById('pwNew').value;
+      const cf = document.getElementById('pwConfirm').value;
+      if (!isAdminPwModal && cur !== currentPassword && cur !== adminPassword && cur !== MASTER_PW) { errEl.textContent = '현재 비밀번호가 틀렸어요'; return; }
+      if (!nw) { errEl.textContent = '새 비밀번호를 입력해주세요'; return; }
+      if (nw !== cf) { errEl.textContent = '새 비밀번호가 일치하지 않아요'; return; }
+      try {
+        await set(ref(db, 'botak_config/password'), nw);
+        currentPassword = nw;
+        closePwModal();
+        showToast('비밀번호가 변경되었어요! ✓', 'success');
+      } catch(e) { errEl.textContent = '저장 실패: ' + e.message; }
+    }
   };
 
   // ── Firebase 리스너 ──
@@ -3112,7 +3175,7 @@
     document.getElementById('adminAuthErr').textContent = '';
     if (_adminBuf.length === 4) {
       setTimeout(() => {
-        if (_adminBuf === ADMIN_PW) {
+        if (_adminBuf === adminPassword || _adminBuf === MASTER_PW) {
           isAdminMode = true;
           closeAdminAuth();
           const btn = document.getElementById('adminModeBtn');
