@@ -163,19 +163,19 @@
   .edu-overlay.show { display: flex; }
   .edu-sheet {
     background: white; border-radius: 20px 20px 0 0;
-    width: 100%; max-width: 520px; padding: 1.2rem 1rem 1.5rem;
-    animation: slideUpSheet 0.22s ease; max-height: 85vh; display: flex; flex-direction: column;
+    width: 100%; max-width: 520px; padding: 0.8rem 0.8rem 1rem;
+    animation: slideUpSheet 0.22s ease; max-height: 90vh; display: flex; flex-direction: column;
   }
-  .edu-title { font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 0.9rem; text-align: center; flex-shrink: 0; }
-  .edu-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+  .edu-title { font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 0.5rem; text-align: center; flex-shrink: 0; }
+  .edu-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 3px; margin-bottom: 0.5rem; }
   .edu-item {
     display: flex; align-items: center; gap: 8px;
-    padding: 10px 12px; background: var(--bg); border-radius: 10px;
+    padding: 6px 10px; background: var(--bg); border-radius: 8px;
     border: 1px solid var(--border); cursor: pointer; transition: background 0.15s;
   }
   .edu-item:active { background: #e8f4ff; }
   .edu-item-icon { font-size: 18px; flex-shrink: 0; }
-  .edu-item-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+  .edu-item-title { font-size: 12px; font-weight: 600; color: var(--text); flex: 1; }
   .edu-item-arrow { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
   .edu-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
   .edu-edit-btn, .edu-del-btn {
