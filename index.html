@@ -3498,6 +3498,18 @@ if('serviceWorker' in navigator){
       .catch(err => console.warn('SW error:', err));
   });
 }
+
+// 교육자료 버튼 연결 (module 스크립트 밖에서 처리)
+document.getElementById('loginEduBtn').addEventListener('click', function() {
+  var modal = document.getElementById('eduModal');
+  if (modal) modal.classList.add('show');
+  if (typeof window.openEduModal === 'function') window.openEduModal();
+});
+
+// 교육자료 모달 닫기 버튼 보조
+document.getElementById('eduModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('show');
+});
 </script>
 </body>
 </html>
