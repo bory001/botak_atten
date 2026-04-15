@@ -2152,12 +2152,13 @@
   };
 
   window.eduActionEdit = function() {
+    const id = _eduActionId;  // 먼저 저장
     closeEduActionSheet();
-    openEduAddForm(_eduActionId);
+    openEduAddForm(id);
   };
 
   window.eduActionDelete = function() {
-    const id = _eduActionId;
+    const id = _eduActionId;  // 먼저 저장
     closeEduActionSheet();
     deleteEduItem(id);
   };
