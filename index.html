@@ -154,6 +154,55 @@
   }
   .modal-error { font-size: 12px; color: var(--danger); min-height: 16px; margin-bottom: 0.25rem; }
 
+  /* ── 교육자료 모달 ── */
+  .edu-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.55);
+    display: none; align-items: flex-end; justify-content: center;
+    z-index: 1000; padding-bottom: env(safe-area-inset-bottom,0);
+  }
+  .edu-overlay.show { display: flex; }
+  .edu-sheet {
+    background: white; border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 520px; padding: 1.2rem 1rem 1.5rem;
+    animation: slideUpSheet 0.22s ease; max-height: 85vh; display: flex; flex-direction: column;
+  }
+  .edu-title { font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 0.9rem; text-align: center; flex-shrink: 0; }
+  .edu-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+  .edu-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 12px; background: var(--bg); border-radius: 10px;
+    border: 1px solid var(--border); cursor: pointer; transition: background 0.15s;
+  }
+  .edu-item:active { background: #e8f4ff; }
+  .edu-item-icon { font-size: 18px; flex-shrink: 0; }
+  .edu-item-title { font-size: 13px; font-weight: 600; color: var(--text); flex: 1; }
+  .edu-item-arrow { font-size: 12px; color: var(--text-muted); flex-shrink: 0; }
+  .edu-item-actions { display: flex; gap: 4px; flex-shrink: 0; }
+  .edu-edit-btn, .edu-del-btn {
+    font-size: 11px; padding: 3px 7px; border-radius: 6px; border: none;
+    font-family: inherit; cursor: pointer; font-weight: 600;
+  }
+  .edu-edit-btn { background: rgba(59,130,246,0.12); color: #1d4ed8; }
+  .edu-del-btn  { background: rgba(239,68,68,0.12);  color: #dc2626; }
+  .edu-add-form {
+    display: none; flex-direction: column; gap: 6px;
+    padding: 10px; background: var(--bg); border-radius: 10px;
+    border: 1px solid var(--border); margin-bottom: 8px; flex-shrink: 0;
+  }
+  .edu-add-form.show { display: flex; }
+  .edu-add-input {
+    padding: 7px 10px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 13px; font-family: inherit; color: var(--text); outline: none;
+  }
+  .edu-add-input:focus { border-color: var(--primary); }
+  .edu-add-btns { display: flex; gap: 6px; }
+  .edu-add-save { flex:1; padding: 7px; background: var(--primary); color: white; border: none; border-radius: 8px; font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer; }
+  .edu-add-cancel { padding: 7px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; font-size: 12px; font-family: inherit; cursor: pointer; }
+  .edu-footer { display: flex; gap: 8px; flex-shrink: 0; }
+  .edu-close-btn { flex:1; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; color: var(--text-muted); }
+  .edu-add-open-btn { flex:1; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; }
+  .edu-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 1.5rem 0; }
+
   /* ── 연락처 액션 팝업 ── */
   .contact-popup-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.45);
@@ -874,6 +923,10 @@
       style="background:none;border:none;color:#ffffff;font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:inherit;padding:4px 6px;border-radius:6px;transition:color .2s;"
       onmouseenter="this.style.color='#3498db'" onmouseleave="this.style.color='#ffffff'"
       ontouchstart="this.style.color='#3498db'" ontouchend="this.style.color='#ffffff'">🔄 캐시 새로고침</button>
+    <button onclick="openEduModal()"
+      style="background:none;border:1px solid rgba(255,255,255,0.3);color:#ffffff;font-size:10px;font-weight:700;letter-spacing:.5px;cursor:pointer;font-family:inherit;padding:4px 10px;border-radius:6px;transition:all .2s;"
+      onmouseenter="this.style.borderColor='#3498db';this.style.color='#3498db'" onmouseleave="this.style.borderColor='rgba(255,255,255,0.3)';this.style.color='#ffffff'"
+      ontouchstart="this.style.color='#3498db'" ontouchend="this.style.color='#ffffff'">📚 교육자료</button>
     <div style="color:#ffffff;font-size:10px;letter-spacing:.5px;font-weight:700;">Made by yybest</div>
   </div>
 </div>
@@ -1243,6 +1296,32 @@
     <div class="modal-btns">
       <button class="modal-cancel" onclick="closeLeagueDayModal()">취소</button>
       <button class="modal-confirm" onclick="saveLeagueDays()">저장</button>
+    </div>
+  </div>
+</div>
+
+<!-- 교육자료 모달 -->
+<div class="edu-overlay" id="eduModal" onclick="eduOverlayClick(event)">
+  <div class="edu-sheet">
+    <div class="edu-title">📚 동영상 교육자료</div>
+
+    <!-- 관리자 추가 폼 -->
+    <div class="edu-add-form" id="eduAddForm">
+      <input type="text" class="edu-add-input" id="eduAddTitle" placeholder="자료 제목" maxlength="50">
+      <input type="url" class="edu-add-input" id="eduAddUrl" placeholder="유튜브 URL 붙여넣기">
+      <div class="edu-add-btns">
+        <button class="edu-add-cancel" onclick="closeEduAddForm()">취소</button>
+        <button class="edu-add-save" onclick="saveEduItem()">저장</button>
+      </div>
+      <div style="font-size:11px;color:var(--danger);min-height:14px;" id="eduAddErr"></div>
+    </div>
+
+    <div class="edu-list" id="eduList">
+      <div class="edu-empty">자료를 불러오는 중...</div>
+    </div>
+
+    <div class="edu-footer" id="eduFooter">
+      <button class="edu-close-btn" onclick="closeEduModal()">닫기</button>
     </div>
   </div>
 </div>
@@ -1774,6 +1853,125 @@
       showToast('저장 실패: ' + e.message, 'error');
     }
   };
+
+  // ══════════════════════════════════════════
+  // ── 교육자료 ──
+  // ══════════════════════════════════════════
+  let _eduData = {};     // { id: { title, url, order } }
+  let _eduEditId = null; // 수정 중인 항목 id
+
+  // Firebase 교육자료 리스닝
+  onValue(ref(db, 'botak_edu'), (snap) => {
+    _eduData = snap.val() || {};
+    if (document.getElementById('eduModal').classList.contains('show')) {
+      renderEduList();
+    }
+  });
+
+  window.openEduModal = function() {
+    _eduEditId = null;
+    closeEduAddForm();
+    renderEduList();
+    // 관리자 버튼 표시
+    const footer = document.getElementById('eduFooter');
+    if (footer) {
+      footer.innerHTML = isAdminMode
+        ? `<button class="edu-close-btn" onclick="closeEduModal()">닫기</button>
+           <button class="edu-add-open-btn" onclick="openEduAddForm()">+ 추가</button>`
+        : `<button class="edu-close-btn" onclick="closeEduModal()">닫기</button>`;
+    }
+    document.getElementById('eduModal').classList.add('show');
+  };
+
+  window.closeEduModal = function() {
+    document.getElementById('eduModal').classList.remove('show');
+    _eduEditId = null;
+    closeEduAddForm();
+  };
+
+  window.eduOverlayClick = function(e) {
+    if (e.target === document.getElementById('eduModal')) closeEduModal();
+  };
+
+  window.openEduAddForm = function(id) {
+    _eduEditId = id || null;
+    const form = document.getElementById('eduAddForm');
+    const titleEl = document.getElementById('eduAddTitle');
+    const urlEl = document.getElementById('eduAddUrl');
+    document.getElementById('eduAddErr').textContent = '';
+    if (id && _eduData[id]) {
+      titleEl.value = _eduData[id].title || '';
+      urlEl.value = _eduData[id].url || '';
+    } else {
+      titleEl.value = '';
+      urlEl.value = '';
+    }
+    form.classList.add('show');
+    titleEl.focus();
+  };
+
+  window.closeEduAddForm = function() {
+    document.getElementById('eduAddForm').classList.remove('show');
+    _eduEditId = null;
+  };
+
+  window.saveEduItem = async function() {
+    const title = document.getElementById('eduAddTitle').value.trim();
+    const url = document.getElementById('eduAddUrl').value.trim();
+    const errEl = document.getElementById('eduAddErr');
+    if (!title) { errEl.textContent = '제목을 입력하세요'; return; }
+    if (!url) { errEl.textContent = 'URL을 입력하세요'; return; }
+    if (!url.startsWith('http')) { errEl.textContent = '올바른 URL을 입력하세요'; return; }
+    try {
+      const id = _eduEditId || ('edu_' + Date.now());
+      const order = _eduEditId ? (_eduData[_eduEditId]?.order || Date.now()) : Date.now();
+      await set(ref(db, `botak_edu/${id}`), { title, url, order });
+      closeEduAddForm();
+      showToast(_eduEditId ? '수정되었습니다' : '교육자료가 추가되었습니다', 'success');
+    } catch(e) {
+      errEl.textContent = '저장 실패: ' + e.message;
+    }
+  };
+
+  window.deleteEduItem = async function(id) {
+    if (!confirm(`"${_eduData[id]?.title}" 을 삭제할까요?`)) return;
+    try {
+      await remove(ref(db, `botak_edu/${id}`));
+      showToast('삭제되었습니다');
+    } catch(e) { showToast('삭제 실패', 'error'); }
+  };
+
+  function renderEduList() {
+    const list = document.getElementById('eduList');
+    if (!list) return;
+    const items = Object.entries(_eduData)
+      .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+    if (items.length === 0) {
+      list.innerHTML = '<div class="edu-empty">등록된 교육자료가 없습니다</div>';
+      return;
+    }
+    list.innerHTML = '';
+    items.forEach(([id, item]) => {
+      const div = document.createElement('div');
+      div.className = 'edu-item';
+      div.innerHTML = `
+        <span class="edu-item-icon">▶️</span>
+        <span class="edu-item-title">${item.title}</span>
+        ${isAdminMode
+          ? `<div class="edu-item-actions">
+               <button class="edu-edit-btn" onclick="event.stopPropagation();openEduAddForm('${id}')">수정</button>
+               <button class="edu-del-btn" onclick="event.stopPropagation();deleteEduItem('${id}')">삭제</button>
+             </div>`
+          : `<span class="edu-item-arrow">▶</span>`}
+      `;
+      if (!isAdminMode) {
+        div.onclick = () => window.open(item.url, '_blank');
+      } else {
+        div.onclick = () => window.open(item.url, '_blank');
+      }
+      list.appendChild(div);
+    });
+  }
 
   window.doLogout = function() {
     window.close();
