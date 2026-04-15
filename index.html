@@ -202,6 +202,29 @@
   .edu-close-btn { flex:1; padding: 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; color: var(--text-muted); }
   .edu-add-open-btn { flex:1; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 12px; font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; }
   .edu-empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 1.5rem 0; }
+  .edu-action-sheet-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: none; align-items: flex-end; justify-content: center;
+    z-index: 10002; padding-bottom: env(safe-area-inset-bottom,0);
+  }
+  .edu-action-sheet-overlay.show { display: flex; }
+  .edu-action-sheet {
+    background: white; border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px; padding: 1.2rem 1rem 1.5rem;
+    animation: slideUpSheet 0.2s ease;
+  }
+  .edu-action-sheet-name {
+    font-size: 14px; font-weight: 800; color: var(--primary);
+    text-align: center; margin-bottom: 1rem;
+  }
+  .edu-action-sheet-btns { display: flex; flex-direction: column; gap: 8px; }
+  .edu-sheet-btn {
+    padding: 13px; border-radius: 12px; border: none;
+    font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer;
+  }
+  .edu-sheet-btn.edit  { background: #e3f2fd; color: #0d47a1; }
+  .edu-sheet-btn.del   { background: #fef2f2; color: #dc2626; }
+  .edu-sheet-btn.cancel { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
 
   /* ── 연락처 액션 팝업 ── */
   .contact-popup-overlay {
@@ -1354,6 +1377,18 @@
   </div>
 </div>
 
+<!-- 교육자료 항목 액션시트 -->
+<div class="edu-action-sheet-overlay" id="eduActionSheet" onclick="if(event.target===this)closeEduActionSheet()">
+  <div class="edu-action-sheet">
+    <div class="edu-action-sheet-name" id="eduActionSheetName"></div>
+    <div class="edu-action-sheet-btns">
+      <button class="edu-sheet-btn edit" onclick="eduActionEdit()">✏️ 수정</button>
+      <button class="edu-sheet-btn del"  onclick="eduActionDelete()">🗑️ 삭제</button>
+      <button class="edu-sheet-btn cancel" onclick="closeEduActionSheet()">취소</button>
+    </div>
+  </div>
+</div>
+
 <!-- 대진 모달 -->
 <div class="daejin-overlay" id="daejinModal" onclick="daejinOverlayClick(event)">
   <div class="daejin-sheet">
@@ -1930,14 +1965,22 @@
       setTimeout(() => {
         if (_eduAuthBuf === ADMIN_PW) {
           closeEduAuth();
-          // 인증 성공 → 추가 폼 열기 + 업로드 버튼 → 추가 버튼으로 교체
+          // 인증 성공 → footer 업로드→추가 교체 + 관리자 모드 렌더
           const footer = document.getElementById('eduFooter');
           if (footer) {
             footer.innerHTML = `<button class="edu-close-btn" onclick="closeEduModal()">닫기</button>
                <button class="edu-add-open-btn" onclick="openEduAddForm()">+ 추가</button>`;
           }
-          renderEduList(true); // 관리자 모드로 렌더
-          openEduAddForm();
+          renderEduList(true);
+          // 롱프레스로 들어온 경우 → 액션시트 열기, 업로드 버튼으로 들어온 경우 → 추가폼
+          if (_pendingActionId) {
+            _eduActionId = _pendingActionId;
+            document.getElementById('eduActionSheetName').textContent = `📹 ${_pendingActionTitle}`;
+            document.getElementById('eduActionSheet').classList.add('show');
+            _pendingActionId = null; _pendingActionTitle = '';
+          } else {
+            openEduAddForm();
+          }
         } else {
           document.getElementById('eduAuthErr').textContent = '비밀번호가 틀렸어요';
           for (let i = 0; i < 4; i++) {
@@ -2039,7 +2082,11 @@
     } catch(e) { showToast('삭제 실패', 'error'); }
   };
 
+  let _eduActionId = null;
+  let _eduForceAdmin = false;
+
   function renderEduList(forceAdmin) {
+    _eduForceAdmin = forceAdmin || false;
     const list = document.getElementById('eduList');
     if (!list) return;
     const items = Object.entries(_eduData)
@@ -2055,21 +2102,79 @@
       div.innerHTML = `
         <span class="edu-item-icon">▶️</span>
         <span class="edu-item-title">${item.title}</span>
-        ${(isAdminMode || forceAdmin)
-          ? `<div class="edu-item-actions">
-               <button class="edu-edit-btn" onclick="event.stopPropagation();openEduAddForm('${id}')">수정</button>
-               <button class="edu-del-btn" onclick="event.stopPropagation();deleteEduItem('${id}')">삭제</button>
-             </div>`
-          : `<span class="edu-item-arrow">▶</span>`}
+        <span class="edu-item-arrow">▶</span>
       `;
-      if (!isAdminMode) {
-        div.onclick = () => window.open(item.url, '_blank');
-      } else {
-        div.onclick = () => window.open(item.url, '_blank');
-      }
+      // 짧게 클릭 → 영상 열기
+      let pressTimer = null;
+      const onStart = () => {
+        pressTimer = setTimeout(() => {
+          pressTimer = null;
+          openEduActionSheet(id, item.title);
+        }, 600);
+      };
+      const onEnd = (e) => {
+        if (pressTimer) {
+          clearTimeout(pressTimer);
+          pressTimer = null;
+          window.open(item.url, '_blank');
+        }
+      };
+      const onCancel = () => { if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; } };
+      div.addEventListener('mousedown', onStart);
+      div.addEventListener('touchstart', onStart, { passive: true });
+      div.addEventListener('mouseup', onEnd);
+      div.addEventListener('touchend', onEnd);
+      div.addEventListener('mouseleave', onCancel);
+      div.addEventListener('touchcancel', onCancel);
       list.appendChild(div);
     });
   }
+
+  window.openEduActionSheet = function(id, title) {
+    // 관리자 인증 여부 확인
+    if (!isAdminMode && !_eduForceAdmin) {
+      // 비인증 상태면 인증 먼저
+      _eduActionId = id;
+      document.getElementById('eduActionSheetName').textContent = `📹 ${title}`;
+      // 인증 후 액션시트 열기 위해 플래그 저장
+      window._pendingEduAction = id;
+      openEduAuthForAction(id, title);
+      return;
+    }
+    _eduActionId = id;
+    document.getElementById('eduActionSheetName').textContent = `📹 ${title}`;
+    document.getElementById('eduActionSheet').classList.add('show');
+  };
+
+  window.closeEduActionSheet = function() {
+    document.getElementById('eduActionSheet').classList.remove('show');
+    _eduActionId = null;
+  };
+
+  window.eduActionEdit = function() {
+    closeEduActionSheet();
+    openEduAddForm(_eduActionId);
+  };
+
+  window.eduActionDelete = function() {
+    const id = _eduActionId;
+    closeEduActionSheet();
+    deleteEduItem(id);
+  };
+
+  // 롱프레스 시 인증이 필요한 경우
+  let _pendingActionId = null, _pendingActionTitle = '';
+  window.openEduAuthForAction = function(id, title) {
+    _pendingActionId = id;
+    _pendingActionTitle = title;
+    _eduAuthBuf = '';
+    for (let i = 0; i < 4; i++) {
+      const d = document.getElementById('eapd' + i);
+      if (d) { d.classList.remove('filled','error'); }
+    }
+    document.getElementById('eduAuthErr').textContent = '';
+    document.getElementById('eduAuthModal').classList.add('show');
+  };
 
   window.doLogout = function() {
     window.close();
