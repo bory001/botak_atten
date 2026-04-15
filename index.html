@@ -1326,6 +1326,34 @@
   </div>
 </div>
 
+<!-- 교육자료 관리자 인증 모달 -->
+<div class="modal-overlay" id="eduAuthModal" style="z-index:10001;">
+  <div class="modal-box" style="text-align:center;">
+    <div class="modal-title">🔐 관리자 인증</div>
+    <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">관리자 비밀번호를 입력하세요</div>
+    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:12px;">
+      <div class="pw-dot" id="eapd0"></div><div class="pw-dot" id="eapd1"></div>
+      <div class="pw-dot" id="eapd2"></div><div class="pw-dot" id="eapd3"></div>
+    </div>
+    <div style="font-size:11px;color:#e74c3c;min-height:16px;margin-bottom:10px;" id="eduAuthErr"></div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:240px;margin:0 auto;">
+      <button class="kbtn" onclick="eduAuthKey('1')">1</button>
+      <button class="kbtn" onclick="eduAuthKey('2')">2</button>
+      <button class="kbtn" onclick="eduAuthKey('3')">3</button>
+      <button class="kbtn" onclick="eduAuthKey('4')">4</button>
+      <button class="kbtn" onclick="eduAuthKey('5')">5</button>
+      <button class="kbtn" onclick="eduAuthKey('6')">6</button>
+      <button class="kbtn" onclick="eduAuthKey('7')">7</button>
+      <button class="kbtn" onclick="eduAuthKey('8')">8</button>
+      <button class="kbtn" onclick="eduAuthKey('9')">9</button>
+      <div class="kbtn empty"></div>
+      <button class="kbtn" onclick="eduAuthKey('0')">0</button>
+      <button class="kbtn del" onclick="eduAuthKeyDel()">⌫</button>
+    </div>
+    <button class="modal-cancel" onclick="closeEduAuth()" style="margin-top:14px;width:100%;padding:10px;">취소</button>
+  </div>
+</div>
+
 <!-- 대진 모달 -->
 <div class="daejin-overlay" id="daejinModal" onclick="daejinOverlayClick(event)">
   <div class="daejin-sheet">
@@ -1868,17 +1896,87 @@
     }
   });
 
+  // ── 교육자료 업로드 관리자 인증 ──
+  let _eduAuthBuf = '';
+
+  window.openEduAuth = function() {
+    _eduAuthBuf = '';
+    for (let i = 0; i < 4; i++) {
+      const d = document.getElementById('eapd' + i);
+      if (d) { d.classList.remove('filled','error'); }
+    }
+    document.getElementById('eduAuthErr').textContent = '';
+    document.getElementById('eduAuthModal').classList.add('show');
+  };
+
+  window.closeEduAuth = function() {
+    _eduAuthBuf = '';
+    document.getElementById('eduAuthModal').classList.remove('show');
+  };
+
+  function updateEduAuthDots() {
+    for (let i = 0; i < 4; i++) {
+      const d = document.getElementById('eapd' + i);
+      if (d) d.classList.toggle('filled', i < _eduAuthBuf.length);
+    }
+  }
+
+  window.eduAuthKey = function(n) {
+    if (_eduAuthBuf.length >= 4) return;
+    _eduAuthBuf += n;
+    updateEduAuthDots();
+    document.getElementById('eduAuthErr').textContent = '';
+    if (_eduAuthBuf.length === 4) {
+      setTimeout(() => {
+        if (_eduAuthBuf === ADMIN_PW) {
+          closeEduAuth();
+          // 인증 성공 → 추가 폼 열기 + 업로드 버튼 → 추가 버튼으로 교체
+          const footer = document.getElementById('eduFooter');
+          if (footer) {
+            footer.innerHTML = `<button class="edu-close-btn" onclick="closeEduModal()">닫기</button>
+               <button class="edu-add-open-btn" onclick="openEduAddForm()">+ 추가</button>`;
+          }
+          renderEduList(true); // 관리자 모드로 렌더
+          openEduAddForm();
+        } else {
+          document.getElementById('eduAuthErr').textContent = '비밀번호가 틀렸어요';
+          for (let i = 0; i < 4; i++) {
+            const d = document.getElementById('eapd' + i);
+            if (d) { d.classList.remove('filled'); d.classList.add('error'); }
+          }
+          _eduAuthBuf = '';
+          setTimeout(() => {
+            for (let i = 0; i < 4; i++) {
+              const d = document.getElementById('eapd' + i);
+              if (d) d.classList.remove('error');
+            }
+          }, 600);
+        }
+      }, 120);
+    }
+  };
+
+  window.eduAuthKeyDel = function() {
+    if (_eduAuthBuf.length > 0) {
+      _eduAuthBuf = _eduAuthBuf.slice(0, -1);
+      updateEduAuthDots();
+    }
+  };
+
   window.openEduModal = function() {
     _eduEditId = null;
     closeEduAddForm();
     renderEduList();
-    // 관리자 버튼 표시
+    // footer: 업로드 버튼은 항상, 관리자면 직접 추가폼 오픈
     const footer = document.getElementById('eduFooter');
     if (footer) {
-      footer.innerHTML = isAdminMode
-        ? `<button class="edu-close-btn" onclick="closeEduModal()">닫기</button>
-           <button class="edu-add-open-btn" onclick="openEduAddForm()">+ 추가</button>`
-        : `<button class="edu-close-btn" onclick="closeEduModal()">닫기</button>`;
+      if (isAdminMode) {
+        footer.innerHTML = `<button class="edu-close-btn" onclick="closeEduModal()">닫기</button>
+           <button class="edu-add-open-btn" onclick="openEduAddForm()">+ 추가</button>`;
+      } else {
+        footer.innerHTML = `<button class="edu-close-btn" onclick="closeEduModal()">닫기</button>
+           <button class="edu-add-open-btn" onclick="openEduAuth()" style="background:#e67e22;">📤 업로드</button>`;
+      }
     }
     document.getElementById('eduModal').classList.add('show');
   };
@@ -1941,7 +2039,7 @@
     } catch(e) { showToast('삭제 실패', 'error'); }
   };
 
-  function renderEduList() {
+  function renderEduList(forceAdmin) {
     const list = document.getElementById('eduList');
     if (!list) return;
     const items = Object.entries(_eduData)
@@ -1957,7 +2055,7 @@
       div.innerHTML = `
         <span class="edu-item-icon">▶️</span>
         <span class="edu-item-title">${item.title}</span>
-        ${isAdminMode
+        ${(isAdminMode || forceAdmin)
           ? `<div class="edu-item-actions">
                <button class="edu-edit-btn" onclick="event.stopPropagation();openEduAddForm('${id}')">수정</button>
                <button class="edu-del-btn" onclick="event.stopPropagation();deleteEduItem('${id}')">삭제</button>
