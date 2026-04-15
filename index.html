@@ -2027,6 +2027,7 @@
   window.closeEduModal = function() {
     document.getElementById('eduModal').classList.remove('show');
     _eduEditId = null;
+    _eduForceAdmin = false; // 모달 닫으면 세션 초기화
     closeEduAddForm();
   };
 
@@ -2089,8 +2090,17 @@
     _eduForceAdmin = forceAdmin || false;
     const list = document.getElementById('eduList');
     if (!list) return;
+    // 제목 앞 숫자(연번) 기준 정렬, 숫자 없으면 뒤로
+    function eduTitleNum(title) {
+      const m = (title || '').match(/^(\d+)/);
+      return m ? parseInt(m[1]) : 99999;
+    }
     const items = Object.entries(_eduData)
-      .sort((a, b) => (a[1].order || 0) - (b[1].order || 0));
+      .sort((a, b) => {
+        const na = eduTitleNum(a[1].title), nb = eduTitleNum(b[1].title);
+        if (na !== nb) return na - nb;
+        return (a[1].title || '').localeCompare(b[1].title || '', 'ko');
+      });
     if (items.length === 0) {
       list.innerHTML = '<div class="edu-empty">등록된 교육자료가 없습니다</div>';
       return;
