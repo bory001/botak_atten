@@ -542,6 +542,40 @@
   .mdp-attend-btn.cancel { background: #fef2f2; color: var(--danger); border: 1.5px solid #fecaca; }
   .mdp-attend-btn.cancel:hover { background: #fee2e2; }
 
+  /* ── 조 색상 모달 ── */
+  .jo-color-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+    display: none; align-items: center; justify-content: center;
+    z-index: 600; padding: 1rem;
+  }
+  .jo-color-overlay.show { display: flex; }
+  .jo-color-box {
+    background: white; border-radius: 16px; padding: 1.5rem;
+    width: 100%; max-width: 380px; max-height: 85vh; overflow-y: auto;
+  }
+  .jo-color-title { font-size: 15px; font-weight: 800; color: var(--primary); margin-bottom: 1rem; text-align: center; }
+  .jo-color-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--border);
+  }
+  .jo-color-row:last-of-type { border-bottom: none; }
+  .jo-color-name { font-size: 13px; font-weight: 700; min-width: 60px; color: var(--text); }
+  .jo-color-preview {
+    width: 28px; height: 28px; border-radius: 6px; flex-shrink: 0;
+    border: 2px solid rgba(0,0,0,0.1);
+  }
+  .jo-color-palette { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+  .jo-color-swatch {
+    width: 22px; height: 22px; border-radius: 4px; cursor: pointer;
+    border: 2px solid transparent; transition: transform 0.1s;
+    flex-shrink: 0;
+  }
+  .jo-color-swatch:active { transform: scale(0.9); }
+  .jo-color-swatch.selected { border-color: #1a2433; transform: scale(1.15); }
+  .jo-color-footer { display: flex; gap: 8px; margin-top: 1.2rem; }
+  .jo-color-save { flex:1; padding: 11px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; font-family: inherit; cursor: pointer; }
+  .jo-color-cancel { flex:1; padding: 11px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; font-size: 13px; font-family: inherit; cursor: pointer; color: var(--text-muted); }
+
   /* ── 대진 ── */
   .daejin-btn {
     font-size: 11px; font-weight: 700; padding: 3px 9px;
@@ -969,6 +1003,7 @@
       </div>
       <button class="hdr-btn hdr-attend-btn" id="hdrTimeBtn" onclick="openTimeModal()" style="display:none;">⏰ 시각등록</button>
       <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">✅ 참석 등록</button>
+      <button class="hdr-btn" id="joColorBtn" onclick="openJoColorModal()" style="display:none;background:rgba(236,72,153,0.2);border-color:rgba(236,72,153,0.6);">🎨 조색상</button>
       <button class="hdr-btn" id="leagueDayBtn" onclick="openLeagueDayModal()" style="display:none;background:rgba(59,130,246,0.25);border-color:rgba(59,130,246,0.7);">📅 리그요일</button>
       <button class="hdr-btn" id="memberDbBtn" onclick="openMemberDb()" style="display:none;background:rgba(16,185,129,0.25);border-color:rgba(16,185,129,0.7);">👥 회원DB</button>
       <button class="hdr-btn" onclick="openRankingModal()" style="background:rgba(99,102,241,0.3);border-color:rgba(99,102,241,0.7);">🏆 통계</button>
@@ -1276,6 +1311,18 @@
     </div>
 
     <button class="mdb-close-btn" onclick="closeMemberDb()">닫기</button>
+  </div>
+</div>
+
+<!-- 조 색상 설정 모달 -->
+<div class="jo-color-overlay" id="joColorModal" onclick="if(event.target===this)closeJoColorModal()">
+  <div class="jo-color-box">
+    <div class="jo-color-title">🎨 조별 색상 설정</div>
+    <div id="joColorRows"></div>
+    <div class="jo-color-footer">
+      <button class="jo-color-cancel" onclick="closeJoColorModal()">취소</button>
+      <button class="jo-color-save" onclick="saveJoColors()">저장</button>
+    </div>
   </div>
 </div>
 
@@ -2513,11 +2560,6 @@
         const noJo = sorted.filter(m => !m.jo);
 
         // 조별 행 생성
-        // 조별 가독성 좋은 색상 (최대 10개 조)
-        const joColors = ['#111111','#e91e8c','#9b1c1c','#2b6cb0'];
-        // 가나다순 기준으로 조명→색상 매핑 생성 (랭킹에서 공유)
-        _joColorMap = {};
-        joSet.forEach((jn, ji) => { _joColorMap[jn] = joColors[ji % joColors.length]; });
         joSet.forEach((joName, joIdx) => {
           const members = sorted
             .filter(m => m.jo === joName)
@@ -2528,7 +2570,9 @@
           row.className = 'busoo-row';
           const label = document.createElement('div');
           label.className = 'busoo-label';
-          label.style.background = joColors[joIdx % joColors.length];
+          const joBg = _joColorMap[joName] || '#2b6cb0';
+          label.style.background = joBg;
+          label.style.color = joBg === '#ffffff' ? '#1a2433' : 'white';
           label.textContent = `${joName}`;
           row.appendChild(label);
           const namesWrap = document.createElement('div');
@@ -3047,6 +3091,8 @@
       if (mdbBtn) mdbBtn.style.display = 'none';
       const ldBtn = document.getElementById('leagueDayBtn');
       if (ldBtn) ldBtn.style.display = 'none';
+      const jcBtn = document.getElementById('joColorBtn');
+      if (jcBtn) jcBtn.style.display = 'none';
       if (selectedDate) { renderMobilePanel(); renderSidebar(); }
       showToast('관리자 모드 해제');
       return;
@@ -3075,6 +3121,8 @@
           if (mdbBtn) mdbBtn.style.display = 'inline-block';
           const ldBtn = document.getElementById('leagueDayBtn');
           if (ldBtn) ldBtn.style.display = 'inline-block';
+          const jcBtn = document.getElementById('joColorBtn');
+          if (jcBtn) jcBtn.style.display = 'inline-block';
           if (selectedDate) { renderMobilePanel(); renderSidebar(); }
           showToast('관리자 모드 활성화', 'success');
         } else {
@@ -3168,6 +3216,99 @@
     renderMdbList();
     switchMdbTab('single');
     document.getElementById('memberDbModal').classList.add('show');
+  };
+
+  // ── 조 색상 설정 ──
+  const JO_PALETTE = [
+    '#111111','#ffffff','#e91e8c','#9b1c1c','#2b6cb0','#6d28d9',
+    '#1b5e20','#b45309','#0e7490','#be123c','#7c3aed','#1d4ed8',
+    '#047857','#92400e','#374151','#f59e0b'
+  ];
+  let _joColorSetting = {}; // 모달 내 임시 선택값
+
+  // Firebase에서 조색상 로드
+  (async function loadJoColors() {
+    try {
+      const snap = await get(ref(db, 'botak_config/joColors'));
+      if (snap.exists()) {
+        _joColorMap = snap.val();
+      }
+    } catch(e) {}
+  })();
+
+  window.openJoColorModal = function() {
+    // 현재 참석 데이터 + 회원DB에서 조명 추출
+    const joSet = new Set();
+    // 회원DB
+    Object.values(memberData).forEach(m => { if (m.jo) joSet.add(m.jo); });
+    // 참석 데이터
+    Object.values(attendanceData).forEach(day => {
+      Object.values(day).forEach(m => { if (m.jo) joSet.add(m.jo); });
+    });
+    const jos = [...joSet].sort();
+    if (jos.length === 0) {
+      showToast('등록된 조가 없습니다', '');
+      return;
+    }
+    // 임시 설정값 초기화 (기존 저장값 반영)
+    _joColorSetting = {};
+    jos.forEach(jo => {
+      _joColorSetting[jo] = _joColorMap[jo] || '#2b6cb0';
+    });
+    // 렌더
+    const rows = document.getElementById('joColorRows');
+    rows.innerHTML = '';
+    jos.forEach(jo => {
+      const row = document.createElement('div');
+      row.className = 'jo-color-row';
+      const name = document.createElement('div');
+      name.className = 'jo-color-name';
+      name.textContent = jo;
+      const preview = document.createElement('div');
+      preview.className = 'jo-color-preview';
+      preview.id = `jcp_${jo}`;
+      preview.style.background = _joColorSetting[jo];
+      const palette = document.createElement('div');
+      palette.className = 'jo-color-palette';
+      JO_PALETTE.forEach(color => {
+        const sw = document.createElement('div');
+        sw.className = 'jo-color-swatch' + (_joColorSetting[jo] === color ? ' selected' : '');
+        sw.style.background = color;
+        sw.style.border = color === '#ffffff' ? '2px solid #dde3ec' : '2px solid transparent';
+        sw.dataset.jo = jo;
+        sw.dataset.color = color;
+        sw.onclick = () => {
+          // 같은 조의 선택 해제
+          palette.querySelectorAll('.jo-color-swatch').forEach(s => s.classList.remove('selected'));
+          sw.classList.add('selected');
+          _joColorSetting[jo] = color;
+          preview.style.background = color;
+        };
+        palette.appendChild(sw);
+      });
+      row.appendChild(name);
+      row.appendChild(preview);
+      row.appendChild(palette);
+      rows.appendChild(row);
+    });
+    document.getElementById('joColorModal').classList.add('show');
+  };
+
+  window.closeJoColorModal = function() {
+    document.getElementById('joColorModal').classList.remove('show');
+  };
+
+  window.saveJoColors = async function() {
+    try {
+      await set(ref(db, 'botak_config/joColors'), _joColorSetting);
+      _joColorMap = { ..._joColorSetting };
+      closeJoColorModal();
+      if (selectedDate) { renderMobilePanel(); renderSidebar(); }
+      renderCalendar();
+      showToast('조 색상이 저장되었습니다 🎨', 'success');
+    } catch(e) {
+      showToast('저장 실패: ' + e.message, 'error');
+    }
   };
 
   // ── 리그요일 설정 모달 ──
