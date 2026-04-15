@@ -2087,7 +2087,7 @@
   let _eduForceAdmin = false;
 
   function renderEduList(forceAdmin) {
-    _eduForceAdmin = forceAdmin || false;
+    if (forceAdmin !== undefined) _eduForceAdmin = forceAdmin; // 명시적으로 넘길 때만 갱신
     const list = document.getElementById('eduList');
     if (!list) return;
     // 제목 앞 숫자(연번) 기준 정렬, 숫자 없으면 뒤로
