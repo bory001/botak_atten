@@ -1125,6 +1125,7 @@
             <input type="text" class="mdp-manual-input" id="mdpManualName" placeholder="이름" maxlength="10">
             <input type="number" class="mdp-manual-busoo" id="mdpManualBusoo" placeholder="부수" min="1" max="8"
               oninput="this.value=this.value.replace(/[^1-8]/g,'').slice(0,1)">
+            <input type="text" class="mdp-manual-input" id="mdpManualJo" placeholder="조명" maxlength="5" style="width:56px;">
             <button class="mdp-manual-submit" onclick="submitManual()">수동등록</button>
           </div>
         </div>
@@ -2737,9 +2738,18 @@
             const chip = container.querySelector ? (container.querySelector('.att-name-chip') || container) : container;
             container.addEventListener('click', () => handleChipTap(name, container));
             setupLongPress(container, () => {
-              const dt = registeredAt ? new Date(registeredAt) : null;
-              const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
-              showDateTooltip(container, msg);
+              if (isAdminMode && getMemo(selectedDate).includes('월례대회')) {
+                // 관리자: 길게 누르면 식사여부 토글
+                const cur = _mealData[selectedDate]?.[name];
+                const yn = cur === false ? true : false;
+                set(ref(db, `botak_meal/${selectedDate}/${name}`), yn)
+                  .then(() => showToast(yn ? `${name} 식사 참여` : `${name} 식사 불참`, yn ? 'success' : ''))
+                  .catch(() => showToast('저장 실패', 'error'));
+              } else {
+                const dt = registeredAt ? new Date(registeredAt) : null;
+                const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
+                showDateTooltip(container, msg);
+              }
             });
             applyMealBadge(container, name, selectedDate);
             namesWrap.appendChild(container);
@@ -2783,9 +2793,18 @@
               container.textContent = chipText;
             }
             setupLongPress(container, () => {
-              const dt = registeredAt ? new Date(registeredAt) : null;
-              const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
-              showDateTooltip(container, msg);
+              if (isAdminMode && getMemo(selectedDate).includes('월례대회')) {
+                // 관리자: 길게 누르면 식사여부 토글
+                const cur = _mealData[selectedDate]?.[name];
+                const yn = cur === false ? true : false;
+                set(ref(db, `botak_meal/${selectedDate}/${name}`), yn)
+                  .then(() => showToast(yn ? `${name} 식사 참여` : `${name} 식사 불참`, yn ? 'success' : ''))
+                  .catch(() => showToast('저장 실패', 'error'));
+              } else {
+                const dt = registeredAt ? new Date(registeredAt) : null;
+                const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
+                showDateTooltip(container, msg);
+              }
             });
             applyMealBadge(container, name, selectedDate);
             namesWrap.appendChild(container);
@@ -2943,18 +2962,20 @@
     if (!selectedDate) return;
     const name = document.getElementById('mdpManualName').value.trim();
     const busooVal = document.getElementById('mdpManualBusoo').value.trim();
+    const jo = (document.getElementById('mdpManualJo')?.value || '').trim();
     const busooNum = parseInt(busooVal);
     if (!name) { showToast('이름을 입력해주세요', 'error'); return; }
     if (!busooVal || isNaN(busooNum) || busooNum < 1 || busooNum > 8) {
       showToast('부수를 1~8로 입력해주세요', 'error'); return;
     }
     try {
-      await set(ref(db, `botak_attendance/${selectedDate}/${name}`), {
-        name, busoo: busooNum, registeredAt: Date.now()
-      });
+      const data = { name, busoo: busooNum, registeredAt: Date.now() };
+      if (jo) data.jo = jo;
+      await set(ref(db, `botak_attendance/${selectedDate}/${name}`), data);
       document.getElementById('mdpManualName').value = '';
       document.getElementById('mdpManualBusoo').value = '';
-      showToast(`${name} (${busooNum}부) 등록 완료`, 'success');
+      if (document.getElementById('mdpManualJo')) document.getElementById('mdpManualJo').value = '';
+      showToast(`${name} (${busooNum}부${jo ? ' '+jo : ''}) 등록 완료`, 'success');
     } catch(e) { showToast('등록 실패: ' + e.message, 'error'); }
   };
 
