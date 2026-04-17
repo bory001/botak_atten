@@ -2563,7 +2563,7 @@
         <button class="att-page-btn" id="attNextBtn" ${page >= totalPages - 1 ? 'disabled' : ''} onclick="changeAttPage(1)">▶</button>
       </div>`;
     }
-    html += `<div class="long-press-hint">이름 클릭 → 전화/문자 선택 | 길게 누르면 등록시각 조회</div>`;
+    html += `<div class="long-press-hint">이름 클릭 → 전화/문자 선택 | ${getMemo(selectedDate).includes('월례대회') ? '길게 누르면 월례식사 불참(△) 등록' : '길게 누르면 등록시각 조회'}</div>`;
     attList.innerHTML = html;
 
     attList.querySelectorAll('.att-name-chip, .att-name-chip-wrap').forEach(el => {
@@ -2665,10 +2665,16 @@
     // 참석자 수 뱃지
     const chipHint = document.getElementById('mdpChipHint');
     const daejinBtn = document.getElementById('daejinBtn');
+    const isTournamentDay = getMemo(selectedDate).includes('월례대회');
     if (names.length > 0) {
       attCountEl.style.display = '';
       attCountEl.textContent = `${names.length}명`;
-      if (chipHint) chipHint.style.display = '';
+      if (chipHint) {
+        chipHint.style.display = '';
+        chipHint.textContent = isTournamentDay
+          ? '이름 클릭 → 전화/문자 선택 | 길게 누르면 월례식사 불참(△) 등록'
+          : '이름 클릭 → 전화/문자 선택 | 길게 누르면 등록시각 조회';
+      }
       if (daejinBtn) {
         daejinBtn.style.display = 'inline-block';
         daejinBtn.textContent = isAdminMode ? '🎯 대진설정' : '📋 대진표';
@@ -2744,8 +2750,13 @@
             const chip = container.querySelector ? (container.querySelector('.att-name-chip') || container) : container;
             container.addEventListener('click', () => handleChipTap(name, container));
             setupLongPress(container, () => {
-              if (isAdminMode && getMemo(selectedDate).includes('월례대회')) {
-                // 관리자: 길게 누르면 식사여부 토글
+              if (getMemo(selectedDate).includes('월례대회')) {
+                // 월례대회: 관리자/일반 모두 길게 누르면 식사여부 토글
+                if (!isAdminMode && name !== currentUser) {
+                  // 일반 사용자는 본인것만
+                  showToast('본인 식사여부만 변경 가능합니다', '');
+                  return;
+                }
                 const cur = _mealData[selectedDate]?.[name];
                 const yn = cur === false ? true : false;
                 set(ref(db, `botak_meal/${selectedDate}/${name}`), yn)
@@ -2800,7 +2811,11 @@
             }
             container.addEventListener('click', () => handleChipTap(name, container));
             setupLongPress(container, () => {
-              if (isAdminMode && getMemo(selectedDate).includes('월례대회')) {
+              if (getMemo(selectedDate).includes('월례대회')) {
+                if (!isAdminMode && name !== currentUser) {
+                  showToast('본인 식사여부만 변경 가능합니다', '');
+                  return;
+                }
                 const cur = _mealData[selectedDate]?.[name];
                 const yn = cur === false ? true : false;
                 set(ref(db, `botak_meal/${selectedDate}/${name}`), yn)
@@ -3331,11 +3346,7 @@
       if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
       return;
     }
-    // 일반 모드: 월례대회 날 + 본인 칩 → 식사여부 팝업
-    if (name === currentUser && selectedDate && getMemo(selectedDate).includes('월례대회')) {
-      openMealPopup(name);
-      return;
-    }
+    // 월례대회 식사여부는 길게 누르기로만 변경
     // 일반 모드: 연락처 팝업
     const phone = memberData[name];
     if (phone) {
