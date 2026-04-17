@@ -3298,6 +3298,13 @@
 
   // ── 칩 탭 핸들러: 관리자=선택, 일반=전화/문자 팝업 ──
   function handleChipTap(name, chipEl) {
+    // 월례대회 날 → 관리자/본인 모두 식사여부 팝업
+    if (selectedDate && getMemo(selectedDate).includes('월례대회')) {
+      if (isAdminMode || name === currentUser) {
+        openMealPopup(name);
+        return;
+      }
+    }
     if (isAdminMode) {
       const mainEl = chipEl || document.querySelector(`.att-name-chip[data-name="${name}"]`);
       document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
@@ -3309,11 +3316,6 @@
       }
       const hb = document.getElementById('hdrAttendBtn');
       if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
-      return;
-    }
-    // 월례대회 날 + 본인 칩 → 식사여부 팝업
-    if (name === currentUser && selectedDate && getMemo(selectedDate).includes('월례대회')) {
-      openMealPopup(name);
       return;
     }
     // 일반 모드: 연락처 팝업 표시
@@ -3328,7 +3330,9 @@
   }
 
   // ── 월례식사 여부 ──
+  let _mealTargetName = null;
   window.openMealPopup = function(name) {
+    _mealTargetName = name;
     const cur = _mealData[selectedDate]?.[name];
     document.getElementById('mealPopupTitle').textContent =
       cur === false ? `🍽️ ${name} - 현재: 불참 → 변경?` : `🍽️ ${name} - 월례 식사 참여?`;
@@ -3340,11 +3344,11 @@
   };
 
   window.setMealAnswer = async function(yn) {
+    const target = _mealTargetName || currentUser;
     closeMealPopup();
     if (!selectedDate) return;
     try {
-      await set(ref(db, `botak_meal/${selectedDate}/${currentUser}`), yn);
-      // _mealData는 onValue로 자동 갱신됨
+      await set(ref(db, `botak_meal/${selectedDate}/${target}`), yn);
     } catch(e) { showToast('저장 실패', 'error'); }
   };
 
