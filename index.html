@@ -228,17 +228,20 @@
 
   /* ── 월례식사 여부 ── */
   .meal-no-badge {
-    position: absolute; top: -4px; right: -4px;
-    font-size: 11px; line-height: 1; color: #ef4444;
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; line-height: 1; color: #ef4444;
     pointer-events: none; font-weight: 900; z-index: 2;
+    background: rgba(255,255,255,0.45); border-radius: inherit;
   }
   .att-name-chip-wrap { position: relative; }
-  .att-name-chip.meal-no-standalone {
-    position: relative;
-  }
+  .att-name-chip { position: relative; }
   .meal-no-badge-inline {
-    color: #ef4444; font-size: 10px; font-weight: 900;
-    margin-left: 1px; vertical-align: super; line-height: 1;
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 900; color: #ef4444;
+    pointer-events: none; z-index: 2;
+    background: rgba(255,255,255,0.45); border-radius: inherit;
   }
   .meal-popup-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.45);
@@ -3346,26 +3349,19 @@
   };
 
   // 칩에 △ 배지 적용 헬퍼
-  function applyMealBadge(chipEl, name, dateKey) {
+  function applyMealBadge(container, name, dateKey) {
+    // 실제 칩 엘리먼트 찾기
+    const chip = container.classList.contains('att-name-chip')
+      ? container
+      : container.querySelector('.att-name-chip') || container;
     // 기존 배지 제거
-    const old = chipEl.parentElement?.querySelector('.meal-no-badge') ||
-                chipEl.querySelector('.meal-no-badge-inline');
-    if (old) old.remove();
+    chip.querySelectorAll('.meal-no-badge, .meal-no-badge-inline').forEach(b => b.remove());
     if (_mealData[dateKey]?.[name] === false) {
-      // att-name-chip-wrap 구조면 absolute 배지, 아니면 inline
-      if (chipEl.classList.contains('att-name-chip-wrap') || chipEl.parentElement?.classList.contains('att-name-chip-wrap')) {
-        const wrap = chipEl.classList.contains('att-name-chip-wrap') ? chipEl : chipEl.parentElement;
-        const badge = document.createElement('span');
-        badge.className = 'meal-no-badge';
-        badge.textContent = '▲';
-        wrap.style.position = 'relative';
-        wrap.appendChild(badge);
-      } else {
-        const badge = document.createElement('span');
-        badge.className = 'meal-no-badge-inline';
-        badge.textContent = '▲';
-        chipEl.appendChild(badge);
-      }
+      const badge = document.createElement('span');
+      badge.className = 'meal-no-badge-inline';
+      badge.textContent = '▲';
+      chip.style.position = 'relative';
+      chip.appendChild(badge);
     }
   }
 
