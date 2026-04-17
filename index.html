@@ -239,9 +239,8 @@
   .meal-no-badge-inline {
     position: absolute; inset: 0;
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 900; color: #ef4444;
     pointer-events: none; z-index: 2;
-    background: rgba(255,255,255,0.45); border-radius: inherit;
+    font-size: 14px; font-weight: 900; color: #ef4444;
   }
   .meal-popup-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.45);
@@ -3359,8 +3358,9 @@
     if (_mealData[dateKey]?.[name] === false) {
       const badge = document.createElement('span');
       badge.className = 'meal-no-badge-inline';
-      badge.textContent = '▲';
+
       chip.style.position = 'relative';
+      badge.textContent = '△';
       chip.appendChild(badge);
     }
   }
