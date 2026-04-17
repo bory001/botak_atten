@@ -2514,6 +2514,9 @@
     btn.disabled = false;
     const names = selectedDate && attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
     const isRegistered = names.includes(currentUser);
+    const todayStrSb = new Date().toISOString().slice(0, 10);
+    const isPastSb = selectedDate < todayStrSb;
+    const canEditSb = isAdminMode || !isPastSb;
 
     if (isRegistered) {
       btn.className = 'my-attend-btn cancel';
@@ -2524,7 +2527,14 @@
     }
 
     // 시각 토글 버튼 상태
-    updateTimeToggleBtns(isRegistered);
+    if (!canEditSb) {
+      const pcAttBtn = document.getElementById('myAttendBtn') || document.querySelector('.my-attend-btn:not(.time-single-btn)');
+      if (pcAttBtn) pcAttBtn.style.display = 'none';
+      const pcTimeBtn = document.getElementById('timeToggleBtn');
+      if (pcTimeBtn) pcTimeBtn.style.display = 'none';
+    } else {
+      updateTimeToggleBtns(isRegistered);
+    }
 
     if (names.length === 0) {
       attList.innerHTML = `<div class="att-empty">아직 등록된 참석자가 없어요</div>`;
@@ -2647,20 +2657,34 @@
       manualForm.style.display = isAdminMode ? 'flex' : 'none';
     }
 
+    // 과거 날짜 여부 (오늘 날짜 기준, 어제 이전이면 과거)
+    const todayStr = new Date().toISOString().slice(0, 10);
+    const isPast = selectedDate < todayStr;
+    const canEdit = isAdminMode || !isPast; // 관리자는 항상, 일반은 오늘~미래만
+
     // 헤더 참석 버튼 동기화
     const hdrBtn = document.getElementById('hdrAttendBtn');
     if (hdrBtn) {
-      hdrBtn.style.display = 'inline-block';
-      if (isRegistered) {
-        hdrBtn.className = 'hdr-btn hdr-attend-btn cancel';
-        hdrBtn.innerHTML = '❌ 참석 취소';
+      if (!canEdit) {
+        hdrBtn.style.display = 'none'; // 과거 날짜면 버튼 숨김
       } else {
-        hdrBtn.className = 'hdr-btn hdr-attend-btn register';
-        hdrBtn.innerHTML = '✅ 참석 등록';
+        hdrBtn.style.display = 'inline-block';
+        if (isRegistered) {
+          hdrBtn.className = 'hdr-btn hdr-attend-btn cancel';
+          hdrBtn.innerHTML = '❌ 참석 취소';
+        } else {
+          hdrBtn.className = 'hdr-btn hdr-attend-btn register';
+          hdrBtn.innerHTML = '✅ 참석 등록';
+        }
       }
     }
-    // 헤더 시각 버튼 동기화
-    updateTimeToggleBtns(isRegistered);
+    // 헤더 시각 버튼 동기화 (과거면 숨김)
+    if (!canEdit) {
+      const hdrTimeBtn = document.getElementById('hdrTimeBtn');
+      if (hdrTimeBtn) hdrTimeBtn.style.display = 'none';
+    } else {
+      updateTimeToggleBtns(isRegistered);
+    }
 
     // 참석자 수 뱃지
     const chipHint = document.getElementById('mdpChipHint');
@@ -3015,6 +3039,10 @@
 
   // ── 참석 등록/취소 토글 ──
   window.toggleAttendance = async function() {
+    const todayCheck = new Date().toISOString().slice(0, 10);
+    if (!isAdminMode && selectedDate < todayCheck) {
+      showToast('과거 날짜는 참석 변경이 불가합니다', 'error'); return;
+    }
     if (!selectedDate) return;
     const names = attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
     const isRegistered = names.includes(currentUser);
@@ -3029,6 +3057,10 @@
   };
 
   window.toggleAttendanceMobile = async function() {
+    const todayCheck = new Date().toISOString().slice(0, 10);
+    if (!isAdminMode && selectedDate < todayCheck) {
+      showToast('과거 날짜는 참석 변경이 불가합니다', 'error'); return;
+    }
     if (!selectedDate) return;
     const names = attendanceData[selectedDate] ? Object.keys(attendanceData[selectedDate]) : [];
     // 관리자 모드: chip 탭으로 선택된 이름 취소
