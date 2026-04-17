@@ -226,6 +226,52 @@
   .edu-sheet-btn.del   { background: #fef2f2; color: #dc2626; }
   .edu-sheet-btn.cancel { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
 
+  /* ── 월례식사 여부 ── */
+  .meal-no-badge {
+    position: absolute; top: -4px; right: -4px;
+    font-size: 11px; line-height: 1; color: #ef4444;
+    pointer-events: none; font-weight: 900; z-index: 2;
+  }
+  .att-name-chip-wrap { position: relative; }
+  .att-name-chip.meal-no-standalone {
+    position: relative;
+  }
+  .meal-no-badge-inline {
+    color: #ef4444; font-size: 10px; font-weight: 900;
+    margin-left: 1px; vertical-align: super; line-height: 1;
+  }
+  .meal-popup-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+    display: none; align-items: flex-end; justify-content: center;
+    z-index: 800; padding-bottom: env(safe-area-inset-bottom,0);
+  }
+  .meal-popup-overlay.show { display: flex; }
+  .meal-popup {
+    background: white; border-radius: 20px 20px 0 0;
+    width: 100%; max-width: 480px; padding: 1.25rem 1rem 1.5rem;
+    animation: slideUpSheet 0.22s ease;
+  }
+  .meal-popup-title {
+    font-size: 15px; font-weight: 800; color: var(--primary);
+    text-align: center; margin-bottom: 1rem;
+  }
+  .meal-popup-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .meal-btn {
+    padding: 14px 10px; border-radius: 14px; border: none;
+    font-size: 15px; font-weight: 700; font-family: inherit;
+    cursor: pointer; display: flex; flex-direction: column;
+    align-items: center; gap: 6px; transition: all 0.15s;
+  }
+  .meal-btn .ca-icon { font-size: 26px; line-height: 1; }
+  .meal-btn.yes  { background: #e8f5e9; color: #1b5e20; }
+  .meal-btn.no   { background: #fef2f2; color: #dc2626; }
+  .meal-popup-cancel {
+    margin-top: 10px; width: 100%; padding: 13px;
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: 12px; font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer; color: var(--text-muted);
+  }
+
   /* ── 연락처 액션 팝업 ── */
   .contact-popup-overlay {
     position: fixed; inset: 0; background: rgba(0,0,0,0.45);
@@ -1499,6 +1545,22 @@
   </div>
 </div>
 
+<!-- 월례식사 여부 팝업 -->
+<div class="meal-popup-overlay" id="mealPopup" onclick="if(event.target===this)closeMealPopup()">
+  <div class="meal-popup">
+    <div class="meal-popup-title" id="mealPopupTitle">🍽️ 월례 식사 참여</div>
+    <div class="meal-popup-btns">
+      <button class="meal-btn yes" onclick="setMealAnswer(true)">
+        <span class="ca-icon">✅</span>예
+      </button>
+      <button class="meal-btn no" onclick="setMealAnswer(false)">
+        <span class="ca-icon">❌</span>아니오
+      </button>
+    </div>
+    <button class="meal-popup-cancel" onclick="closeMealPopup()">취소</button>
+  </div>
+</div>
+
 <!-- 연락처 액션 팝업 -->
 <div class="contact-popup-overlay" id="contactPopup" onclick="closeContactPopup(event)">
   <div class="contact-popup">
@@ -1577,6 +1639,7 @@
   let leagueDays = [2, 6];     // 리그 요일 (0=일,1=월,...,6=토), 기본 화,토
   let _memoEmoji = '';          // 현재 선택된 메모 이모지
   let _contactPhone = '';       // 연락처 팝업용 전화번호
+  let _mealData = {};           // { dateKey: { name: true/false } }
   let _adminSelectedName = null; // 관리자가 선택한 참석자          // 참석자 목록 현재 페이지
   const ATT_PAGE_SIZE = 20; // 페이지당 표시 수
   let _timeModalMode = 'reg'; // 'reg' | 'mod'
@@ -2349,6 +2412,11 @@
       document.getElementById('syncLabel').textContent = '오류';
     });
     // 메모 데이터 리스닝
+    onValue(ref(db, 'botak_meal'), (snap) => {
+      _mealData = snap.val() || {};
+      if (selectedDate) renderMobilePanel();
+    });
+
     onValue(ref(db, 'botak_memo'), (snap) => {
       memoData = snap.val() || {};
       renderCalendar();
@@ -2670,6 +2738,7 @@
               const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
               showDateTooltip(container, msg);
             });
+            applyMealBadge(container, name, selectedDate);
             namesWrap.appendChild(container);
           });
           row.appendChild(namesWrap);
@@ -2715,6 +2784,7 @@
               const msg = dt ? `등록: ${dt.getMonth()+1}.${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '등록일시 없음';
               showDateTooltip(container, msg);
             });
+            applyMealBadge(container, name, selectedDate);
             namesWrap.appendChild(container);
           });
           row.appendChild(namesWrap);
@@ -3238,6 +3308,11 @@
       if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
       return;
     }
+    // 월례대회 날 + 본인 칩 → 식사여부 팝업
+    if (name === currentUser && selectedDate && getMemo(selectedDate).includes('월례대회')) {
+      openMealPopup(name);
+      return;
+    }
     // 일반 모드: 연락처 팝업 표시
     const phone = memberData[name];
     if (phone) {
@@ -3246,6 +3321,51 @@
       document.getElementById('contactPopup').classList.add('show');
     } else {
       showToast(`"${name}" 님의 연락처가 등록되어 있지 않아요`, '');
+    }
+  }
+
+  // ── 월례식사 여부 ──
+  window.openMealPopup = function(name) {
+    const cur = _mealData[selectedDate]?.[name];
+    document.getElementById('mealPopupTitle').textContent =
+      cur === false ? `🍽️ ${name} - 현재: 불참 → 변경?` : `🍽️ ${name} - 월례 식사 참여?`;
+    document.getElementById('mealPopup').classList.add('show');
+  };
+
+  window.closeMealPopup = function() {
+    document.getElementById('mealPopup').classList.remove('show');
+  };
+
+  window.setMealAnswer = async function(yn) {
+    closeMealPopup();
+    if (!selectedDate) return;
+    try {
+      await set(ref(db, `botak_meal/${selectedDate}/${currentUser}`), yn);
+      // _mealData는 onValue로 자동 갱신됨
+    } catch(e) { showToast('저장 실패', 'error'); }
+  };
+
+  // 칩에 △ 배지 적용 헬퍼
+  function applyMealBadge(chipEl, name, dateKey) {
+    // 기존 배지 제거
+    const old = chipEl.parentElement?.querySelector('.meal-no-badge') ||
+                chipEl.querySelector('.meal-no-badge-inline');
+    if (old) old.remove();
+    if (_mealData[dateKey]?.[name] === false) {
+      // att-name-chip-wrap 구조면 absolute 배지, 아니면 inline
+      if (chipEl.classList.contains('att-name-chip-wrap') || chipEl.parentElement?.classList.contains('att-name-chip-wrap')) {
+        const wrap = chipEl.classList.contains('att-name-chip-wrap') ? chipEl : chipEl.parentElement;
+        const badge = document.createElement('span');
+        badge.className = 'meal-no-badge';
+        badge.textContent = '▲';
+        wrap.style.position = 'relative';
+        wrap.appendChild(badge);
+      } else {
+        const badge = document.createElement('span');
+        badge.className = 'meal-no-badge-inline';
+        badge.textContent = '▲';
+        chipEl.appendChild(badge);
+      }
     }
   }
 
