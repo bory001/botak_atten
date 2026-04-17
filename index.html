@@ -316,13 +316,14 @@
 
   header {
     background: var(--primary); color: white; padding: 0.5rem 1rem;
-    min-height: 56px; display: flex; align-items: center;
+    min-height: 56px; display: flex; align-items: flex-start;
     justify-content: space-between; position: sticky; top: 0; z-index: 100; gap: 8px;
+    flex-wrap: wrap;
   }
   .header-left h1 { font-size: 17px; font-weight: 700; white-space: nowrap; }
   .header-left .subtitle { font-size: 12px; opacity: 0.7; white-space: nowrap; padding-left: 22px; }
   .header-left { flex-shrink: 1; min-width: 0; overflow: hidden; }
-  .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+  .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
   .user-badge {
     display: flex; align-items: center; gap: 5px;
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
@@ -335,7 +336,7 @@
   .sync-label { font-size: 10px; color: #6ee7b7; }
   .hdr-btn {
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
-    color: white; padding: 5px 7px; border-radius: 16px; font-size: 11px;
+    color: white; padding: 4px 6px; border-radius: 16px; font-size: 10px;
     font-family: inherit; cursor: pointer; white-space: nowrap;
   }
   .hdr-attend-btn.register { background: var(--accent); border-color: var(--accent); }
@@ -3319,14 +3320,8 @@
 
   // ── 칩 탭 핸들러: 관리자=선택, 일반=전화/문자 팝업 ──
   function handleChipTap(name, chipEl) {
-    // 월례대회 날 → 관리자/본인 모두 식사여부 팝업
-    if (selectedDate && getMemo(selectedDate).includes('월례대회')) {
-      if (isAdminMode || name === currentUser) {
-        openMealPopup(name);
-        return;
-      }
-    }
     if (isAdminMode) {
+      // 관리자: 클릭 → 참석취소 선택
       const mainEl = chipEl || document.querySelector(`.att-name-chip[data-name="${name}"]`);
       document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
       if (_adminSelectedName === name) {
@@ -3339,7 +3334,12 @@
       if (hb) hb.innerHTML = _adminSelectedName ? `❌ ${_adminSelectedName} 취소` : '❌ 참석 취소';
       return;
     }
-    // 일반 모드: 연락처 팝업 표시
+    // 일반 모드: 월례대회 날 + 본인 칩 → 식사여부 팝업
+    if (name === currentUser && selectedDate && getMemo(selectedDate).includes('월례대회')) {
+      openMealPopup(name);
+      return;
+    }
+    // 일반 모드: 연락처 팝업
     const phone = memberData[name];
     if (phone) {
       _contactPhone = phone.replace(/[^0-9]/g, '');
