@@ -315,15 +315,16 @@
   #app { display: none; }
 
   header {
-    background: var(--primary); color: white; padding: 0.5rem 1rem;
-    min-height: 56px; display: flex; align-items: flex-start;
-    justify-content: space-between; position: sticky; top: 0; z-index: 100; gap: 8px;
-    flex-wrap: wrap;
+    background: var(--primary); color: white; padding: 0.4rem 0.75rem 0.4rem;
+    display: flex; flex-direction: column; gap: 4px;
+    position: sticky; top: 0; z-index: 100;
   }
+  .header-row1 { display: flex; align-items: center; justify-content: space-between; gap: 6px; min-height: 40px; }
+  .header-row2 { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; padding-bottom: 2px; }
   .header-left h1 { font-size: 17px; font-weight: 700; white-space: nowrap; }
   .header-left .subtitle { font-size: 12px; opacity: 0.7; white-space: nowrap; padding-left: 22px; }
   .header-left { flex-shrink: 1; min-width: 0; overflow: hidden; }
-  .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
+  .header-right { display: flex; align-items: center; gap: 4px; flex-shrink: 0; flex-wrap: nowrap; }
   .user-badge {
     display: flex; align-items: center; gap: 5px;
     background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3);
@@ -342,18 +343,16 @@
   .hdr-attend-btn.register { background: var(--accent); border-color: var(--accent); }
   .hdr-attend-btn.cancel { background: rgba(239,68,68,0.3); border-color: rgba(239,68,68,0.7); }
   @media (max-width: 480px) {
-    header { padding: 0.4rem 0.4rem; gap: 4px; }
     .header-left h1 { font-size: 13px; }
     .header-left .subtitle { font-size: 10px; padding-left: 16px; }
-    .hdr-btn { font-size: 11px; padding: 4px 5px; }
+    .hdr-btn { font-size: 10px; padding: 3px 5px; }
     .header-right { gap: 3px; }
     .sync-dot-wrap { display: none; }
   }
   @media (max-width: 400px) {
-    header { padding: 0.35rem 0.3rem; gap: 3px; }
     .header-left h1 { font-size: 12px; }
     .header-left .subtitle { font-size: 9px; padding-left: 14px; }
-    .hdr-btn { font-size: 10px; padding: 4px 4px; border-radius: 12px; }
+    .hdr-btn { font-size: 9px; padding: 3px 4px; border-radius: 10px; }
     .header-right { gap: 2px; }
   }
   @media (max-width: 360px) {
@@ -1041,24 +1040,29 @@
 <!-- 메인 앱 -->
 <div id="app">
   <header>
-    <div class="header-left">
-      <h1>🏓 보탁 참석자 현황</h1>
-      <div class="subtitle">(보령탁구동호회)</div>
-    </div>
-    <div class="header-right">
-
-      <div class="sync-dot-wrap">
-        <div class="sync-dot" id="syncDot"></div>
-        <span class="sync-label" id="syncLabel">연결됨</span>
+    <!-- 1줄: 타이틀 + 기본 버튼 -->
+    <div class="header-row1">
+      <div class="header-left">
+        <h1>🏓 보탁 참석자 현황</h1>
+        <div class="subtitle">(보령탁구동호회)</div>
       </div>
-      <button class="hdr-btn hdr-attend-btn" id="hdrTimeBtn" onclick="openTimeModal()" style="display:none;">⏰ 시각등록</button>
-      <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">✅ 참석 등록</button>
-      <button class="hdr-btn" id="joColorBtn" onclick="openJoColorModal()" style="display:none;background:rgba(236,72,153,0.2);border-color:rgba(236,72,153,0.6);">🎨 조색상</button>
-      <button class="hdr-btn" id="leagueDayBtn" onclick="openLeagueDayModal()" style="display:none;background:rgba(59,130,246,0.25);border-color:rgba(59,130,246,0.7);">📅 리그요일</button>
-      <button class="hdr-btn" id="memberDbBtn" onclick="openMemberDb()" style="display:none;background:rgba(16,185,129,0.25);border-color:rgba(16,185,129,0.7);">👥 회원DB</button>
-      <button class="hdr-btn" onclick="openRankingModal()" style="background:rgba(99,102,241,0.3);border-color:rgba(99,102,241,0.7);">🏆 통계</button>
-      <button class="hdr-btn" id="adminModeBtn" onclick="openAdminAuth()" style="background:rgba(255,165,0,0.2);border-color:rgba(255,165,0,0.5);">⚙️ 관리자</button>
-      <button class="hdr-btn" onclick="doLogout()">나가기</button>
+      <div class="header-right">
+        <div class="sync-dot-wrap">
+          <div class="sync-dot" id="syncDot"></div>
+          <span class="sync-label" id="syncLabel">연결됨</span>
+        </div>
+        <button class="hdr-btn hdr-attend-btn" id="hdrTimeBtn" onclick="openTimeModal()" style="display:none;">⏰ 시각등록</button>
+        <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">✅ 참석 등록</button>
+        <button class="hdr-btn" onclick="openRankingModal()" style="background:rgba(99,102,241,0.3);border-color:rgba(99,102,241,0.7);">🏆 통계</button>
+        <button class="hdr-btn" id="adminModeBtn" onclick="openAdminAuth()" style="background:rgba(255,165,0,0.2);border-color:rgba(255,165,0,0.5);">⚙️ 관리자</button>
+        <button class="hdr-btn" onclick="doLogout()">나가기</button>
+      </div>
+    </div>
+    <!-- 2줄: 관리자 전용 버튼 (관리자 모드일 때만 표시) -->
+    <div class="header-row2" id="adminRow2" style="display:none;">
+      <button class="hdr-btn" id="joColorBtn" onclick="openJoColorModal()" style="background:rgba(236,72,153,0.2);border-color:rgba(236,72,153,0.6);">🎨 조색상</button>
+      <button class="hdr-btn" id="leagueDayBtn" onclick="openLeagueDayModal()" style="background:rgba(59,130,246,0.25);border-color:rgba(59,130,246,0.7);">📅 리그요일</button>
+      <button class="hdr-btn" id="memberDbBtn" onclick="openMemberDb()" style="background:rgba(16,185,129,0.25);border-color:rgba(16,185,130,0.7);">👥 회원DB</button>
     </div>
   </header>
 
@@ -3245,12 +3249,8 @@
       document.querySelectorAll('.att-name-chip').forEach(c => c.style.outline = '');
       const btn = document.getElementById('adminModeBtn');
       if (btn) { btn.innerHTML = '⚙️ 관리자'; btn.style.background = 'rgba(255,165,0,0.2)'; btn.style.borderColor = 'rgba(255,165,0,0.5)'; }
-      const mdbBtn = document.getElementById('memberDbBtn');
-      if (mdbBtn) mdbBtn.style.display = 'none';
-      const ldBtn = document.getElementById('leagueDayBtn');
-      if (ldBtn) ldBtn.style.display = 'none';
-      const jcBtn = document.getElementById('joColorBtn');
-      if (jcBtn) jcBtn.style.display = 'none';
+      const adminRow2 = document.getElementById('adminRow2');
+      if (adminRow2) adminRow2.style.display = 'none';
       if (selectedDate) { renderMobilePanel(); renderSidebar(); }
       showToast('관리자 모드 해제');
       return;
@@ -3275,12 +3275,8 @@
           closeAdminAuth();
           const btn = document.getElementById('adminModeBtn');
           if (btn) { btn.innerHTML = '⚙️ 관리중'; btn.style.background = 'rgba(255,100,0,0.4)'; btn.style.borderColor = 'rgba(255,100,0,0.8)'; }
-          const mdbBtn = document.getElementById('memberDbBtn');
-          if (mdbBtn) mdbBtn.style.display = 'inline-block';
-          const ldBtn = document.getElementById('leagueDayBtn');
-          if (ldBtn) ldBtn.style.display = 'inline-block';
-          const jcBtn = document.getElementById('joColorBtn');
-          if (jcBtn) jcBtn.style.display = 'inline-block';
+          const adminRow2 = document.getElementById('adminRow2');
+          if (adminRow2) adminRow2.style.display = 'flex';
           if (selectedDate) { renderMobilePanel(); renderSidebar(); }
           showToast('관리자 모드 활성화', 'success');
         } else {
