@@ -2793,9 +2793,9 @@
               container.dataset.name = name;
               container.textContent = chipText;
             }
+            container.addEventListener('click', () => handleChipTap(name, container));
             setupLongPress(container, () => {
               if (isAdminMode && getMemo(selectedDate).includes('월례대회')) {
-                // 관리자: 길게 누르면 식사여부 토글
                 const cur = _mealData[selectedDate]?.[name];
                 const yn = cur === false ? true : false;
                 set(ref(db, `botak_meal/${selectedDate}/${name}`), yn)
