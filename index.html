@@ -2337,10 +2337,21 @@
   };
 
   window.doLogout = function() {
-    window.close();
-    setTimeout(function() {
-      history.go(-(history.length));
-    }, 200);
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      // iOS: 로그아웃 처리 (로그인 화면으로)
+      document.getElementById('app').style.display = 'none';
+      document.getElementById('loginScreen').style.display = 'flex';
+      // 비번 초기화
+      _lockBuf = ''; updateDots();
+      document.getElementById('loginError').textContent = '';
+    } else {
+      // 안드로이드: 기존대로 탭 닫기
+      window.close();
+      setTimeout(function() {
+        history.go(-(history.length));
+      }, 200);
+    }
   };
 
   // ── 비밀번호 변경 ──
