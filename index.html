@@ -3140,7 +3140,7 @@
         if (hasTime) {
           const t = attendanceData[selectedDate][currentUser].arrivalTime;
           pcBtn.className = 'my-attend-btn time-single-btn has-time';
-          pcBtn.innerHTML = `✏️ 시각수정 (${t})`;
+          pcBtn.innerHTML = `🕐 ${t} ✕ (클릭시 삭제)`;
         } else {
           pcBtn.className = 'my-attend-btn time-single-btn';
           pcBtn.innerHTML = '⏰ 시각등록';
@@ -3158,7 +3158,7 @@
         if (hasTime) {
           const t = attendanceData[selectedDate][currentUser].arrivalTime;
           hdrBtn.className = 'hdr-btn hdr-attend-btn time-mod';
-          hdrBtn.innerHTML = `✏️ ${t}`;
+          hdrBtn.innerHTML = `🕐 ${t} ✕`;
         } else {
           hdrBtn.className = 'hdr-btn hdr-attend-btn time-reg';
           hdrBtn.innerHTML = '⏰ 시각등록';
@@ -3175,7 +3175,16 @@
     const hasTime = selectedDate && attendanceData[selectedDate] &&
       attendanceData[selectedDate][currentUser] &&
       !!attendanceData[selectedDate][currentUser].arrivalTime;
-    _timeModalMode = hasTime ? 'mod' : 'reg';
+
+    // 시각이 등록된 상태면 즉시 삭제
+    if (hasTime) {
+      remove(ref(db, `botak_attendance/${selectedDate}/${currentUser}/arrivalTime`))
+        .then(() => showToast('시각이 삭제되었습니다'))
+        .catch(e => showToast('삭제 실패: ' + e.message, 'error'));
+      return;
+    }
+
+    _timeModalMode = 'reg';
 
     const titleEl = document.getElementById('timeModalTitle');
     const errEl = document.getElementById('timeModalErr');
