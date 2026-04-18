@@ -33,8 +33,17 @@ self.addEventListener('fetch', e => {
     e.respondWith(fetch(e.request));
     return;
   }
+  // 네트워크 우선: 항상 서버에서 최신 파일 가져오고, 실패 시 캐시 사용
   e.respondWith(
-    caches.match(e.request)
-      .then(res => res || fetch(e.request))
+    fetch(e.request)
+      .then(res => {
+        // 정상 응답이면 캐시에도 저장
+        if (res && res.status === 200) {
+          const resClone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(e.request, resClone));
+        }
+        return res;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
