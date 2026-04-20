@@ -2777,7 +2777,8 @@
       .sort((a, b) => (a[1].registeredAt || 0) - (b[1].registeredAt || 0))
       .map(([name, val]) => ({ name, busoo: val.busoo || 0, jo: val.jo || '', registeredAt: val.registeredAt || 0, arrivalTime: val.arrivalTime || '' }));
 
-    if (sorted.length === 0) {
+    const absentNamesCheck = Object.keys(_absentData[selectedDate] || {});
+    if (sorted.length === 0 && !(isTournament && absentNamesCheck.length > 0)) {
       attGrid.innerHTML = '<div class="mdp-empty">아직 등록된 참석자가 없어요</div>';
       attGrid.style.cssText = '';
     } else {
@@ -2785,7 +2786,6 @@
       attGrid.style.cssText = 'width:100%;';
 
       // ── 월례대회 모드: 조별 정렬 ──
-      const isTournament = getMemo(selectedDate).includes('월례대회');
       if (isTournament) {
         // 불참자 목록 (회원DB에서 조 정보 가져옴)
         const absentNames = Object.keys(_absentData[selectedDate] || {});
