@@ -2354,11 +2354,16 @@
     try {
       if (isAbsent) {
         await remove(ref(db, `botak_absent/${selectedDate}/${currentUser}`));
+        if (!_absentData[selectedDate]) _absentData[selectedDate] = {};
+        delete _absentData[selectedDate][currentUser];
         showToast('불참이 해제되었습니다');
       } else {
         await set(ref(db, `botak_absent/${selectedDate}/${currentUser}`), true);
+        if (!_absentData[selectedDate]) _absentData[selectedDate] = {};
+        _absentData[selectedDate][currentUser] = true;
         showToast('불참으로 등록되었습니다', 'error');
       }
+      renderMobilePanel();
     } catch(e) { showToast('저장 실패: ' + e.message, 'error'); }
   };
 
@@ -2946,8 +2951,56 @@
             applyAbsentBadge(container, name, selectedDate);
             namesWrap.appendChild(container);
           });
+          // 조 없는 불참자도 미배정 행에 추가
+          const noJoAbsent = absentMembers.filter(m => !m.jo);
+          noJoAbsent.sort((a,b)=>(a.busoo||99)-(b.busoo||99)).forEach(({ name, busoo }) => {
+            const isMine = (name === currentUser);
+            const chipText = busoo ? `${busoo}${name}` : name;
+            const chip = document.createElement('div');
+            chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
+            chip.dataset.name = name;
+            chip.style.position = 'relative';
+            chip.style.opacity = '0.7';
+            chip.textContent = chipText;
+            const badge = document.createElement('span');
+            badge.className = 'absent-badge';
+            badge.textContent = '✕';
+            chip.appendChild(badge);
+            namesWrap.appendChild(chip);
+          });
           row.appendChild(namesWrap);
           attGrid.appendChild(row);
+        } else {
+          // 참석자는 없고 불참자만 있는 경우 (noJo 없음) → 미배정 행 생성
+          const noJoAbsent = absentMembers.filter(m => !m.jo);
+          if (noJoAbsent.length > 0) {
+            const row = document.createElement('div');
+            row.className = 'busoo-row';
+            const label = document.createElement('div');
+            label.className = 'busoo-label';
+            label.style.background = '#94a3b8';
+            label.textContent = '미배정';
+            row.appendChild(label);
+            const namesWrap = document.createElement('div');
+            namesWrap.className = 'busoo-names';
+            noJoAbsent.sort((a,b)=>(a.busoo||99)-(b.busoo||99)).forEach(({ name, busoo }) => {
+              const isMine = (name === currentUser);
+              const chipText = busoo ? `${busoo}${name}` : name;
+              const chip = document.createElement('div');
+              chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
+              chip.dataset.name = name;
+              chip.style.position = 'relative';
+              chip.style.opacity = '0.7';
+              chip.textContent = chipText;
+              const badge = document.createElement('span');
+              badge.className = 'absent-badge';
+              badge.textContent = '✕';
+              chip.appendChild(badge);
+              namesWrap.appendChild(chip);
+            });
+            row.appendChild(namesWrap);
+            attGrid.appendChild(row);
+          }
         }
 
         return; // 월례대회 모드 완료
