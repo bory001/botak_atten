@@ -2750,9 +2750,11 @@
     const chipHint = document.getElementById('mdpChipHint');
     const daejinBtn = document.getElementById('daejinBtn');
     const isTournamentDay = getMemo(selectedDate).includes('월례대회');
-    if (names.length > 0) {
+    const absentCount = Object.keys(_absentData[selectedDate] || {}).length;
+    const displayCount = names.length; // 참석자만 (불참자 별도)
+    if (names.length > 0 || absentCount > 0) {
       attCountEl.style.display = '';
-      attCountEl.textContent = `${names.length}명`;
+      attCountEl.textContent = `${displayCount}명`;
       if (chipHint) {
         chipHint.style.display = '';
         chipHint.textContent = isTournamentDay
@@ -2785,8 +2787,17 @@
       // ── 월례대회 모드: 조별 정렬 ──
       const isTournament = getMemo(selectedDate).includes('월례대회');
       if (isTournament) {
-        // 조 목록 추출 (등록된 참석자 기준, 조명 있는 사람만)
-        const joSet = [...new Set(sorted.filter(m => m.jo).map(m => m.jo))].sort();
+        // 불참자 목록 (회원DB에서 조 정보 가져옴)
+        const absentNames = Object.keys(_absentData[selectedDate] || {});
+        const absentMembers = absentNames.map(name => {
+          const m = memberData[name] || {};
+          return { name, busoo: m.busoo || 0, jo: m.jo || '' };
+        });
+
+        // 조 목록 추출 (참석자 + 불참자 모두 포함)
+        const joSetAttend = sorted.filter(m => m.jo).map(m => m.jo);
+        const joSetAbsent = absentMembers.filter(m => m.jo).map(m => m.jo);
+        const joSet = [...new Set([...joSetAttend, ...joSetAbsent])].sort();
         // 조 없는 사람도 처리
         const noJo = sorted.filter(m => !m.jo);
 
@@ -2794,8 +2805,11 @@
         joSet.forEach((joName, joIdx) => {
           const members = sorted
             .filter(m => m.jo === joName)
-            .sort((a, b) => (a.busoo || 99) - (b.busoo || 99)); // 부수 오름차순
-          if (members.length === 0) return;
+            .sort((a, b) => (a.busoo || 99) - (b.busoo || 99));
+          const absentInJo = absentMembers
+            .filter(m => m.jo === joName)
+            .sort((a, b) => (a.busoo || 99) - (b.busoo || 99));
+          if (members.length === 0 && absentInJo.length === 0) return;
 
           const row = document.createElement('div');
           row.className = 'busoo-row';
@@ -2855,6 +2869,22 @@
             applyMealBadge(container, name, selectedDate);
             applyAbsentBadge(container, name, selectedDate);
             namesWrap.appendChild(container);
+          });
+          // 불참자 칩 추가 (같은 행에)
+          absentInJo.forEach(({ name, busoo }) => {
+            const isMine = (name === currentUser);
+            const chipText = busoo ? `${busoo}${name}` : name;
+            const chip = document.createElement('div');
+            chip.className = `att-name-chip ${isMine ? 'mine' : ''}`;
+            chip.dataset.name = name;
+            chip.style.position = 'relative';
+            chip.style.opacity = '0.7';
+            chip.textContent = chipText;
+            const badge = document.createElement('span');
+            badge.className = 'absent-badge';
+            badge.textContent = '✕';
+            chip.appendChild(badge);
+            namesWrap.appendChild(chip);
           });
           row.appendChild(namesWrap);
           attGrid.appendChild(row);
