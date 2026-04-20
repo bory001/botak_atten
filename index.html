@@ -226,6 +226,15 @@
   .edu-sheet-btn.del   { background: #fef2f2; color: #dc2626; }
   .edu-sheet-btn.cancel { background: var(--bg); color: var(--text-muted); border: 1px solid var(--border); }
 
+  /* ── 월례 불참 ── */
+  .absent-badge {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none; z-index: 3;
+    font-size: 15px; font-weight: 900; color: #ef4444;
+    -webkit-text-stroke: 1px #ef4444;
+  }
+
   /* ── 월례식사 여부 ── */
   .meal-no-badge {
     position: absolute; inset: 0;
@@ -1045,7 +1054,7 @@
     <div class="header-row1">
       <div class="header-left">
         <h1>🏓 보탁 참석자 현황</h1>
-        <div class="subtitle">(보령탁구동호회)v1.0</div>
+        <div class="subtitle">(보령탁구동호회)</div>
       </div>
       <div class="header-right">
         <div class="sync-dot-wrap">
@@ -1054,6 +1063,7 @@
         </div>
         <button class="hdr-btn hdr-attend-btn" id="hdrTimeBtn" onclick="openTimeModal()" style="display:none;">⏰ 시각등록</button>
         <button class="hdr-btn hdr-attend-btn" id="hdrAttendBtn" onclick="toggleAttendanceMobile()" style="display:none;">✅ 참석 등록</button>
+        <button class="hdr-btn" id="hdrAbsentBtn" onclick="toggleAbsent()" style="display:none;background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.6);">✕ 불참등록</button>
         <button class="hdr-btn" onclick="openRankingModal()" style="background:rgba(99,102,241,0.3);border-color:rgba(99,102,241,0.7);">🏆 통계</button>
         <button class="hdr-btn" id="adminModeBtn" onclick="openAdminAuth()" style="background:rgba(255,165,0,0.2);border-color:rgba(255,165,0,0.5);">⚙️ 관리자</button>
         <button class="hdr-btn" onclick="doLogout()">나가기</button>
@@ -1650,6 +1660,7 @@
   let _memoEmoji = '';          // 현재 선택된 메모 이모지
   let _contactPhone = '';       // 연락처 팝업용 전화번호
   let _mealData = {};           // { dateKey: { name: true/false } }
+  let _absentData = {};         // { dateKey: { name: true } }
   let _adminSelectedName = null; // 관리자가 선택한 참석자          // 참석자 목록 현재 페이지
   const ATT_PAGE_SIZE = 20; // 페이지당 표시 수
   let _timeModalMode = 'reg'; // 'reg' | 'mod'
@@ -2336,6 +2347,21 @@
     document.getElementById('eduAuthModal').classList.add('show');
   };
 
+  // ── 월례 불참 토글 ──
+  window.toggleAbsent = async function() {
+    if (!selectedDate) return;
+    const isAbsent = !!_absentData[selectedDate]?.[currentUser];
+    try {
+      if (isAbsent) {
+        await remove(ref(db, `botak_absent/${selectedDate}/${currentUser}`));
+        showToast('불참이 해제되었습니다');
+      } else {
+        await set(ref(db, `botak_absent/${selectedDate}/${currentUser}`), true);
+        showToast('불참으로 등록되었습니다', 'error');
+      }
+    } catch(e) { showToast('저장 실패: ' + e.message, 'error'); }
+  };
+
   window.doLogout = function() {
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     if (isIOS) {
@@ -2433,6 +2459,11 @@
       document.getElementById('syncLabel').textContent = '오류';
     });
     // 메모 데이터 리스닝
+    onValue(ref(db, 'botak_absent'), (snap) => {
+      _absentData = snap.val() || {};
+      if (selectedDate) renderMobilePanel();
+    });
+
     onValue(ref(db, 'botak_meal'), (snap) => {
       _mealData = snap.val() || {};
       if (selectedDate) renderMobilePanel();
@@ -2675,9 +2706,12 @@
 
     // 헤더 참석 버튼 동기화
     const hdrBtn = document.getElementById('hdrAttendBtn');
+    const hdrAbsentBtn = document.getElementById('hdrAbsentBtn');
+    const isTournament = getMemo(selectedDate).includes('월례대회');
+    const isAbsent = !!_absentData[selectedDate]?.[currentUser];
     if (hdrBtn) {
       if (!canEdit) {
-        hdrBtn.style.display = 'none'; // 과거 날짜면 버튼 숨김
+        hdrBtn.style.display = 'none';
       } else {
         hdrBtn.style.display = 'inline-block';
         if (isRegistered) {
@@ -2687,6 +2721,21 @@
           hdrBtn.className = 'hdr-btn hdr-attend-btn register';
           hdrBtn.innerHTML = '✅ 참석 등록';
         }
+      }
+    }
+    // 불참 버튼: 월례대회 + canEdit + 미등록 시에만
+    if (hdrAbsentBtn) {
+      if (canEdit && isTournament && !isRegistered) {
+        hdrAbsentBtn.style.display = 'inline-block';
+        if (isAbsent) {
+          hdrAbsentBtn.style.background = 'rgba(239,68,68,0.5)';
+          hdrAbsentBtn.innerHTML = '✕ 불참해제';
+        } else {
+          hdrAbsentBtn.style.background = 'rgba(239,68,68,0.2)';
+          hdrAbsentBtn.innerHTML = '✕ 불참등록';
+        }
+      } else {
+        hdrAbsentBtn.style.display = 'none';
       }
     }
     // 헤더 시각 버튼 동기화 (과거면 숨김)
@@ -2804,6 +2853,7 @@
               }
             });
             applyMealBadge(container, name, selectedDate);
+            applyAbsentBadge(container, name, selectedDate);
             namesWrap.appendChild(container);
           });
           row.appendChild(namesWrap);
@@ -2863,6 +2913,7 @@
               }
             });
             applyMealBadge(container, name, selectedDate);
+            applyAbsentBadge(container, name, selectedDate);
             namesWrap.appendChild(container);
           });
           row.appendChild(namesWrap);
@@ -3432,6 +3483,21 @@
       await set(ref(db, `botak_meal/${selectedDate}/${target}`), yn);
     } catch(e) { showToast('저장 실패', 'error'); }
   };
+
+  // 칩에 ✕ 불참 배지 적용 헬퍼
+  function applyAbsentBadge(container, name, dateKey) {
+    const chip = container.classList.contains('att-name-chip')
+      ? container
+      : container.querySelector('.att-name-chip') || container;
+    chip.querySelectorAll('.absent-badge').forEach(b => b.remove());
+    if (_absentData[dateKey]?.[name]) {
+      const badge = document.createElement('span');
+      badge.className = 'absent-badge';
+      badge.textContent = '✕';
+      chip.style.position = 'relative';
+      chip.appendChild(badge);
+    }
+  }
 
   // 칩에 △ 배지 적용 헬퍼
   function applyMealBadge(container, name, dateKey) {
