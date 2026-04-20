@@ -2358,9 +2358,10 @@
         delete _absentData[selectedDate][currentUser];
         showToast('불참이 해제되었습니다');
       } else {
-        await set(ref(db, `botak_absent/${selectedDate}/${currentUser}`), true);
+        const absentInfo = { busoo: currentBusoo || 0, jo: currentJo || '' };
+        await set(ref(db, `botak_absent/${selectedDate}/${currentUser}`), absentInfo);
         if (!_absentData[selectedDate]) _absentData[selectedDate] = {};
-        _absentData[selectedDate][currentUser] = true;
+        _absentData[selectedDate][currentUser] = absentInfo;
         showToast('불참으로 등록되었습니다', 'error');
       }
       renderMobilePanel();
@@ -2792,11 +2793,21 @@
 
       // ── 월례대회 모드: 조별 정렬 ──
       if (isTournament) {
-        // 불참자 목록 (회원DB에서 조 정보 가져옴)
+        // 불참자 목록 (저장된 조/부수 정보 사용)
         const absentNames = Object.keys(_absentData[selectedDate] || {});
         const absentMembers = absentNames.map(name => {
-          const m = memberData[name] || {};
-          return { name, busoo: m.busoo || 0, jo: m.jo || '' };
+          const val = _absentData[selectedDate][name];
+          // 새 형식: { busoo, jo } / 구형식: true
+          if (val && typeof val === 'object') {
+            return { name, busoo: val.busoo || 0, jo: val.jo || '' };
+          }
+          // 구형식(true)인 경우 참석 이력에서 보완
+          const sortedDates = Object.keys(attendanceData).sort().reverse();
+          for (const dateKey of sortedDates) {
+            const d = (attendanceData[dateKey] || {})[name];
+            if (d && d.jo) return { name, busoo: d.busoo || 0, jo: d.jo };
+          }
+          return { name, busoo: 0, jo: '' };
         });
 
         // 조 목록 추출 (참석자 + 불참자 모두 포함)
